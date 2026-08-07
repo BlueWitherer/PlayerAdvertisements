@@ -1,8 +1,9 @@
 # v1.2.1 
-- Re-adjusted credits to fit new ownership
+- New mod ownership inbound
+- UI visual adjustments
 - Internal tweaks
 
-# v1.2.0
+# v1.2.0 
 - Reduce scaling when clicking/holding on the advertisement
 - Added **Show Spinner on unloaded Ads** in the mod settings
 - Fixed particles showing less than expected

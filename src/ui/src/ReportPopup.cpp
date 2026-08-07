@@ -36,6 +36,7 @@ bool ReportPopup::init(unsigned int adId, int levelId, std::string description) 
 
     setID("report"_spr);
     setTitle("Report AD ID: " + numToString(m_impl->adId));
+    setCloseButtonSpr(CircleButtonSprite::createWithSpriteFrameName("geode.loader/close.png", 0.875f, CircleBaseColor::DarkAqua, CircleBaseSize::Small));
 
     auto descriptionInput = TextInput::create(260.f, "Report Reason...", "chatFont.fnt");
     descriptionInput->setID("description-input");
@@ -48,7 +49,7 @@ bool ReportPopup::init(unsigned int adId, int levelId, std::string description) 
     auto menu = CCMenu::create();
     menu->setPosition({m_mainLayer->getScaledContentWidth() / 2, 0.f});
 
-    auto submitButtonSprite = ButtonSprite::create("Submit Report", 0, false, "goldFont.fnt", "GJ_button_01.png", 0.f, 1.f);
+    auto submitButtonSprite = ButtonSprite::create("Submit Report", 0, false, "goldFont.fnt", "geode.loader/GE_button_05.png", 0.f, 1.f);
     auto submitButton = CCMenuItemSpriteExtra::create(submitButtonSprite, this, menu_selector(ReportPopup::onSubmitButton));
 
     menu->addChild(submitButton);

@@ -52,6 +52,7 @@ bool AdPreview::init(unsigned int adId, int levelId, std::string userId, AdType 
 
     setID("preview"_spr);
     setTitle("Ad ID: " + numToString(m_impl->adId));
+    setCloseButtonSpr(CircleButtonSprite::createWithSpriteFrameName("geode.loader/close.png", 0.875f, CircleBaseColor::DarkAqua, CircleBaseSize::Small));
 
     auto levelIdLabel = CCLabelBMFont::create(
         ("Level ID: " + numToString(m_impl->levelId)).c_str(),
@@ -95,13 +96,18 @@ bool AdPreview::init(unsigned int adId, int levelId, std::string userId, AdType 
     m_mainLayer->addChild(clickCountLabel);
 
     // report button
-    auto reportBtn = Button::createWithSpriteFrameName(
-        "GJ_reportBtn_001.png",
+    auto reportBtn = Button::createWithNode(
+        CircleButtonSprite::createWithSpriteFrameName(
+            // @geode-ignore(unknown-resource)
+            "exMark_001.png",
+            0.875f,
+            CircleBaseColor::DarkAqua,
+            CircleBaseSize::Medium),
         [this](auto) {
             if (auto reportPopup = ReportPopup::create(m_impl->adId, m_impl->levelId, "")) reportPopup->show();
         });
     reportBtn->setID("report-ad-btn");
-    reportBtn->setScale(0.75f);
+    reportBtn->setScale(0.625f);
     reportBtn->setPosition({0, 0});
 
     m_mainLayer->addChild(reportBtn);
@@ -111,7 +117,7 @@ bool AdPreview::init(unsigned int adId, int levelId, std::string userId, AdType 
             // @geode-ignore(unknown-resource)
             "geode.loader/news.png",
             0.75f,
-            CircleBaseColor::Green,
+            CircleBaseColor::DarkAqua,
             CircleBaseSize::Medium),
         [](auto) {
             // fetch from /api/announcement
@@ -152,7 +158,7 @@ bool AdPreview::init(unsigned int adId, int levelId, std::string userId, AdType 
                 });
         });
     announcementBtn->setID("latest-announcement-btn");
-    announcementBtn->setScale(0.75f);
+    announcementBtn->setScale(0.625f);
     announcementBtn->setPosition({m_mainLayer->getScaledContentWidth(), 0});
 
     m_mainLayer->addChild(announcementBtn);
