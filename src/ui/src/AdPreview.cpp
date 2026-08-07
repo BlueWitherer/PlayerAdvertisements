@@ -159,7 +159,7 @@ bool AdPreview::init(unsigned int adId, int levelId, std::string userId, AdType 
 
     m_mainLayer->addChild(announcementBtn);
 
-    this->scheduleUpdate();
+    scheduleUpdate();
 
     return true;
 };
@@ -194,22 +194,22 @@ void AdPreview::onPlayButton(CCObject* sender) {
             [this, sender](auto, bool btn) {
                 if (btn) {
                     auto menuItem = typeinfo_cast<CCMenuItemSpriteExtra*>(sender);
-                    this->registerClick(m_impl->adId, m_impl->userId);
-                    this->tryOpenOrFetchLevel(menuItem, m_impl->levelId);
+                    registerClick(m_impl->adId, m_impl->userId);
+                    tryOpenOrFetchLevel(menuItem, m_impl->levelId);
                 };
             });
     } else {
         auto menuItem = typeinfo_cast<CCMenuItemSpriteExtra*>(sender);
         if (!m_impl->hasClicked) {
             m_impl->hasClicked = true;
-            this->registerClick(m_impl->adId, m_impl->userId);
+            registerClick(m_impl->adId, m_impl->userId);
             log::debug("click registered for ad_id={}, user_id={}", m_impl->adId, m_impl->userId);
-            this->tryOpenOrFetchLevel(menuItem, m_impl->levelId);
+            tryOpenOrFetchLevel(menuItem, m_impl->levelId);
         } else {
             log::debug("click already registered for ad_id={}, user_id={}",
                 m_impl->adId,
                 m_impl->userId);
-            this->tryOpenOrFetchLevel(menuItem, m_impl->levelId);
+            tryOpenOrFetchLevel(menuItem, m_impl->levelId);
         };
     };
 };

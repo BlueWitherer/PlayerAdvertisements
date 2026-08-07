@@ -434,7 +434,7 @@ bool AdManager::init() {
     m_buttonMenu->addChild(discordBtn);
     m_buttonMenu->addChild(kofiBtn);
 
-    this->scheduleUpdate();
+    scheduleUpdate();
 
     return true;
 };

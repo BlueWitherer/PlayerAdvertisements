@@ -62,9 +62,6 @@ namespace ads {
         LazySprite* adSprite = nullptr;
         CCSprite* adIcon = nullptr;
 
-        bool hasLoaded = false;
-        bool loadRandom = false;
-
         int loadId = 0;
 
         std::string token;
@@ -93,7 +90,7 @@ namespace ads {
     };
 
     void Advertisement::reload() {
-        this->removeAllChildrenWithCleanup(true);
+        removeAllChildrenWithCleanup(true);
 
         if (!m_impl->adSprite) {
             log::warn("ad sprite is null");
@@ -122,7 +119,7 @@ namespace ads {
         m_impl->adButton->setPosition(getScaledContentSize() / 2.f);
 
         if (m_impl->adButton) {
-            this->addChild(m_impl->adButton, 1);
+            addChild(m_impl->adButton, 1);
             m_impl->adButton->setScaleMultiplier(1.05f);
             log::info("Advertisement button created and added to menu");
         } else {
@@ -131,7 +128,7 @@ namespace ads {
     };
 
     void Advertisement::reloadType() {
-        this->setContentSize(getAdSize(m_impl->type));
+        setContentSize(getAdSize(m_impl->type));
 
         m_impl->adSprite = LazySprite::create(getScaledContentSize(), Mod::get()->getSettingValue<bool>("adLoading"));
         if (!m_impl->adSprite) {
@@ -193,7 +190,7 @@ namespace ads {
                     if (s->m_impl->adButton) {
                         s->m_impl->adButton->addChild(s->m_impl->adIcon, 9);
                         s->m_impl->adButton->setScaleMultiplier(1.05f);
-                    }
+                    };
 
                     if (!s->m_impl->adSprite) {
                         log::warn("Load callback: ad sprite is null");
@@ -423,9 +420,6 @@ namespace ads {
                 if (auto s = self.lock()) s->handleAdResponse(res);
             });
 
-        m_impl->hasLoaded = true;
-        m_impl->loadRandom = true;
-
         log::info("Sent request for random advertisement");
     };
 
@@ -445,8 +439,6 @@ namespace ads {
                 if (auto s = self.lock()) s->handleAdResponse(res);
             });
 
-        m_impl->hasLoaded = true;
-        m_impl->loadRandom = false;
         m_impl->loadId = id;
 
         log::info("Sent request for advertisement of ID {}", id);

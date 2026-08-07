@@ -19,7 +19,7 @@ class $modify(AdsGauntletSelectLayer, GauntletSelectLayer) {
                 adBanner->setID("banner"_spr);
                 adBanner->setPosition({winSize.width / 2.f, 30.f});
 
-                this->addChild(adBanner, 1);
+                addChild(adBanner, 1);
 
                 adBanner->loadRandom();
             };

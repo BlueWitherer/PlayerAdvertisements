@@ -19,7 +19,7 @@ class $modify(AdsLevelBrowserLayer, LevelBrowserLayer) {
                 adBanner->setID("banner"_spr);
                 adBanner->setPosition({winSize.width / 2.f, winSize.height - 30.f});
 
-                this->addChild(adBanner, 2);
+                addChild(adBanner, 2);
 
                 adBanner->loadRandom();
             };

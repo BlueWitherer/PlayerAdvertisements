@@ -65,7 +65,7 @@ class $modify(AdsPauseLayer, PauseLayer) {
                 adBanner->setID("banner"_spr);
                 adBanner->setPosition({winSize.width / 2.f, winSize.height - 50.f});
 
-                this->addChild(adBanner, 100);
+                addChild(adBanner, 100);
 
                 adBanner->loadRandom();
             };

@@ -9,8 +9,8 @@ using namespace geode::prelude;
 bool AdNode::init(const matjson::Value& adValue, float width) {
     if (!CCNode::init()) return false;
 
-    this->setContentSize({width, 85.f});
-    this->setAnchorPoint({0.5f, 0.5f});
+    setContentSize({width, 85.f});
+    setAnchorPoint({0.5f, 0.5f});
 
     auto clipNode = CCClippingNode::create();
     clipNode->setContentSize({width, 85.f});
@@ -30,7 +30,7 @@ bool AdNode::init(const matjson::Value& adValue, float width) {
     bg->setContentSize({stencil->getContentSize()});
     bg->setAnchorPoint({0.0f, 0.0f});
 
-    this->addChild(bg, 1);
+    addChild(bg, 1);
 
     auto imageUrl = adValue["image_url"].asString();
     auto lazySprite = LazySprite::create({width, 85.f});
@@ -38,11 +38,11 @@ bool AdNode::init(const matjson::Value& adValue, float width) {
 
     lazySprite->setContentSize({width, 85.f});
     lazySprite->setScale(0.55f);
-    lazySprite->setPosition({this->getScaledContentWidth() / 2, this->getScaledContentHeight() / 2});
+    lazySprite->setPosition({getScaledContentWidth() / 2, getScaledContentHeight() / 2});
 
     clipNode->addChild(lazySprite);
 
-    this->addChild(clipNode);
+    addChild(clipNode);
 
     // ad data
     auto adId = adValue["ad_id"].asInt();
@@ -57,41 +57,41 @@ bool AdNode::init(const matjson::Value& adValue, float width) {
     std::string adIdStr = adId.isOk() ? numToString(adId.unwrap()) : "N/A";
 
     auto adLabel = CCLabelBMFont::create(("Ad ID: " + adIdStr).c_str(), "goldFont.fnt");
-    adLabel->setPosition({this->getScaledContentWidth() / 2, this->getScaledContentHeight() - 10.f});
+    adLabel->setPosition({getScaledContentWidth() / 2, getScaledContentHeight() - 10.f});
     adLabel->setAnchorPoint({0.5f, 0.5f});
     adLabel->setScale(0.4f);
 
-    this->addChild(adLabel, 2);
+    addChild(adLabel, 2);
 
     std::string levelIdStr = levelId.isOk() ? numToString(levelId.unwrap()) : "N/A";
 
     auto levelLabel = CCLabelBMFont::create(("Level ID: " + levelIdStr).c_str(), "goldFont.fnt");
-    levelLabel->setPosition({this->getScaledContentWidth() / 2, this->getScaledContentHeight() - 25.f});
+    levelLabel->setPosition({getScaledContentWidth() / 2, getScaledContentHeight() - 25.f});
     levelLabel->setAnchorPoint({0.5f, 0.5f});
     levelLabel->setScale(0.4f);
 
-    this->addChild(levelLabel, 2);
+    addChild(levelLabel, 2);
 
     // views and clicks
     std::string viewsStr = viewCount.isOk() ? numToString(GameToolbox::pointsToString(viewCount.unwrap())) : "0";
     auto viewsLabel = CCLabelBMFont::create(("Views: " + viewsStr).c_str(), "goldFont.fnt");
 
-    viewsLabel->setPosition({this->getScaledContentWidth() / 4, this->getScaledContentHeight() - 40.f});
+    viewsLabel->setPosition({getScaledContentWidth() / 4, getScaledContentHeight() - 40.f});
     viewsLabel->setAnchorPoint({0.5f, 0.5f});
     viewsLabel->setColor({255, 125, 0});
     viewsLabel->setScale(0.4f);
 
-    this->addChild(viewsLabel, 2);
+    addChild(viewsLabel, 2);
 
     std::string clicksStr = clickCount.isOk() ? numToString(GameToolbox::pointsToString(clickCount.unwrap())) : "0";
     auto clicksLabel = CCLabelBMFont::create(("Clicks: " + clicksStr).c_str(), "goldFont.fnt");
 
-    clicksLabel->setPosition({this->getScaledContentWidth() / 4 * 3, this->getScaledContentHeight() - 40.f});
+    clicksLabel->setPosition({getScaledContentWidth() / 4 * 3, getScaledContentHeight() - 40.f});
     clicksLabel->setAnchorPoint({0.5f, 0.5f});
     clicksLabel->setColor({0, 175, 255});
     clicksLabel->setScale(0.4f);
 
-    this->addChild(clicksLabel, 2);
+    addChild(clicksLabel, 2);
 
     // pending label
     auto pendingLabel = CCLabelBMFont::create("Pending", "goldFont.fnt");
@@ -100,7 +100,7 @@ bool AdNode::init(const matjson::Value& adValue, float width) {
     pendingLabel->setColor({255, 0, 0});
     pendingLabel->setScale(0.3f);
 
-    this->addChild(pendingLabel, 2);
+    addChild(pendingLabel, 2);
 
     if (pending.isOk() && !pending.unwrap()) {
         pendingLabel->setString("Approved");
@@ -109,11 +109,11 @@ bool AdNode::init(const matjson::Value& adValue, float width) {
 
     // created at
     auto createdAtLabel = CCLabelBMFont::create(("Created at: " + createdAt.unwrap()).c_str(), "chatFont.fnt");
-    createdAtLabel->setPosition({this->getScaledContentWidth() / 2, 10.f});
+    createdAtLabel->setPosition({getScaledContentWidth() / 2, 10.f});
     createdAtLabel->setAnchorPoint({0.5f, 0.5f});
     createdAtLabel->setScale(0.3f);
 
-    this->addChild(createdAtLabel, 2);
+    addChild(createdAtLabel, 2);
 
     // play button at the bottom right
     auto playBtnSprite = CCSprite::createWithSpriteFrameName("GJ_playBtn2_001.png");
@@ -128,12 +128,12 @@ bool AdNode::init(const matjson::Value& adValue, float width) {
     m_playBtn = playBtn;
 
     auto playMenu = CCMenu::create();
-    playMenu->setPosition({this->getScaledContentWidth() / 2, this->getScaledContentHeight() / 2 - 5});
+    playMenu->setPosition({getScaledContentWidth() / 2, getScaledContentHeight() / 2 - 5});
     playMenu->addChild(playBtn);
     m_playMenu = playMenu;
 
-    this->addChild(playMenu, 3);
-    this->scheduleUpdate();
+    addChild(playMenu, 3);
+    scheduleUpdate();
 
     return true;
 };
@@ -184,7 +184,7 @@ void AdNode::tryOpenOrFetchLevel(CCMenuItemSpriteExtra* playBtn, int levelId) {
         if (m_playMenu) {
             m_playMenu->addChild(spinner);
         } else {
-            this->addChild(spinner);
+            addChild(spinner);
         }
 
         if (m_playBtn) {
@@ -206,10 +206,10 @@ void AdNode::onPlayButton(CCObject* sender) {
                 "Cancel",
                 "Proceed",
                 [this, playBtn](auto, bool ok) {
-                    if (ok) this->tryOpenOrFetchLevel(playBtn, playBtn->getTag());
+                    if (ok) tryOpenOrFetchLevel(playBtn, playBtn->getTag());
                 });
         } else {
-            this->tryOpenOrFetchLevel(playBtn, playBtn->getTag());
+            tryOpenOrFetchLevel(playBtn, playBtn->getTag());
         };
     };
 };

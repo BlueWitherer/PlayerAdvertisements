@@ -30,10 +30,10 @@ class $modify(AdsRetryLevelLayer, RetryLevelLayer) {
                     };
                 };
 
-                // add funny banner
-                auto const winSize = CCDirector::sharedDirector()->getWinSize();
-
                 if (auto adBanner = Advertisement::create(AdType::Square)) {
+                    // add funny banner
+                    auto const winSize = CCDirector::sharedDirector()->getWinSize();
+
                     adBanner->setID("advertisement-menu");
                     adBanner->setPosition({winSize.width / 2.f, winSize.height / 2.f});
 

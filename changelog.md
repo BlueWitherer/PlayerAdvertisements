@@ -1,3 +1,7 @@
+# v1.2.1 
+- Re-adjusted credits to fit new ownership
+- Internal tweaks
+
 # v1.2.0
 - Reduce scaling when clicking/holding on the advertisement
 - Added **Show Spinner on unloaded Ads** in the mod settings

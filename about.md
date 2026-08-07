@@ -1,7 +1,7 @@
 # Player Advertisements
-**Community-made ads for awesome levels!**
+#### Community-made ads for awesome levels!
 
-*by [a dog](user:7689052) & [a rat](user:6408873)!*
+*by **[a rat](user:6408873)** & [a dog](user:7689052)!*
 
 ###### ![?!](frame:geode.loader/tag-modtober25.png?scale=0.125) <co>Entry for Modtober 2025: What The Heck!?</c>
 
@@ -21,10 +21,6 @@ This mod is <cp>the perfect tool to find some very awesome levels that you other
 ##### ![🗨️](frame:gj_discordIcon_001.png?scale=0.25) If you need help, join our [support Discord server](https://www.dsc.gg/cheeseworks) and ask! :)
 
 ##### ![$](frame:shard0205ShardBig_001.png?scale=0.25) <cp>Buy boosts or subscribe to Verified on [our Ko-fi](https://ko-fi.com/playerads) to expand your reach!</c>
-
----
-### Credits
-- [Cheeseworks](user:6408873) for helping with the backend side of the mod and the website
 
 ---
 

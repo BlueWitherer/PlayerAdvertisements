@@ -65,7 +65,7 @@ class $modify(AdsPlayLayer, PlayLayer) {
             };
 
             log::info("setting up scheduler for auto ad refresh");
-            this->schedule(schedule_selector(AdsPlayLayer::schedReload), 12.5f);
+            schedule(schedule_selector(AdsPlayLayer::schedReload), 12.5f);
         };
 
         PlayLayer::setupHasCompleted();
@@ -73,19 +73,19 @@ class $modify(AdsPlayLayer, PlayLayer) {
 
     void fullReset() {
         // reload all ads lulz
-        this->reloadAllAds();
+        reloadAllAds();
         PlayLayer::fullReset();
     };
 
     void resetLevelFromStart() {
         // reload all ads lulz
-        this->reloadAllAds();
+        reloadAllAds();
         PlayLayer::resetLevelFromStart();
     };
 
     void destroyPlayer(PlayerObject* player, GameObject* object) {
         PlayLayer::destroyPlayer(player, object);
-        if (player->m_isDead) this->reloadAllAds();
+        if (player->m_isDead) reloadAllAds();
     };
 
     void reloadAllAds() {
@@ -99,6 +99,6 @@ class $modify(AdsPlayLayer, PlayLayer) {
 
     void schedReload(float dt) {
         log::debug("reloading ads after {}s...", dt);
-        this->reloadAllAds();
+        reloadAllAds();
     };
 };

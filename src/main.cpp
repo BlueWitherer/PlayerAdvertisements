@@ -42,14 +42,14 @@ class $modify(AdsMenuLayer, MenuLayer) {
                 adBanner->setType(AdType::Banner);
                 adBanner->setPosition({winSize.width / 2.f, winSize.height / 2.f - 70.f});
 
-                this->addChild(adBanner);
+                addChild(adBanner);
 
                 adBanner->loadRandom();
             };
         };
 
         // ad button in the bottom menu
-        if (auto bottomMenu = this->getChildByID("bottom-menu")) {
+        if (auto bottomMenu = getChildByID("bottom-menu")) {
             auto popupButton = CCMenuItemSpriteExtra::create(
                 CircleButtonSprite::createWithSpriteFrameName(
                     "adIcon.png"_spr,

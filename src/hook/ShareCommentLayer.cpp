@@ -20,7 +20,7 @@ class $modify(AdsShareCommentLayer, ShareCommentLayer) {
                 adSquareLeft->setPosition({winSize.width / 2.f - 140.f, winSize.height / 2.f - 70.f});
 
                 m_mainLayer->addChild(adSquareLeft);
-                this->positionForCommentType(adSquareLeft, type);
+                positionForCommentType(adSquareLeft, type);
 
                 adSquareLeft->loadRandom();
             };
@@ -31,7 +31,7 @@ class $modify(AdsShareCommentLayer, ShareCommentLayer) {
                 adSquareCenter->setPosition({winSize.width / 2.f, winSize.height / 2.f - 70.f});
 
                 m_mainLayer->addChild(adSquareCenter);
-                this->positionForCommentType(adSquareCenter, type);
+                positionForCommentType(adSquareCenter, type);
 
                 adSquareCenter->loadRandom();
             };
@@ -43,7 +43,7 @@ class $modify(AdsShareCommentLayer, ShareCommentLayer) {
 
                 m_mainLayer->addChild(adSquareRight);
 
-                this->positionForCommentType(adSquareRight, type);
+                positionForCommentType(adSquareRight, type);
 
                 adSquareRight->loadRandom();
             };

@@ -117,7 +117,7 @@ void ReportPopup::onSubmitButton(CCObject* sender) {
                 reportReq.post("https://ads.arcticwoof.xyz/api/report"),
                 [this, upopup](web::WebResponse res) {
                     if (res.ok()) {
-                        this->onClose(nullptr);
+                        onClose(nullptr);
                         upopup->showSuccessMessage("Report submitted successfully");
                     } else {
                         upopup->showFailMessage(res.code() == 403 ? "You've been banned from reporting ads" : "Failed to send report");

@@ -15,13 +15,13 @@ class $modify(AdsInfoLayer, InfoLayer) {
             auto const winSize = CCDirector::sharedDirector()->getWinSize();
 
             // skyscraper ad on the right side
-            if (auto adSkyscraper = Advertisement::create(AdType::Skyscraper)) {
-                adSkyscraper->setID("skyscraper-right"_spr);
-                adSkyscraper->setPosition({winSize.width - 30.f, winSize.height / 2.f});
+            if (auto adSkyscraperRight = Advertisement::create(AdType::Skyscraper)) {
+                adSkyscraperRight->setID("skyscraper-right"_spr);
+                adSkyscraperRight->setPosition({winSize.width - 30.f, winSize.height / 2.f});
 
-                m_mainLayer->addChild(adSkyscraper);
+                m_mainLayer->addChild(adSkyscraperRight);
 
-                adSkyscraper->loadRandom();
+                adSkyscraperRight->loadRandom();
             };
 
             // skyscraper ad on the left side

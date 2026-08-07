@@ -19,7 +19,7 @@ class $modify(AdsGJPathsLayer, GJPathsLayer) {
                 adBannerLeft->setID("banner-left"_spr);
                 adBannerLeft->setPosition({30.f, winSize.height / 2.f});
 
-                this->addChild(adBannerLeft);
+                addChild(adBannerLeft);
 
                 adBannerLeft->loadRandom();
             };
@@ -29,7 +29,7 @@ class $modify(AdsGJPathsLayer, GJPathsLayer) {
                 adBannerRight->setID("banner-right"_spr);
                 adBannerRight->setPosition({winSize.width - 30.f, winSize.height / 2.f});
 
-                this->addChild(adBannerRight);
+                addChild(adBannerRight);
 
                 adBannerRight->loadRandom();
             };
