@@ -7,7 +7,7 @@
 
 ---
 ### About
-<cj>You looooove advertisements, right?</c> Who doesn't?! Well, maybe you want to <cg>*promote some of your own levels*</c> with over-the-top, eye catching, MrBeast-type clickbaity advertisements! Or, maybe you just wanna <cy>*find some new, rather interesting levels to play* and enjoy</c>... Either way, <cc>this mod is for **everyone**</c>!
+<cj>You looove advertisements, right?</c> Who doesn't?! Well, maybe you want to <cg>*promote some of your own levels*</c> with over-the-top, eye catching, MrBeast-type clickbaity advertisements! Or, maybe you just wanna <cy>*find some new, rather interesting levels to play* and enjoy</c>... Either way, <cc>this mod is for **everyone**</c>!
 
 <cl>This mod adds advertisements for levels everywhere in the game!</c> In most areas of the game, you will likely find an advertisement for someone's level! You can also click on these advertisements to get sent to their totally awesome levels.
 

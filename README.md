@@ -5,7 +5,7 @@
 
 ###### Entry for Modtober 2025: What The Heck!?
 
-You looooove advertisements, right? Who doesn't?! Well, maybe you want to *promote some of your own levels* with over-the-top, eye catching, MrBeast-type clickbaity advertisements! Or, maybe you just wanna *find some new, rather interesting levels to play* and enjoy... Either way, this mod is for everyone!
+You looove advertisements, right? Who doesn't?! Well, maybe you want to *promote some of your own levels* with over-the-top, eye catching, MrBeast-type clickbaity advertisements! Or, maybe you just wanna *find some new, rather interesting levels to play* and enjoy... Either way, this mod is for everyone!
 
 This cool mod adds advertisements for levels everywhere in the game! In most areas of the game, you will likely find an advertisement for someone's level! You can also click on these advertisements to get sent to their totally awesome levels as advertised.
 
