@@ -15,23 +15,22 @@
 using namespace geode::prelude;
 using namespace ads;
 
+$on_mod(Loaded) {
+    async::spawn(
+        argon::startAuth(),
+        [](Result<std::string> res) {
+            if (res.isOk()) {
+                auto token = std::move(res).unwrap();
+                Mod::get()->setSavedValue<std::string>("argon_token", token);
+            } else {
+                log::warn("Auth failed: {}", res.unwrapErr());
+            };
+        });
+};
+
 class $modify(AdsMenuLayer, MenuLayer) {
     bool init() {
         if (!MenuLayer::init()) return false;
-
-        async::spawn(
-            argon::startAuth(),
-            [this](Result<std::string> res) {
-                if (res.isOk()) {
-                    auto token = std::move(res).unwrap();
-                    Mod::get()->setSavedValue<std::string>("argon_token", token);
-
-                    // log::debug("Token: {}", token);
-                } else {
-                    log::warn("Auth failed: {}", res.unwrapErr());
-                    // Notification::create("Failed to authorize with Argon", NotificationIcon::Error)->show();
-                };
-            });
 
         auto const winSize = CCDirector::sharedDirector()->getWinSize();
 

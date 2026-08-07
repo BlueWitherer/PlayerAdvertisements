@@ -46,7 +46,7 @@ public:
 
             if (adsList->m_contentLayer) adsList->m_contentLayer->removeAllChildrenWithCleanup(true);
 
-            for (const auto& adValue : adsArray.unwrap()) {
+            for (const auto& adValue : std::move(adsArray).unwrap()) {
                 if (auto node = AdNode::create(adValue, adsList->getScaledContentWidth())) adsList->m_contentLayer->addChild(node);
             };
 
@@ -67,8 +67,9 @@ public:
             if (json.contains("ads")) {
                 adsData = json["ads"];
                 auto adsArray = adsData.asArray();
+
                 if (adsArray.isOk()) {
-                    log::info("Fetched {} ads", adsArray.unwrap().size());
+                    log::info("Fetched {} ads", std::move(adsArray).unwrap().size());
                     setupAdsList();
                 } else {
                     log::info("Fetched 0 ads");

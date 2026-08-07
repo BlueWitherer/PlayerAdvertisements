@@ -1,19 +1,5 @@
 #pragma once
 
-#ifdef GEODE_IS_WINDOWS
-#ifdef AWCW_ADS_API_EXPORTING
-#define AWCW_ADS_API_DLL __declspec(dllexport)
-#else
-#define AWCW_ADS_API_DLL __declspec(dllimport)
-#endif
-#else
-#ifdef AWCW_ADS_API_EXPORTING
-#define AWCW_ADS_API_DLL __attribute__((visibility("default")))
-#else
-#define AWCW_ADS_API_DLL
-#endif
-#endif
-
 #include <cocos2d.h>
 
 #include <memory>
@@ -71,7 +57,7 @@ namespace ads {
      */
     constexpr const char* getParticlesForAdType(AdType type) noexcept;
 
-    class AWCW_ADS_API_DLL Advertisement final : public cocos2d::CCNode {
+    class Advertisement final : public cocos2d::CCNode {
     private:
         class Impl;
         std::unique_ptr<Impl> m_impl;

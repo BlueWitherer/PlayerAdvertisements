@@ -63,14 +63,12 @@ bool AdPreview::init(unsigned int adId, int levelId, std::string userId, AdType 
     m_mainLayer->addChild(levelIdLabel);
 
     auto playAdLevelSprite = CCSprite::createWithSpriteFrameName("GJ_playBtn2_001.png");
-    auto playAdLevelBtn = CCMenuItemSpriteExtra::create(
+    m_playAdLevelBtn = CCMenuItemSpriteExtra::create(
         playAdLevelSprite,
         this,
         menu_selector(AdPreview::onPlayButton));
-    playAdLevelBtn->setID("play-btn");
-    playAdLevelBtn->setTag(m_impl->levelId);  // tag the play button with the level id so the scheduler can restore it later
-    playAdLevelBtn->setPosition({m_mainLayer->getScaledContentWidth() / 2, m_mainLayer->getScaledContentHeight() / 2});
-    m_playAdLevelBtn = playAdLevelBtn;
+    m_playAdLevelBtn->setID("play-btn");
+    m_playAdLevelBtn->setPosition({m_mainLayer->getScaledContentWidth() / 2, m_mainLayer->getScaledContentHeight() / 2});
 
     // store the menu for spinner placement / restoring state
     m_buttonMenu->addChild(m_playAdLevelBtn);
@@ -169,7 +167,7 @@ void AdPreview::onPlayButton(CCObject* sender) {
     if (CCDirector::sharedDirector()->sceneCount() >= 10 &&
         Mod::get()->getSettingValue<bool>("scene-protection") == false) {
         createQuickPopup(
-            "Stop right there!",
+            "Hold up!",
             "You have <cr>too many scenes loaded</c> because you're opening too "
             "many ads. This may cause your game to become "
             "<cr>unstable</c>.\n<cy>Would you like to return to the main menu?</c>",
