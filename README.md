@@ -20,9 +20,6 @@ This mod is the perfect tool to find some very awesome levels that you otherwise
 
 ##### Buy boosts or subscribe to Verified on [our Ko-fi](https://ko-fi.com/playerads) to expand your reach!
 
-## Credits
-- [Cheeseworks](https://github.com/BlueWitherer) for helping with the backend side of the mod and the website
-
 ---
 
 ### [<img alt="Trailer Likes" height="15" src="https://img.shields.io/youtube/likes/PI_poDUUauw?style=for-the-badge&logo=youtube">](https://www.youtube.com/watch?v=PI_poDUUauw&list=PL0dsSu2pR5cERnq7gojZTKVRvUwWo2Ohu) Watch the [Horrible Mods](https://www.youtube.com/watch?v=Ssl49pNmW_0&list=PL0dsSu2pR5cERnq7gojZTKVRvUwWo2Ohu) series out now on YouTube!
