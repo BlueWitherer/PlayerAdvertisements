@@ -1,3 +1,6 @@
+# v1.2.2 
+- Updated Argon authentication
+
 # v1.2.1 
 - New mod ownership inbound
 - UI visual adjustments
