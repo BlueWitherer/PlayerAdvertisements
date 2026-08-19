@@ -1,4 +1,6 @@
 # v1.2.2 
+- Directly support new ads servers
+- Temporarily removed in-game Ads Manager
 - Updated Argon authentication
 
 # v1.2.1 
