@@ -1,11 +1,11 @@
-#include <Advertisements.hpp>
+#include <Advertisements.h>
 
 #include <Geode/Geode.hpp>
 
 #include <Geode/modify/GJDropDownLayer.hpp>
 
 using namespace geode::prelude;
-using namespace ads;
+using namespace cw::ads;
 
 class $modify(AdsGJDropDownLayer, GJDropDownLayer) {
     bool init(const char* p0, float p1, bool p2) {

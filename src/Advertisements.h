@@ -2,47 +2,43 @@
 
 #include <cocos2d.h>
 
-#include <memory>
+#include <Geode/Geode.hpp>
 
-#include <Geode/ui/LazySprite.hpp>
-
-#include <Geode/utils/web.hpp>
-
-namespace ads {
-    enum class AdType : unsigned int {
+namespace cw::ads {
+    enum class AdType : uint64_t {
         Banner = 1,
         Square = 2,
         Skyscraper = 3
     };
 
     struct Ad final {
-        unsigned int id;
+        uint64_t id;
         std::string image;
         int level = 0;
         std::string user = "";
         AdType type;
-        int viewCount = 0;
-        int clickCount = 0;
-        int glowLevel = 0;
+        uint64_t viewCount = 0;
+        uint64_t clickCount = 0;
+        uint8_t glowLevel = 0;
 
         Ad() = default;
 
         inline Ad(
-            unsigned int id,
+            uint64_t id,
             std::string image,
             int level,
             AdType type,
             std::string user,
-            int viewCount = 0,
-            int clickCount = 0,
-            int glowLevel = 0) : id(id),
-                                 image(std::move(image)),
-                                 level(level),
-                                 type(type),
-                                 user(std::move(user)),
-                                 viewCount(viewCount),
-                                 clickCount(clickCount),
-                                 glowLevel(glowLevel) {};
+            uint64_t viewCount = 0,
+            uint64_t clickCount = 0,
+            uint8_t glowLevel = 0) : id(id),
+                                     image(std::move(image)),
+                                     level(level),
+                                     type(type),
+                                     user(std::move(user)),
+                                     viewCount(viewCount),
+                                     clickCount(clickCount),
+                                     glowLevel(glowLevel) {};
     };
 
     /**

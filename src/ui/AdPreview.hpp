@@ -1,12 +1,12 @@
 #pragma once
 
-#include <Advertisements.hpp>
+#include <Advertisements.h>
 
 #include <Geode/Geode.hpp>
 #include "Geode/cocos/menu_nodes/CCMenuItem.h"
 
 using namespace geode::prelude;
-using namespace ads;
+using namespace cw::ads;
 
 class AdPreview final : public Popup {
 private:
@@ -18,15 +18,15 @@ protected:
     AdPreview();
     ~AdPreview();
 
-    bool init(unsigned int adId, int levelId, std::string userId, AdType type, unsigned int viewCount, unsigned int clickCount);
+    bool init(uint64_t adId, int levelId, std::string userId, AdType type, uint64_t viewCount, uint64_t clickCount);
 
     void onPlayButton(CCObject* sender);
 
-    void registerClick(unsigned int adId, std::string_view userId);
+    void registerClick(uint64_t adId, std::string_view userId);
     void tryOpenOrFetchLevel(CCMenuItemSpriteExtra* menuItem, int levelId);
 
     void update(float dt) override;
 
 public:
-    static AdPreview* create(unsigned int adId, int levelId, std::string userId, AdType type, unsigned int viewCount, unsigned int clickCount);
+    static AdPreview* create(uint64_t adId, int levelId, std::string userId, AdType type, uint64_t viewCount, uint64_t clickCount);
 };

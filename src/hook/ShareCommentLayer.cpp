@@ -1,11 +1,11 @@
-#include <Advertisements.hpp>
+#include <Advertisements.h>
 
 #include <Geode/Geode.hpp>
 
 #include <Geode/modify/ShareCommentLayer.hpp>
 
 using namespace geode::prelude;
-using namespace ads;
+using namespace cw::ads;
 
 class $modify(AdsShareCommentLayer, ShareCommentLayer) {
     bool init(gd::string title, int charLimit, CommentType type, int ID, gd::string desc) {

@@ -1,11 +1,11 @@
-#include <Advertisements.hpp>
+#include <Advertisements.h>
 
 #include <Geode/Geode.hpp>
 
 #include <Geode/modify/InfoLayer.hpp>
 
 using namespace geode::prelude;
-using namespace ads;
+using namespace cw::ads;
 
 class $modify(AdsInfoLayer, InfoLayer) {
     bool init(GJGameLevel* p0, GJUserScore* p1, GJLevelList* p2) {

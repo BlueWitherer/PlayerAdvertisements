@@ -1,4 +1,4 @@
-#include <Advertisements.hpp>
+#include <Advertisements.h>
 
 #include "ui/AdPreview.hpp"
 
@@ -14,9 +14,9 @@
 
 using namespace geode::prelude;
 using namespace geode::utils;
-using namespace ads;
+using namespace cw::ads;
 
-namespace ads {
+namespace cw::ads {
     namespace particles {
         constexpr const char* banner = "75,2065,2,4515,3,855,155,1,156,20,145,20a-1a1a0.3a15a90a0a20a0a100a25a0a25a0a0a0a0a10a5a0a180a1a0a1a0a1a0a1a0a5a0a180a0a1a0a1a0a1a0a1a0a0a1a1a0a0a0a0a0a0a0a0a2a1a0a0a0a41a0a0a0a0a0a0a0a0a0a0a0a0a0a0;";
         constexpr const char* square = "75,2065,2,4515,3,855,155,1,156,20,145,20a-1a1a0.3a15a90a0a20a0a50a50a0a25a0a0a0a0a10a5a0a180a1a0a1a0a1a0a1a0a5a0a180a0a1a0a1a0a1a0a1a0a0a1a1a0a0a0a0a0a0a0a0a2a1a0a0a0a41a0a0a0a0a0a0a0a0a0a0a0a0a0a0;";

@@ -14,7 +14,7 @@ using namespace geode::utils;
 
 class ReportPopup::Impl final {
 public:
-    unsigned int adId = 0;
+    uint64_t adId = 0;
     int levelId = 0;
 
     std::string userId = "";
@@ -26,7 +26,7 @@ public:
 ReportPopup::ReportPopup() : m_impl(std::make_unique<Impl>()) {};
 ReportPopup::~ReportPopup() {};
 
-bool ReportPopup::init(unsigned int adId, int levelId, std::string description) {
+bool ReportPopup::init(uint64_t adId, int levelId, std::string description) {
     m_impl->adId = adId;
     m_impl->levelId = levelId;
     m_impl->description = std::move(description);
@@ -127,7 +127,7 @@ void ReportPopup::onSubmitButton(CCObject* sender) {
         });
 };
 
-ReportPopup* ReportPopup::create(unsigned int adId, int levelId, std::string description) {
+ReportPopup* ReportPopup::create(uint64_t adId, int levelId, std::string description) {
     auto ret = new ReportPopup();
     // @geode-ignore(unknown-resource)
     if (ret->init(adId, levelId, std::move(description))) {

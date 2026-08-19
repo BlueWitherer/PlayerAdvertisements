@@ -1,9 +1,9 @@
-#include <Advertisements.hpp>
+#include <Advertisements.h>
 
 #include <Geode/Geode.hpp>
 
 using namespace geode::prelude;
-using namespace ads;
+using namespace cw::ads;
 
 class ReportPopup final : public Popup {
 private:
@@ -14,9 +14,9 @@ protected:
     ReportPopup();
     ~ReportPopup();
 
-    bool init(unsigned int adId, int levelId, std::string description);
+    bool init(uint64_t adId, int levelId, std::string description);
     void onSubmitButton(CCObject* sender);
 
 public:
-    static ReportPopup* create(unsigned int adId, int levelId, std::string description);
+    static ReportPopup* create(uint64_t adId, int levelId, std::string description);
 };

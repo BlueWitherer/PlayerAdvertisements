@@ -1,11 +1,11 @@
-#include <Advertisements.hpp>
+#include <Advertisements.h>
 
 #include <Geode/Geode.hpp>
 
 #include <Geode/modify/ChallengesPage.hpp>
 
 using namespace geode::prelude;
-using namespace ads;
+using namespace cw::ads;
 
 class $modify(AdsChallengesPage, ChallengesPage) {
     bool init() {

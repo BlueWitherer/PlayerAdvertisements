@@ -1,6 +1,4 @@
-#include <Advertisements.hpp>
-
-#include "ui/AdManager.hpp"
+#include <Advertisements.h>
 
 #include <argon/argon.hpp>
 
@@ -13,7 +11,7 @@
 #include <Geode/modify/MenuLayer.hpp>
 
 using namespace geode::prelude;
-using namespace ads;
+using namespace cw::ads;
 
 $on_mod(Loaded) {
     async::spawn(
@@ -26,62 +24,4 @@ $on_mod(Loaded) {
                 log::warn("Auth failed: {}", res.unwrapErr());
             };
         });
-};
-
-class $modify(AdsMenuLayer, MenuLayer) {
-    bool init() {
-        if (!MenuLayer::init()) return false;
-
-        auto const winSize = CCDirector::sharedDirector()->getWinSize();
-
-        if (Mod::get()->getSettingValue<bool>("MenuLayer")) {
-            // banner ad at the center
-            if (auto adBanner = Advertisement::create()) {
-                adBanner->setID("banner"_spr);
-                adBanner->setType(AdType::Banner);
-                adBanner->setPosition({winSize.width / 2.f, winSize.height / 2.f - 70.f});
-
-                addChild(adBanner);
-
-                adBanner->loadRandom();
-            };
-        };
-
-        // ad button in the bottom menu
-        if (auto bottomMenu = getChildByID("bottom-menu")) {
-            auto popupButton = CCMenuItemSpriteExtra::create(
-                CircleButtonSprite::createWithSpriteFrameName(
-                    "adIcon.png"_spr,
-                    0.875f,
-                    CircleBaseColor::Green,
-                    CircleBaseSize::MediumAlt),
-                this,
-                menu_selector(AdsMenuLayer::onAdMenuButton));
-
-            bottomMenu->addChild(popupButton);
-            bottomMenu->updateLayout();
-        };
-
-        return true;
-    };
-
-    void onAdMenuButton(CCObject* sender) {
-        auto userId = Mod::get()->getSettingValue<std::string>("user-id");
-        if (userId.empty()) {
-            createQuickPopup(
-                "No User ID Set",
-                "You have not set a User ID yet.\n<cy>Do you want to open the Advertisement Manager and mod settings?</c>",
-                "No",
-                "Yes",
-                [](auto, bool ok) {
-                    if (ok) {
-                        openSettingsPopup(getMod());
-                        Notification::create("Opening Advertisement Manager", NotificationIcon::Info)->show();
-                        web::openLinkInBrowser("https://ads.cheeseworks.gay/");
-                    };
-                });
-        } else {
-            if (auto popup = AdManager::create()) popup->show();
-        };
-    }
 };

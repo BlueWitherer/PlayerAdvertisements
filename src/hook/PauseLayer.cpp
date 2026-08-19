@@ -1,29 +1,24 @@
-#include <Advertisements.hpp>
-
-#include "../ui/AdManager.hpp"
+#include <Advertisements.h>
 
 #include <Geode/Geode.hpp>
 
 #include <Geode/modify/PauseLayer.hpp>
 
 using namespace geode::prelude;
-using namespace ads;
+using namespace cw::ads;
 
 class $modify(AdsPauseLayer, PauseLayer) {
     void customSetup() {
         PauseLayer::customSetup();
 
         if (Mod::get()->getSettingValue<bool>("PauseLayer")) {
-            // get level name label
             auto levelName = typeinfo_cast<CCLabelBMFont*>(getChildByID("level-name"));
             levelName->setVisible(false);
 
-            // get the practice mode positions
             auto practiceTitle = typeinfo_cast<CCLabelBMFont*>(getChildByID("practice-mode-label"));
             auto practiceProgress = typeinfo_cast<CCLabelBMFont*>(getChildByID("practice-progress-label"));
             auto practiceBar = typeinfo_cast<CCSprite*>(getChildByID("practice-progress-bar"));
 
-            // move the normal mode title and program bar down
             auto normalTitle = typeinfo_cast<CCLabelBMFont*>(getChildByID("normal-mode-label"));
             auto normalProgress = typeinfo_cast<CCLabelBMFont*>(getChildByID("normal-progress-label"));
             auto normalBar = typeinfo_cast<CCSprite*>(getChildByID("normal-progress-bar"));
@@ -31,28 +26,22 @@ class $modify(AdsPauseLayer, PauseLayer) {
             auto playTime = typeinfo_cast<CCLabelBMFont*>(getChildByID("play-time"));
             auto pointslabel = typeinfo_cast<CCLabelBMFont*>(getChildByID("points-label"));
 
-            // position the y values
             if (practiceTitle && normalTitle) normalTitle->setPositionY(practiceTitle->getPositionY());
             if (practiceProgress && normalProgress) normalProgress->setPositionY(practiceProgress->getPositionY());
             if (practiceBar && normalBar) normalBar->setPositionY(practiceBar->getPositionY());
 
-            // make all practice mode invisible by default
             if (practiceTitle) practiceTitle->setVisible(false);
             if (practiceProgress) practiceProgress->setVisible(false);
             if (practiceBar) practiceBar->setVisible(false);
 
-            // move the play time and points label down a bit by 30
             if (playTime) playTime->setPositionY(playTime->getPositionY() - 30.f);
             if (pointslabel) pointslabel->setPositionY(pointslabel->getPositionY() - 30.f);
 
-            // player is practice mode, show practice mode elements
             if (GJBaseGameLayer::get()->m_isPracticeMode) {
-                // set all practice mode elements to visible
                 if (practiceTitle) practiceTitle->setVisible(true);
                 if (practiceProgress) practiceProgress->setVisible(true);
                 if (practiceBar) practiceBar->setVisible(true);
 
-                // hide normal mode elements
                 if (normalTitle) normalTitle->setVisible(false);
                 if (normalProgress) normalProgress->setVisible(false);
                 if (normalBar) normalBar->setVisible(false);
@@ -60,7 +49,6 @@ class $modify(AdsPauseLayer, PauseLayer) {
 
             auto const winSize = CCDirector::get()->getWinSize();
 
-            // insert ad banner (722x84)
             if (auto adBanner = Advertisement::create(AdType::Banner)) {
                 adBanner->setID("banner"_spr);
                 adBanner->setPosition({winSize.width / 2.f, winSize.height - 50.f});
@@ -70,23 +58,5 @@ class $modify(AdsPauseLayer, PauseLayer) {
                 adBanner->loadRandom();
             };
         };
-
-        // im confused
-        // add a button on the side on the menu
-        if (auto rightButtonMenu = getChildByID("right-button-menu")) {
-            auto adButtonSpr = CircleButtonSprite::create(CCSprite::createWithSpriteFrameName("adIcon.png"_spr));
-            adButtonSpr->setScale(0.675f);
-            auto popupButton = CCMenuItemSpriteExtra::create(
-                adButtonSpr,
-                this,
-                menu_selector(AdsPauseLayer::onAdClicked));
-
-            rightButtonMenu->addChild(popupButton);
-            rightButtonMenu->updateLayout();
-        };
-    };
-
-    void onAdClicked(CCObject* sender) {
-        if (auto popup = AdManager::create()) popup->show();
     };
 };

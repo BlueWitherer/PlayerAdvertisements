@@ -1,11 +1,11 @@
-#include <Advertisements.hpp>
+#include <Advertisements.h>
 
 #include <Geode/Geode.hpp>
 
 #include <Geode/modify/RetryLevelLayer.hpp>
 
 using namespace geode::prelude;
-using namespace ads;
+using namespace cw::ads;
 
 class $modify(AdsRetryLevelLayer, RetryLevelLayer) {
     void customSetup() {
@@ -21,7 +21,7 @@ class $modify(AdsRetryLevelLayer, RetryLevelLayer) {
                     int count = static_cast<int>(children->count());
 
                     for (int i = count - 1; i >= 0; --i) {
-                        CCObject* obj = children->objectAtIndex(static_cast<unsigned int>(i));
+                        CCObject* obj = children->objectAtIndex(static_cast<uint64_t>(i));
                         if (!obj) continue;
 
                         if (auto label = typeinfo_cast<CCLabelBMFont*>(obj)) m_mainLayer->removeChild(label, true);

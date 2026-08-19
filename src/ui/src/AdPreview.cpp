@@ -2,7 +2,7 @@
 
 #include "../ReportPopup.hpp"
 
-#include <Advertisements.hpp>
+#include <Advertisements.h>
 
 #include <argon/argon.hpp>
 
@@ -15,16 +15,16 @@
 using namespace geode::prelude;
 using namespace geode::utils;
 
-using namespace ads;
+using namespace cw::ads;
 
 class AdPreview::Impl final {
 public:
-    unsigned int adId = 0;
+    uint64_t adId = 0;
     int levelId = 0;
     std::string userId = "";
     AdType type = AdType::Banner;
-    unsigned int viewCount = 0;
-    unsigned int clickCount = 0;
+    uint64_t viewCount = 0;
+    uint64_t clickCount = 0;
 
     async::TaskHolder<web::WebResponse> announcementListener;
     async::TaskHolder<web::WebResponse> clickListener;
@@ -39,7 +39,7 @@ public:
 AdPreview::AdPreview() : m_impl(std::make_unique<Impl>()) {};
 AdPreview::~AdPreview() {};
 
-bool AdPreview::init(unsigned int adId, int levelId, std::string userId, AdType type, unsigned int viewCount, unsigned int clickCount) {
+bool AdPreview::init(uint64_t adId, int levelId, std::string userId, AdType type, uint64_t viewCount, uint64_t clickCount) {
     m_impl->adId = adId;
     m_impl->levelId = levelId;
     m_impl->userId = std::move(userId);
@@ -218,7 +218,7 @@ void AdPreview::onPlayButton(CCObject* sender) {
     };
 };
 
-void AdPreview::registerClick(unsigned int adId, std::string_view userId) {
+void AdPreview::registerClick(uint64_t adId, std::string_view userId) {
     log::debug("Sending click tracking request for ad_id={}, user_id={}", adId, userId);
 
     // get argon token yum
@@ -377,7 +377,7 @@ void AdPreview::update(float dt) {
     };
 };
 
-AdPreview* AdPreview::create(unsigned int adId, int levelId, std::string userId, AdType type, unsigned int viewCount, unsigned int clickCount) {
+AdPreview* AdPreview::create(uint64_t adId, int levelId, std::string userId, AdType type, uint64_t viewCount, uint64_t clickCount) {
     auto ret = new AdPreview();
 
     if (ret->init(adId, levelId, userId, type, viewCount, clickCount)) {
