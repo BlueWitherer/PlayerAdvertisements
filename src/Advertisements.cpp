@@ -170,7 +170,7 @@ namespace ads {
         reload();
 
         m_impl->adListener.spawn(
-            req.get("https://ads.arcticwoof.xyz/api/ad"),
+            req.get("https://ads.cheeseworks.gay/api/ad"),
             [self = WeakRef(this)](web::WebResponse res) {
                 if (auto s = self.lock()) s->handleAdResponse(res);
             });
@@ -375,7 +375,7 @@ namespace ads {
 
             viewRequest.bodyJSON(viewBody);
 
-            m_impl->viewListener.spawn(viewRequest.post("https://ads.arcticwoof.xyz/api/view"), [this, id, user](web::WebResponse res) {
+            m_impl->viewListener.spawn(viewRequest.post("https://ads.cheeseworks.gay/api/view"), [this, id, user](web::WebResponse res) {
                 if (res.ok()) {
                     log::info("View passed ad_id={}, user_id={}", id, user);
                 } else {
@@ -415,7 +415,7 @@ namespace ads {
         request.param("type", static_cast<int>(m_impl->type));
 
         m_impl->adListener.spawn(
-            request.get("https://ads.arcticwoof.xyz/api/ad"),
+            request.get("https://ads.cheeseworks.gay/api/ad"),
             [self = WeakRef(this)](web::WebResponse res) {
                 if (auto s = self.lock()) s->handleAdResponse(res);
             });
@@ -434,7 +434,7 @@ namespace ads {
         request.param("id", id);
 
         m_impl->adListener.spawn(
-            request.get("https://ads.arcticwoof.xyz/api/ad/get"),
+            request.get("https://ads.cheeseworks.gay/api/ad/get"),
             [self = WeakRef(this)](web::WebResponse res) {
                 if (auto s = self.lock()) s->handleAdResponse(res);
             });

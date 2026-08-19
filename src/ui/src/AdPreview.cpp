@@ -127,7 +127,7 @@ bool AdPreview::init(unsigned int adId, int levelId, std::string userId, AdType 
             request.header("Content-Type", "application/json");
 
             async::spawn(
-                request.get("https://ads.arcticwoof.xyz/api/announcement"),
+                request.get("https://ads.cheeseworks.gay/api/announcement"),
                 [](web::WebResponse res) {
                     if (res.ok()) {
                         auto data = res.json();
@@ -254,7 +254,7 @@ void AdPreview::registerClick(unsigned int adId, std::string_view userId) {
             clickRequest.bodyJSON(clickBody);
 
             async::spawn(
-                clickRequest.post("https://ads.arcticwoof.xyz/api/click"),
+                clickRequest.post("https://ads.cheeseworks.gay/api/click"),
                 [this, adId, userId](web::WebResponse res) {
                     if (res.ok()) {
                         log::info("Click passed ad_id={}, user_id={}", adId, userId);

@@ -115,7 +115,7 @@ public:
                     if (ok) {
                         openSettingsPopup(getMod());
                         Notification::create("Opening Advertisement Manager", NotificationIcon::Info)->show();
-                        web::openLinkInBrowser("https://ads.arcticwoof.xyz/");
+                        web::openLinkInBrowser("https://ads.cheeseworks.gay/");
                     }
                 });
         };
@@ -172,7 +172,7 @@ bool AdManager::init() {
     setTitle("Advertisement Manager");
 
     // fetch user ads and data
-    std::string urlStr = "https://ads.arcticwoof.xyz/users/fetch?id=";
+    std::string urlStr = "https://ads.cheeseworks.gay/users/fetch?id=";
 
     urlStr += Mod::get()->getSettingValue<std::string>("user-id");
 
@@ -197,7 +197,7 @@ bool AdManager::init() {
     globalStatsReq.header("User-Agent", "PlayerAdvertisements/1.0");
 
     async::spawn(
-        globalStatsReq.get("https://ads.arcticwoof.xyz/stats/global"),
+        globalStatsReq.get("https://ads.cheeseworks.gay/stats/global"),
         [self = WeakRef(this)](web::WebResponse res) {
             if (auto s = self.lock()) {
                 if (res.ok()) {
@@ -319,7 +319,7 @@ bool AdManager::init() {
                 "Proceed",
                 [](auto, bool ok) {
                     if (ok) {
-                        utils::web::openLinkInBrowser("https://ads.arcticwoof.xyz/");
+                        utils::web::openLinkInBrowser("https://ads.cheeseworks.gay/");
                         Notification::create("Opening in your browser", NotificationIcon::Info, 1.f)->show();
                     };
                 });
@@ -356,7 +356,7 @@ bool AdManager::init() {
             request.header("Content-Type", "application/json");
 
             async::spawn(
-                request.get("https://ads.arcticwoof.xyz/api/announcement"),
+                request.get("https://ads.cheeseworks.gay/api/announcement"),
                 [](web::WebResponse res) {
                     if (res.ok()) {
                         auto data = res.json();

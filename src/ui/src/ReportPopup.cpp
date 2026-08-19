@@ -115,7 +115,7 @@ void ReportPopup::onSubmitButton(CCObject* sender) {
             reportReq.bodyJSON(body);
 
             async::spawn(
-                reportReq.post("https://ads.arcticwoof.xyz/api/report"),
+                reportReq.post("https://ads.cheeseworks.gay/api/report"),
                 [this, upopup](web::WebResponse res) {
                     if (res.ok()) {
                         onClose(nullptr);

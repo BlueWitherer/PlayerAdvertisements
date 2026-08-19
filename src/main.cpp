@@ -77,7 +77,7 @@ class $modify(AdsMenuLayer, MenuLayer) {
                     if (ok) {
                         openSettingsPopup(getMod());
                         Notification::create("Opening Advertisement Manager", NotificationIcon::Info)->show();
-                        web::openLinkInBrowser("https://ads.arcticwoof.xyz/");
+                        web::openLinkInBrowser("https://ads.cheeseworks.gay/");
                     };
                 });
         } else {
