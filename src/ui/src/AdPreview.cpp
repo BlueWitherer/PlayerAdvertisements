@@ -122,7 +122,7 @@ bool AdPreview::init(uint64_t adId, int levelId, std::string userId, AdType type
         [](auto) {
             // fetch from /api/announcement
             auto request = web::WebRequest();
-            request.userAgent("PlayerAdvertisements/1.0");
+            request.userAgent("PlayerAdvertisements/1.2");
             request.timeout(std::chrono::seconds(15));
             request.header("Content-Type", "application/json");
 
@@ -242,7 +242,7 @@ void AdPreview::registerClick(uint64_t adId, std::string_view userId) {
             log::debug("Sending click tracking request for ad_id={}, user_id={}", adId, userId);
 
             auto clickRequest = web::WebRequest();
-            clickRequest.userAgent("PlayerAdvertisements/1.0");
+            clickRequest.userAgent("PlayerAdvertisements/1.2");
             clickRequest.header("Content-Type", "application/json");
             clickRequest.timeout(std::chrono::seconds(15));
 

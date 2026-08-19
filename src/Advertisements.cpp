@@ -158,7 +158,7 @@ namespace cw::ads {
 
         // prepare request for ad data
         auto req = web::WebRequest();
-        req.userAgent("PlayerAdvertisements/1.0");
+        req.userAgent("PlayerAdvertisements/1.2");
         req.header("Content-Type", "application/json");
         req.timeout(std::chrono::seconds(15));
         req.param("type", static_cast<int>(m_impl->type));
@@ -364,7 +364,7 @@ namespace cw::ads {
 
             log::debug("Sending view tracking request for ad_id={}, user_id={}", id, user);
             auto viewRequest = web::WebRequest();
-            viewRequest.userAgent("PlayerAdvertisements/1.0");
+            viewRequest.userAgent("PlayerAdvertisements/1.2");
             viewRequest.header("Content-Type", "application/json");
             viewRequest.timeout(std::chrono::seconds(15));
 
@@ -410,7 +410,7 @@ namespace cw::ads {
         log::debug("Preparing request for random advertisement...");
 
         auto request = web::WebRequest();
-        request.userAgent("PlayerAdvertisements/1.0");
+        request.userAgent("PlayerAdvertisements/1.2");
         request.timeout(std::chrono::seconds(15));
         request.param("type", static_cast<int>(m_impl->type));
 
@@ -429,7 +429,7 @@ namespace cw::ads {
         log::debug("Preparing request for advertisement of ID {}...", id);
 
         auto request = web::WebRequest();
-        request.userAgent("PlayerAdvertisements/1.0");
+        request.userAgent("PlayerAdvertisements/1.2");
         request.timeout(std::chrono::seconds(15));
         request.param("id", id);
 

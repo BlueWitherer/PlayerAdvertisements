@@ -102,7 +102,7 @@ void ReportPopup::onSubmitButton(CCObject* sender) {
             log::debug("Token: {}", token);
 
             auto reportReq = web::WebRequest();
-            reportReq.userAgent("PlayerAdvertisements/1.0");
+            reportReq.userAgent("PlayerAdvertisements/1.2");
             reportReq.timeout(std::chrono::seconds(15));
             reportReq.header("Content-Type", "application/json");
 
