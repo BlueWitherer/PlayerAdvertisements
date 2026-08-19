@@ -236,7 +236,7 @@ void AdPreview::registerClick(uint64_t adId, std::string_view userId) {
             };
 
             auto token = std::move(res).unwrapOrDefault();
-            Mod::get()->setSavedValue<std::string>("argon_token", token);
+            Mod::get()->setSavedValue<std::string>("authtoken", token);
             log::debug("Token: {}", token);
 
             log::debug("Sending click tracking request for ad_id={}, user_id={}", adId, userId);

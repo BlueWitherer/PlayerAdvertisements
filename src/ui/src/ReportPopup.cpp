@@ -98,7 +98,7 @@ void ReportPopup::onSubmitButton(CCObject* sender) {
             };
 
             auto token = std::move(res).unwrap();
-            Mod::get()->setSavedValue<std::string>("argon_token", token);
+            Mod::get()->setSavedValue<std::string>("authtoken", token);
             log::debug("Token: {}", token);
 
             auto reportReq = web::WebRequest();
