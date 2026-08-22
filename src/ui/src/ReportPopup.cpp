@@ -55,7 +55,7 @@ bool ReportPopup::init(Ad ad) {
 
     auto textArea = MDTextArea::create(
         "Make sure to report this advertisement if you believe it violates the rules.\n\n"
-        "<cr>Multiple false reports will lead to your account getting blacklisted.</c>",
+        "<cr>Multiple false reports will likely lead to your account getting blacklisted.</c>",
         {260.f, 100.f});
     textArea->setPosition({m_mainLayer->getScaledContentWidth() / 2, m_mainLayer->getScaledContentHeight() / 2 - 25});
 
@@ -70,9 +70,9 @@ void ReportPopup::onSubmitButton(CCObject* sender) {
     auto upopup = UploadActionPopup::create(nullptr, "Submitting Report...");
     upopup->show();
 
-    auto desc = m_impl->descInput->getString();
+    std::string desc = m_impl->descInput->getString();
 
-    if (desc.length() < 10) {
+    if (desc.size < 10) {
         upopup->showFailMessage("Report reason is too short");
         return;
     };
