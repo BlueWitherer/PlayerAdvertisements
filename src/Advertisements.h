@@ -1,29 +1,29 @@
 #pragma once
 
-#include <cocos2d.h>
-
 #include <Geode/Geode.hpp>
 
 namespace cw::ads {
-    enum class AdType : uint64_t {
+    enum class AdType : uint8_t {
         Banner = 1,
         Square = 2,
         Skyscraper = 3
     };
 
     struct Ad final {
-        uint64_t id;
-        std::string image;
-        int level = 0;
-        std::string user = "";
-        AdType type;
-        uint64_t viewCount = 0;
-        uint64_t clickCount = 0;
-        uint8_t glowLevel = 0;
+    private:
+        uint64_t m_id = 0;
+        std::string m_image;
+        int m_level = 0;
+        std::string m_user;
+        AdType m_type = AdType::Banner;
+        uint64_t m_viewCount = 0;
+        uint64_t m_clickCount = 0;
+        uint8_t m_glowLevel = 0;
 
+    public:
         Ad() = default;
 
-        inline Ad(
+        Ad(
             uint64_t id,
             std::string image,
             int level,
@@ -31,14 +31,16 @@ namespace cw::ads {
             std::string user,
             uint64_t viewCount = 0,
             uint64_t clickCount = 0,
-            uint8_t glowLevel = 0) : id(id),
-                                     image(std::move(image)),
-                                     level(level),
-                                     type(type),
-                                     user(std::move(user)),
-                                     viewCount(viewCount),
-                                     clickCount(clickCount),
-                                     glowLevel(glowLevel) {};
+            uint8_t glowLevel = 0);
+
+        uint64_t getID() const noexcept;
+        geode::ZStringView getImage() const noexcept;
+        int getLevel() const noexcept;
+        geode::ZStringView getUser() const noexcept;
+        AdType getType() const noexcept;
+        uint64_t getViews() const noexcept;
+        uint64_t getClicks() const noexcept;
+        uint8_t getGlowLevel() const noexcept;
     };
 
     /**
@@ -55,12 +57,10 @@ namespace cw::ads {
 
     class Advertisement final : public cocos2d::CCNode {
     private:
-        class Impl;
+        struct Impl;
         std::unique_ptr<Impl> m_impl;
 
-        // Reloads the type of advertisement
         void reloadType();
-        // Reloads the advertisement button
         void reload();
 
     protected:
@@ -104,7 +104,11 @@ namespace cw::ads {
          * @param res The web response containing the advertisement data
          */
         void handleAdResponse(geode::utils::web::WebResponse const& res);
-
-        void onEnter() override;
     };
+};
+
+template <>
+struct matjson::Serialize<cw::ads::Ad> final {
+    static geode::Result<cw::ads::Ad> fromJson(matjson::Value const& value);
+    static matjson::Value toJson(cw::ads::Ad const& value);
 };

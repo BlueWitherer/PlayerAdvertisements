@@ -10,12 +10,12 @@
 #include <Geode/utils/async.hpp>
 
 using namespace geode::prelude;
-using namespace geode::utils;
+using namespace cw::ads;
 
-class ReportPopup::Impl final {
-public:
-    uint64_t adId = 0;
-    int levelId = 0;
+struct ReportPopup::Impl final {
+    Ad ad;
+
+    TextInput* descInput = nullptr;
 
     std::string userId = "";
     std::string description = "";
@@ -26,25 +26,22 @@ public:
 ReportPopup::ReportPopup() : m_impl(std::make_unique<Impl>()) {};
 ReportPopup::~ReportPopup() {};
 
-bool ReportPopup::init(uint64_t adId, int levelId, std::string description) {
-    m_impl->adId = adId;
-    m_impl->levelId = levelId;
-    m_impl->description = std::move(description);
+bool ReportPopup::init(Ad ad) {
+    m_impl->ad = std::move(ad);
 
-    // @geode-ignore(unknown-resource)
     if (!Popup::init(300.f, 200.f, "geode.loader/GE_square03.png")) return false;
 
     setID("report"_spr);
-    setTitle("Report AD ID: " + numToString(m_impl->adId));
+    setTitle("Report Ad ID: " + numToString(m_impl->ad.getID()));
     setCloseButtonSpr(CircleButtonSprite::createWithSpriteFrameName("geode.loader/close.png", 0.875f, CircleBaseColor::DarkAqua, CircleBaseSize::Small));
 
-    auto descriptionInput = TextInput::create(260.f, "Report Reason...", "chatFont.fnt");
-    descriptionInput->setID("description-input");
-    descriptionInput->setPosition({m_mainLayer->getScaledContentWidth() / 2, m_mainLayer->getScaledContentHeight() - 50});
+    m_impl->descInput = TextInput::create(260.f, "Report Reason...", "chatFont.fnt");
+    m_impl->descInput->setID("description-input");
+    m_impl->descInput->setPosition({m_mainLayer->getScaledContentWidth() / 2, m_mainLayer->getScaledContentHeight() - 50});
 
-    if (!m_impl->description.empty()) descriptionInput->setString(m_impl->description);
+    if (!m_impl->description.empty()) m_impl->descInput->setString(m_impl->description);
 
-    m_mainLayer->addChild(descriptionInput);
+    m_mainLayer->addChild(m_impl->descInput);
 
     auto menu = CCMenu::create();
     menu->setPosition({m_mainLayer->getScaledContentWidth() / 2, 0.f});
@@ -68,69 +65,65 @@ bool ReportPopup::init(uint64_t adId, int levelId, std::string description) {
 };
 
 void ReportPopup::onSubmitButton(CCObject* sender) {
-    auto descriptionInput = typeinfo_cast<TextInput*>(m_mainLayer->getChildByID("description-input"));
+    if (!m_impl->descInput) return;
 
     auto upopup = UploadActionPopup::create(nullptr, "Submitting Report...");
     upopup->show();
 
-    std::string desc;
-    if (descriptionInput) {
-        desc = descriptionInput->getString();
-    } else {
-        desc = m_impl->description;
-    };
+    auto desc = m_impl->descInput->getString();
 
     if (desc.length() < 10) {
         upopup->showFailMessage("Report reason is too short");
         return;
     };
 
-    // argon token thing
-    auto accountData = argon::getGameAccountData();
-
     async::spawn(
-        argon::startAuth(std::move(accountData)),
-        [this, desc, upopup](Result<std::string> res) {
-            if (!res) {
-                log::warn("Auth failed: {}", res.unwrapErr());
-                upopup->showFailMessage("Failed to authorize with Argon");
-                return;
+        argon::startAuth(),
+        [self = WeakRef(this), desc = std::move(desc), upopup = WeakRef(upopup)](Result<std::string> res) {
+            if (auto s = self.lock()) {
+                if (res.isErr()) {
+                    log::warn("Auth failed: {}", std::move(res).unwrapErr());
+                    if (auto up = upopup.lock()) up->showFailMessage("Failed to authorize with Argon");
+
+                    return;
+                };
+
+                auto token = std::move(res).unwrap();
+                Mod::get()->setSavedValue<std::string>("authtoken", token);
+                log::debug("Token: {}", token);
+
+                auto reportReq = web::WebRequest();
+                reportReq.userAgent("PlayerAdvertisements/1.2");
+                reportReq.timeout(std::chrono::seconds(15));
+
+                matjson::Value body = matjson::Value();
+
+                body["ad_id"] = s->m_impl->ad.getID();
+                body["account_id"] = GJAccountManager::sharedState()->m_accountID;
+                body["description"] = std::move(desc);
+                body["authtoken"] = std::move(token);
+
+                reportReq.bodyJSON(body);
+
+                async::spawn(
+                    reportReq.post("https://ads.cheeseworks.gay/api/report"),
+                    [self, upopup](web::WebResponse res) {
+                        if (auto s = self.lock()) {
+                            if (res.ok()) {
+                                s->onClose(nullptr);
+                                if (auto up = upopup.lock()) up->showSuccessMessage("Report submitted successfully!");
+                            } else {
+                                if (auto up = upopup.lock()) up->showFailMessage(res.code() == 403 ? "You've been banned from reporting ads." : "Failed to send report!");
+                            };
+                        };
+                    });
             };
-
-            auto token = std::move(res).unwrap();
-            Mod::get()->setSavedValue<std::string>("authtoken", token);
-            log::debug("Token: {}", token);
-
-            auto reportReq = web::WebRequest();
-            reportReq.userAgent("PlayerAdvertisements/1.2");
-            reportReq.timeout(std::chrono::seconds(15));
-            reportReq.header("Content-Type", "application/json");
-
-            matjson::Value body = matjson::Value::object();
-            body["ad_id"] = m_impl->adId;
-            body["account_id"] = GJAccountManager::sharedState()->m_accountID;
-            body["description"] = desc;
-            body["authtoken"] = token;
-
-            reportReq.bodyJSON(body);
-
-            async::spawn(
-                reportReq.post("https://ads.cheeseworks.gay/api/report"),
-                [this, upopup](web::WebResponse res) {
-                    if (res.ok()) {
-                        onClose(nullptr);
-                        upopup->showSuccessMessage("Report submitted successfully");
-                    } else {
-                        upopup->showFailMessage(res.code() == 403 ? "You've been banned from reporting ads" : "Failed to send report");
-                    };
-                });
         });
 };
 
-ReportPopup* ReportPopup::create(uint64_t adId, int levelId, std::string description) {
+ReportPopup* ReportPopup::create(Ad ad) {
     auto ret = new ReportPopup();
-    // @geode-ignore(unknown-resource)
-    if (ret->init(adId, levelId, std::move(description))) {
+    if (ret->init(std::move(ad))) {
         ret->autorelease();
         return ret;
     };

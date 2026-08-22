@@ -1,3 +1,7 @@
+# v1.2.3 
+- Supersede original Player Advertisements
+- Huge internal refactor & optimizations
+
 # v1.2.2 
 - Directly support new ads servers
 - Temporarily removed in-game Ads Manager

@@ -3,30 +3,28 @@
 #include <Advertisements.h>
 
 #include <Geode/Geode.hpp>
-#include "Geode/cocos/menu_nodes/CCMenuItem.h"
 
-using namespace geode::prelude;
-using namespace cw::ads;
+namespace cw::ads {
 
-class AdPreview final : public Popup {
-private:
-    class Impl;
-    std::unique_ptr<Impl> m_impl;
-    CCMenuItemSprite* m_playAdLevelBtn;
+    class AdPreview final : public geode::Popup {
+    private:
+        struct Impl;
+        std::unique_ptr<Impl> m_impl;
 
-protected:
-    AdPreview();
-    ~AdPreview();
+    protected:
+        AdPreview();
+        ~AdPreview();
 
-    bool init(uint64_t adId, int levelId, std::string userId, AdType type, uint64_t viewCount, uint64_t clickCount);
+        bool init(cw::ads::Ad ad);
 
-    void onPlayButton(CCObject* sender);
+        void onPlayButton(cocos2d::CCObject* sender);
 
-    void registerClick(uint64_t adId, std::string_view userId);
-    void tryOpenOrFetchLevel(CCMenuItemSpriteExtra* menuItem, int levelId);
+        void tryOpenOrFetchLevel(CCMenuItemSpriteExtra* menuItem, int levelId);
+        void registerClick();
 
-    void update(float dt) override;
+        void update(float dt) override;
 
-public:
-    static AdPreview* create(uint64_t adId, int levelId, std::string userId, AdType type, uint64_t viewCount, uint64_t clickCount);
+    public:
+        static AdPreview* create(cw::ads::Ad ad);
+    };
 };

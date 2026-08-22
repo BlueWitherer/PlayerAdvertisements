@@ -8,24 +8,79 @@
 
 #include <Geode/Geode.hpp>
 
-#include <Geode/ui/Button.hpp>
-
-#include <Geode/utils/async.hpp>
-
 using namespace geode::prelude;
 using namespace geode::utils;
 using namespace cw::ads;
 
+Result<Ad> matjson::Serialize<Ad>::fromJson(matjson::Value const& value) {
+    if (!value.isObject()) return Err("Expected an object");
+
+    GEODE_UNWRAP_INTO(uint64_t id, value["ad_id"].asUInt());
+    GEODE_UNWRAP_INTO(std::string image, value["image_url"].asString());
+    GEODE_UNWRAP_INTO(int level, value["level_id"].asInt());
+    GEODE_UNWRAP_INTO(uint8_t type, value["type"].asUInt());
+    GEODE_UNWRAP_INTO(std::string user, value["user_id"].asString());
+    GEODE_UNWRAP_INTO(uint64_t viewCount, value["views"].asUInt());
+    GEODE_UNWRAP_INTO(uint64_t clickCount, value["clicks"].asUInt());
+
+    uint8_t glow = 0;
+    GEODE_UNWRAP_INTO_IF_OK(glow, value["glow"].asUInt());
+
+    return Ok(
+        Ad{
+            id,
+            std::move(image),
+            level,
+            static_cast<AdType>(type),
+            std::move(user),
+            viewCount,
+            clickCount,
+            glow,
+        });
+};
+
+matjson::Value matjson::Serialize<Ad>::toJson(Ad const& value) {
+    auto obj = matjson::Value();
+    obj["id"] = value.getID();
+    obj["image_url"] = value.getImage();
+    obj["level_id"] = value.getLevel();
+    obj["type"] = static_cast<uint8_t>(value.getType());
+    obj["user_id"] = value.getUser();
+    obj["views"] = value.getViews();
+    obj["clicks"] = value.getClicks();
+    obj["glow"] = value.getGlowLevel();
+
+    return obj;
+};
+
+Ad::Ad(
+    uint64_t id,
+    std::string image,
+    int level,
+    AdType type,
+    std::string user,
+    uint64_t viewCount,
+    uint64_t clickCount,
+    uint8_t glowLevel) :
+    m_id(id),
+    m_image(std::move(image)),
+    m_level(level),
+    m_type(type),
+    m_user(std::move(user)),
+    m_viewCount(viewCount),
+    m_clickCount(clickCount),
+    m_glowLevel(glowLevel) {};
+
 namespace particles {
-    constexpr const char* banner = "75,2065,2,4515,3,855,155,1,156,20,145,20a-1a1a0.3a15a90a0a20a0a100a25a0a25a0a0a0a0a10a5a0a180a1a0a1a0a1a0a1a0a5a0a180a0a1a0a1a0a1a0a1a0a0a1a1a0a0a0a0a0a0a0a0a2a1a0a0a0a41a0a0a0a0a0a0a0a0a0a0a0a0a0a0;";
-    constexpr const char* square = "75,2065,2,4515,3,855,155,1,156,20,145,20a-1a1a0.3a15a90a0a20a0a50a50a0a25a0a0a0a0a10a5a0a180a1a0a1a0a1a0a1a0a5a0a180a0a1a0a1a0a1a0a1a0a0a1a1a0a0a0a0a0a0a0a0a2a1a0a0a0a41a0a0a0a0a0a0a0a0a0a0a0a0a0a0;";
-    constexpr const char* skyscraper = "75,2065,2,4515,3,855,155,1,156,20,145,20a-1a1a0.3a15a90a0a20a0a25a100a0a25a0a0a0a0a10a5a0a180a1a0a1a0a1a0a1a0a5a0a180a0a1a0a1a0a1a0a1a0a0a1a1a0a0a0a0a0a0a0a0a2a1a0a0a0a41a0a0a0a0a0a0a0a0a0a0a0a0a0a0;";
+    constexpr auto banner = "50,2065,2,4515,3,855,155,1,156,20,145,20a-1a1a0.3a15a90a0a20a0a100a25a0a25a0a0a0a0a10a5a0a180a1a0a1a0a1a0a1a0a5a0a180a0a1a0a1a0a1a0a1a0a0a1a1a0a0a0a0a0a0a0a0a2a1a0a0a0a41a0a0a0a0a0a0a0a0a0a0a0a0a0a0;";
+    constexpr auto square = "50,2065,2,4515,3,855,155,1,156,20,145,20a-1a1a0.3a15a90a0a20a0a50a50a0a25a0a0a0a0a10a5a0a180a1a0a1a0a1a0a1a0a5a0a180a0a1a0a1a0a1a0a1a0a0a1a1a0a0a0a0a0a0a0a0a2a1a0a0a0a41a0a0a0a0a0a0a0a0a0a0a0a0a0a0;";
+    constexpr auto skyscraper = "50,2065,2,4515,3,855,155,1,156,20,145,20a-1a1a0.3a15a90a0a20a0a25a100a0a25a0a0a0a0a10a5a0a180a1a0a1a0a1a0a1a0a5a0a180a0a1a0a1a0a1a0a1a0a0a1a1a0a0a0a0a0a0a0a0a2a1a0a0a0a41a0a0a0a0a0a0a0a0a0a0a0a0a0a0;";
 };
 
 constexpr CCSize cw::ads::getAdSize(AdType type) noexcept {
-    auto const banner = CCSize(364.f, 45.f);
-    auto const square = CCSize(122.6f, 122.6f);
-    auto const skyscraper = CCSize(41.f, 314.f);
+    static constexpr auto banner = CCSize(364.f, 45.f);
+    static constexpr auto square = CCSize(122.6f, 122.6f);
+    static constexpr auto skyscraper = CCSize(41.f, 314.f);
 
     CCSize contentSize = banner;
 
@@ -50,22 +105,47 @@ constexpr const char* cw::ads::getParticlesForAdType(AdType type) noexcept {
     };
 };
 
-class Advertisement::Impl final {
-public:
-    async::TaskHolder<web::WebResponse> adListener;
+uint64_t Ad::getID() const noexcept {
+    return m_id;
+};
 
+ZStringView Ad::getImage() const noexcept {
+    return m_image;
+};
+
+int Ad::getLevel() const noexcept {
+    return m_level;
+};
+
+AdType Ad::getType() const noexcept {
+    return m_type;
+};
+
+ZStringView Ad::getUser() const noexcept {
+    return m_user;
+};
+
+uint64_t Ad::getViews() const noexcept {
+    return m_viewCount;
+};
+
+uint64_t Ad::getClicks() const noexcept {
+    return m_clickCount;
+};
+
+uint8_t Ad::getGlowLevel() const noexcept {
+    return m_glowLevel;
+};
+
+struct Advertisement::Impl final {
     Ad ad = Ad();
     AdType type = AdType::Banner;
 
     Button* adButton = nullptr;
-    LazySprite* adSprite = nullptr;
+    Ref<LazySprite> adSprite = nullptr;
     CCSprite* adIcon = nullptr;
 
-    int loadId = 0;
-
     std::string token;
-
-    async::TaskHolder<web::WebResponse> viewListener;
 };
 
 Advertisement::Advertisement() : m_impl(std::make_unique<Impl>()) {};
@@ -79,13 +159,9 @@ bool Advertisement::init(AdType type) {
     setAnchorPoint({0.5, 0.5});
     setContentSize(getAdSize(type));
 
-    return true;
-};
-
-void Advertisement::onEnter() {
-    CCNode::onEnter();
-    log::trace("advertisement appeared on scene");
     reloadType();
+
+    return true;
 };
 
 void Advertisement::reload() {
@@ -102,14 +178,15 @@ void Advertisement::reload() {
         m_impl->adSprite,
         [this](auto) {
             auto const& ad = m_impl->ad;
-            if (ad.id == 0) {
+
+            if (ad.getID() == 0) {
                 log::warn("Ad not loaded yet or ad ID is invalid");
                 Notification::create("Invalid Ad", NotificationIcon::Error)->show();
                 return;
             };
 
-            log::info("Opening AdPreview popup: ad_id={}, level_id={}, user_id={}, type={}", ad.id, ad.level, ad.user, static_cast<int>(ad.type));
-            if (auto popup = AdPreview::create(ad.id, ad.level, ad.user, ad.type, ad.viewCount, ad.clickCount)) {
+            log::info("Opening AdPreview popup: ad_id={}, level_id={}, user_id={}, type={}", ad.getID(), ad.getLevel(), ad.getUser(), static_cast<uint8_t>(ad.getType()));
+            if (auto popup = AdPreview::create(ad)) {
                 popup->show();
             } else {
                 log::error("Failed to create AdPreview popup");
@@ -127,9 +204,11 @@ void Advertisement::reload() {
 };
 
 void Advertisement::reloadType() {
+    if (m_impl->adSprite) m_impl->adSprite->removeFromParent();
+
     setContentSize(getAdSize(m_impl->type));
 
-    m_impl->adSprite = LazySprite::create(getScaledContentSize(), Mod::get()->getSettingValue<bool>("adLoading"));
+    m_impl->adSprite = LazySprite::create(getScaledContentSize(), Mod::get()->getSettingValue<bool>("loading-circles"));
     if (!m_impl->adSprite) {
         log::error("Failed to create LazySprite");
         return;
@@ -137,7 +216,6 @@ void Advertisement::reloadType() {
 
     log::info("Created LazySprite with size: {}x{}", getScaledContentSize().width, getScaledContentSize().height);
 
-    m_impl->adSprite->retain();
     m_impl->adSprite->setPosition({getScaledContentWidth() / 2.f, getScaledContentHeight() / 2.f});
     m_impl->adSprite->setVisible(true);
 
@@ -147,31 +225,22 @@ void Advertisement::reloadType() {
         argon::startAuth(),
         [self = WeakRef(this)](geode::Result<std::string> res) {
             if (auto s = self.lock()) {
-                if (res.isOk()) {
-                    s->m_impl->token = std::move(res).unwrap();
-                } else {
-                    log::warn("Auth failed: {}", res.unwrapErr());
-                };
+                if (res.isOk()) s->m_impl->token = std::move(res).unwrap();
+
+                auto req = web::WebRequest();
+                req.userAgent("PlayerAdvertisements/1.2");
+                req.timeout(std::chrono::seconds(15));
+
+                req.param("type", static_cast<uint8_t>(s->m_impl->type));
+
+                s->reload();
+
+                async::spawn(
+                    req.get("https://ads.cheeseworks.gay/api/ad"),
+                    [self](web::WebResponse res) {
+                        if (auto s = self.lock()) s->handleAdResponse(res);
+                    });
             };
-        });
-
-    // prepare request for ad data
-    auto req = web::WebRequest();
-    req.userAgent("PlayerAdvertisements/1.2");
-    req.header("Content-Type", "application/json");
-    req.timeout(std::chrono::seconds(15));
-    req.param("type", static_cast<int>(m_impl->type));
-
-    req.onProgress([](web::WebProgress const& progress) {
-        log::trace("ad progress: {}", progress.downloadProgress().value_or(0.f));
-    });
-
-    reload();
-
-    m_impl->adListener.spawn(
-        req.get("https://ads.cheeseworks.gay/api/ad"),
-        [self = WeakRef(this)](web::WebResponse res) {
-            if (auto s = self.lock()) s->handleAdResponse(res);
         });
 
     m_impl->adSprite->setLoadCallback([self = WeakRef(this)](Result<> res) {
@@ -226,7 +295,7 @@ void Advertisement::reloadType() {
                     log::info("Scaled ad sprite by {} to fit target {}x{} (natural {}x{})", scale, target.width, target.height, natural.width, natural.height);
                 };
 
-                if (s->m_impl->ad.glowLevel > 0) {
+                if (s->m_impl->ad.getGlowLevel() > 0) {
                     auto const size = s->m_impl->adSprite->getScaledContentSize();
 
                     auto featuredStar = CCSprite::createWithSpriteFrameName("featuredIcon.png"_spr);
@@ -248,17 +317,17 @@ void Advertisement::reloadType() {
 
                     if (s->m_impl->adButton) glowNode->setPosition(s->m_impl->adButton->getContentSize() / 2);
 
-                    auto particles = GameToolbox::particleFromString(getParticlesForAdType(s->m_impl->ad.type), CCParticleSystemQuad::create(), false);
+                    auto particles = GameToolbox::particleFromString(getParticlesForAdType(s->m_impl->ad.getType()), CCParticleSystemQuad::create(), false);
                     particles->setScale(1.25f);
                     particles->setAnchorPoint({0.5, 0.5});
                     particles->setPosition(glowNode->getPosition());
                     particles->resetSystem();
                     particles->update(0.15f);
 
-                    auto tag = CCLabelBMFont::create("Featured", "bigFont.fnt");
+                    auto tag = Label::create("Featured", "bigFont.fnt");
                     tag->setScale(0.375f);
                     tag->setAnchorPoint({1, 0});
-                    tag->setAlignment(kCCTextAlignmentRight);
+                    tag->setAlignment(Label::Alignment::Right);
 
                     float tagx = 12.f;
                     if (s->m_impl->adButton) tagx = s->m_impl->adButton->getScaledContentWidth() - 12.f;
@@ -266,9 +335,9 @@ void Advertisement::reloadType() {
                     tag->setPosition({tagx, 3.f});
                     tag->setOpacity(200);
 
-                    if (s->m_impl->ad.type == AdType::Skyscraper) tag->setVisible(false);
+                    if (s->m_impl->ad.getType() == AdType::Skyscraper) tag->setVisible(false);
 
-                    switch (s->m_impl->ad.glowLevel) {
+                    switch (s->m_impl->ad.getGlowLevel()) {
                         case 1: {
                             glowNode->setOpacity(175);
                             glowNode->setColor({250, 250, 75});
@@ -312,7 +381,7 @@ void Advertisement::reloadType() {
 
                         if (s->m_impl->adButton) s->m_impl->adButton->addChild(glowNode, -5);
 
-                        if (s->m_impl->ad.type != AdType::Skyscraper) {
+                        if (s->m_impl->ad.getType() != AdType::Skyscraper) {
                             if (particles) {
                                 if (s->m_impl->adButton && s->m_impl->adButton->getParent()) s->m_impl->adButton->getParent()->addChild(particles, 2);
                             };
@@ -338,63 +407,62 @@ void Advertisement::reloadType() {
 };
 
 void Advertisement::handleAdResponse(web::WebResponse const& res) {
-    if (res.ok()) {
-        auto jsonRes = res.json();
-        if (!jsonRes) {
-            log::error("Failed to parse ad JSON");
-            return;
-        };
+    if (res.error()) return log::error("Failed to fetch ad: HTTP {} ({})", res.code(), res.errorMessage());
 
-        auto json = jsonRes.unwrapOrDefault();
+    auto jsonRes = res.json();
+    if (!jsonRes) {
+        log::error("Failed to parse ad json: {}", std::move(jsonRes).unwrapErr());
+        if (m_impl->adSprite) m_impl->adSprite->removeFromParent();
 
-        auto id = json["ad_id"].asInt().unwrapOrDefault();
-        auto image = json["image_url"].asString().unwrapOrDefault();
-        auto level = json["level_id"].asInt().unwrapOrDefault();
-        auto user = json["user_id"].asString().unwrapOrDefault();
-        auto type = static_cast<AdType>(json["type"].asInt().unwrapOrDefault());
-        auto view = json["views"].asInt().unwrapOrDefault();
-        auto click = json["clicks"].asInt().unwrapOrDefault();
-        auto glow = json["glow"].asInt().unwrapOrDefault();
+        return;
+    };
 
-        m_impl->ad = Ad(id, image, level, type, user, view, click, glow);
-        log::debug("Ad metadata set inside listener: ad_id={} level_id={} user_id={} type={}", id, level, user, static_cast<int>(type));
-        log::debug("Ad view count: {}, click count: {}", view, click);
-        log::debug("Ad glow level: {}", glow);
+    auto json = std::move(jsonRes).unwrap();
 
-        log::debug("Sending view tracking request for ad_id={}, user_id={}", id, user);
-        auto viewRequest = web::WebRequest();
-        viewRequest.userAgent("PlayerAdvertisements/1.2");
-        viewRequest.header("Content-Type", "application/json");
-        viewRequest.timeout(std::chrono::seconds(15));
+    auto adRes = json.as<Ad>();
+    if (adRes.isErr()) {
+        log::error("Failed to parse ad: {}", std::move(adRes).unwrapErr());
+        if (m_impl->adSprite) m_impl->adSprite->removeFromParent();
 
-        matjson::Value viewBody = matjson::Value::object();
-        viewBody["ad_id"] = id;
-        viewBody["authtoken"] = m_impl->token;
-        viewBody["account_id"] = GJAccountManager::sharedState()->m_accountID;
+        return;
+    };
 
-        viewRequest.bodyJSON(viewBody);
+    m_impl->ad = std::move(adRes).unwrap();
 
-        m_impl->viewListener.spawn(viewRequest.post("https://ads.cheeseworks.gay/api/view"), [this, id, user](web::WebResponse res) {
-            if (res.ok()) {
-                log::info("View passed ad_id={}, user_id={}", id, user);
-            } else {
-                log::error("View failed with code {} for ad_id={}, user_id={}: {}", res.code(), id, user, res.errorMessage());
+    log::trace("Sending view tracking request for ad_id={}, user_id={}", m_impl->ad.getID(), m_impl->ad.getUser());
+
+    auto viewRequest = web::WebRequest();
+    viewRequest.userAgent("PlayerAdvertisements/1.2");
+    viewRequest.timeout(std::chrono::seconds(15));
+
+    matjson::Value viewBody = matjson::Value::object();
+    viewBody["ad_id"] = m_impl->ad.getID();
+    viewBody["authtoken"] = m_impl->token;
+    viewBody["account_id"] = GJAccountManager::sharedState()->m_accountID;
+
+    viewRequest.bodyJSON(viewBody);
+
+    async::spawn(
+        viewRequest.post("https://ads.cheeseworks.gay/api/view"),
+        [self = WeakRef(this)](web::WebResponse res) {
+            if (auto s = self.lock()) {
+                if (res.error()) return log::error("View failed with code {} for ad_id={}, user_id={}: {}", res.code(), s->m_impl->ad.getID(), s->m_impl->ad.getUser(), res.errorMessage());
+
+                log::info("View passed ad_id={}, user_id={}", s->m_impl->ad.getID(), s->m_impl->ad.getUser());
+
+                log::debug("View request completed for ad_id={}, user_id={}", s->m_impl->ad.getID(), s->m_impl->ad.getUser());
             };
-
-            log::debug("View request completed for ad_id={}, user_id={}", id, user);
         });
-        log::debug("Sent view tracking request for ad_id={}, user_id={}", id, user);
 
-        if (m_impl->adSprite && !m_impl->ad.image.empty()) {
-            log::info("Loading ad image from URL: {}", m_impl->ad.image);
-            m_impl->adSprite->loadFromUrl(utils::string::replace(m_impl->ad.image.c_str(), "arcticwoof.xyz", "cheeseworks.gay"), CCImage::kFmtUnKnown);
-        } else if (m_impl->ad.image.empty()) {
-            log::warn("Ad image URL is empty, skipping image load");
-        } else {
-            log::warn("Ad sprite missing when trying to load image");
-        };
+    log::debug("Sent view tracking request for ad_id={}, user_id={}", m_impl->ad.getID(), m_impl->ad.getUser());
+
+    if (m_impl->adSprite && !m_impl->ad.getImage().empty()) {
+        log::info("Loading ad image from URL: {}", m_impl->ad.getImage());
+        m_impl->adSprite->loadFromUrl(utils::string::replace(m_impl->ad.getImage().c_str(), "arcticwoof.xyz", "cheeseworks.gay"), CCImage::kFmtUnKnown);
+    } else if (m_impl->ad.getImage().empty()) {
+        log::warn("Ad image URL is empty, skipping image load");
     } else {
-        log::error("Failed to fetch ad: HTTP {}", res.code());
+        log::warn("Ad sprite missing when trying to load image");
     };
 };
 
@@ -411,9 +479,9 @@ void Advertisement::loadRandom() {
     auto request = web::WebRequest();
     request.userAgent("PlayerAdvertisements/1.2");
     request.timeout(std::chrono::seconds(15));
-    request.param("type", static_cast<int>(m_impl->type));
+    request.param("type", static_cast<uint8_t>(m_impl->type));
 
-    m_impl->adListener.spawn(
+    async::spawn(
         request.get("https://ads.cheeseworks.gay/api/ad"),
         [self = WeakRef(this)](web::WebResponse res) {
             if (auto s = self.lock()) s->handleAdResponse(res);
@@ -432,13 +500,11 @@ void Advertisement::load(int id) {
     request.timeout(std::chrono::seconds(15));
     request.param("id", id);
 
-    m_impl->adListener.spawn(
+    async::spawn(
         request.get("https://ads.cheeseworks.gay/api/ad/get"),
         [self = WeakRef(this)](web::WebResponse res) {
             if (auto s = self.lock()) s->handleAdResponse(res);
         });
-
-    m_impl->loadId = id;
 
     log::info("Sent request for advertisement of ID {}", id);
 };

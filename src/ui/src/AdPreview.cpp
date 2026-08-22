@@ -17,14 +17,8 @@ using namespace geode::utils;
 
 using namespace cw::ads;
 
-class AdPreview::Impl final {
-public:
-    uint64_t adId = 0;
-    int levelId = 0;
-    std::string userId = "";
-    AdType type = AdType::Banner;
-    uint64_t viewCount = 0;
-    uint64_t clickCount = 0;
+struct AdPreview::Impl final {
+    Ad ad;
 
     async::TaskHolder<web::WebResponse> announcementListener;
     async::TaskHolder<web::WebResponse> clickListener;
@@ -32,30 +26,28 @@ public:
     std::string pendingKey;
     int pendingLevelId = -1;
     float pendingTimeout = 0.0f;
+
     LoadingSpinner* pendingSpinner = nullptr;
+    CCMenuItemSprite* playBtn;
+
     bool hasClicked = false;
 };
 
 AdPreview::AdPreview() : m_impl(std::make_unique<Impl>()) {};
 AdPreview::~AdPreview() {};
 
-bool AdPreview::init(uint64_t adId, int levelId, std::string userId, AdType type, uint64_t viewCount, uint64_t clickCount) {
-    m_impl->adId = adId;
-    m_impl->levelId = levelId;
-    m_impl->userId = std::move(userId);
-    m_impl->type = type;
-    m_impl->viewCount = viewCount;
-    m_impl->clickCount = clickCount;
+bool AdPreview::init(Ad ad) {
+    m_impl->ad = std::move(ad);
 
     // @geode-ignore(unknown-resource)
     if (!Popup::init(250.f, 200.f, "geode.loader/GE_square03.png")) return false;
 
     setID("preview"_spr);
-    setTitle("Ad ID: " + numToString(m_impl->adId));
+    setTitle("Ad ID: " + numToString(m_impl->ad.getID()));
     setCloseButtonSpr(CircleButtonSprite::createWithSpriteFrameName("geode.loader/close.png", 0.875f, CircleBaseColor::DarkAqua, CircleBaseSize::Small));
 
-    auto levelIdLabel = CCLabelBMFont::create(
-        ("Level ID: " + numToString(m_impl->levelId)).c_str(),
+    auto levelIdLabel = Label::create(
+        ("Level ID: " + numToString(m_impl->ad.getLevel())).c_str(),
         "bigFont.fnt");
     levelIdLabel->setID("level-id-label");
     levelIdLabel->setPosition({m_mainLayer->getScaledContentWidth() / 2, m_mainLayer->getScaledContentHeight() - 40});
@@ -64,19 +56,19 @@ bool AdPreview::init(uint64_t adId, int levelId, std::string userId, AdType type
     m_mainLayer->addChild(levelIdLabel);
 
     auto playAdLevelSprite = CCSprite::createWithSpriteFrameName("GJ_playBtn2_001.png");
-    m_playAdLevelBtn = CCMenuItemSpriteExtra::create(
+    m_impl->playBtn = CCMenuItemSpriteExtra::create(
         playAdLevelSprite,
         this,
         menu_selector(AdPreview::onPlayButton));
-    m_playAdLevelBtn->setID("play-btn");
-    m_playAdLevelBtn->setPosition({m_mainLayer->getScaledContentWidth() / 2, m_mainLayer->getScaledContentHeight() / 2});
+    m_impl->playBtn->setID("play-btn");
+    m_impl->playBtn->setPosition({m_mainLayer->getScaledContentWidth() / 2, m_mainLayer->getScaledContentHeight() / 2});
 
     // store the menu for spinner placement / restoring state
-    m_buttonMenu->addChild(m_playAdLevelBtn);
+    m_buttonMenu->addChild(m_impl->playBtn);
 
     // view and click counts
-    auto viewCountLabel = CCLabelBMFont::create(
-        ("Views: " + numToString(m_impl->viewCount)).c_str(),
+    auto viewCountLabel = Label::create(
+        ("Views: " + numToString(m_impl->ad.getViews())).c_str(),
         "goldFont.fnt");
     viewCountLabel->setID("view-count-label");
     viewCountLabel->setColor({255, 125, 0});
@@ -85,8 +77,8 @@ bool AdPreview::init(uint64_t adId, int levelId, std::string userId, AdType type
 
     m_mainLayer->addChild(viewCountLabel);
 
-    auto clickCountLabel = CCLabelBMFont::create(
-        ("Clicks: " + numToString(m_impl->clickCount)).c_str(),
+    auto clickCountLabel = Label::create(
+        ("Clicks: " + numToString(m_impl->ad.getClicks())).c_str(),
         "goldFont.fnt");
     clickCountLabel->setID("click-count-label");
     clickCountLabel->setColor({0, 175, 255});
@@ -104,7 +96,7 @@ bool AdPreview::init(uint64_t adId, int levelId, std::string userId, AdType type
             CircleBaseColor::DarkAqua,
             CircleBaseSize::Medium),
         [this](auto) {
-            if (auto reportPopup = ReportPopup::create(m_impl->adId, m_impl->levelId, "")) reportPopup->show();
+            if (auto reportPopup = ReportPopup::create(m_impl->ad)) reportPopup->show();
         });
     reportBtn->setID("report-ad-btn");
     reportBtn->setScale(0.625f);
@@ -124,7 +116,6 @@ bool AdPreview::init(uint64_t adId, int levelId, std::string userId, AdType type
             auto request = web::WebRequest();
             request.userAgent("PlayerAdvertisements/1.2");
             request.timeout(std::chrono::seconds(15));
-            request.header("Content-Type", "application/json");
 
             async::spawn(
                 request.get("https://ads.cheeseworks.gay/api/announcement"),
@@ -169,8 +160,7 @@ bool AdPreview::init(uint64_t adId, int levelId, std::string userId, AdType type
 };
 
 void AdPreview::onPlayButton(CCObject* sender) {
-    // stop player if they have too many scenes loaded
-    if (CCDirector::sharedDirector()->sceneCount() >= 10 &&
+    if (CCDirector::sharedDirector()->sceneCount() >= 5 &&
         Mod::get()->getSettingValue<bool>("scene-protection") == false) {
         createQuickPopup(
             "Hold up!",
@@ -198,79 +188,76 @@ void AdPreview::onPlayButton(CCObject* sender) {
             [this, sender](auto, bool btn) {
                 if (btn) {
                     auto menuItem = typeinfo_cast<CCMenuItemSpriteExtra*>(sender);
-                    registerClick(m_impl->adId, m_impl->userId);
-                    tryOpenOrFetchLevel(menuItem, m_impl->levelId);
+                    registerClick();
+                    tryOpenOrFetchLevel(menuItem, m_impl->ad.getLevel());
                 };
             });
     } else {
         auto menuItem = typeinfo_cast<CCMenuItemSpriteExtra*>(sender);
         if (!m_impl->hasClicked) {
             m_impl->hasClicked = true;
-            registerClick(m_impl->adId, m_impl->userId);
-            log::debug("click registered for ad_id={}, user_id={}", m_impl->adId, m_impl->userId);
-            tryOpenOrFetchLevel(menuItem, m_impl->levelId);
+            registerClick();
+            log::debug("click registered for ad_id={}, user_id={}", m_impl->ad.getID(), m_impl->ad.getUser());
+            tryOpenOrFetchLevel(menuItem, m_impl->ad.getLevel());
         } else {
             log::debug("click already registered for ad_id={}, user_id={}",
-                m_impl->adId,
-                m_impl->userId);
-            tryOpenOrFetchLevel(menuItem, m_impl->levelId);
+                m_impl->ad.getID(),
+                m_impl->ad.getUser());
+            tryOpenOrFetchLevel(menuItem, m_impl->ad.getLevel());
         };
     };
 };
 
-void AdPreview::registerClick(uint64_t adId, std::string_view userId) {
-    log::debug("Sending click tracking request for ad_id={}, user_id={}", adId, userId);
-
-    // get argon token yum
-    auto accountData = argon::getGameAccountData();
+void AdPreview::registerClick() {
+    log::debug("Sending click tracking request for ad_id={}, user_id={}", m_impl->ad.getID(), m_impl->ad.getUser());
 
     async::spawn(
-        argon::startAuth(std::move(accountData)),
-        [this, adId, userId](Result<std::string> res) {
-            if (res.isErr()) {
-                log::warn("Auth failed: {}", res.unwrapErr());
-                // Notification::create("Failed to authorize with Argon",
-                //     NotificationIcon::Error)
-                //     ->show();
-                return;
+        argon::startAuth(),
+        [self = WeakRef(this)](Result<std::string> res) {
+            if (auto s = self.lock()) {
+                if (res.isErr()) {
+                    log::warn("Auth failed: {}", std::move(res).unwrapErr());
+                    return;
+                };
+
+                auto token = std::move(res).unwrapOrDefault();
+                Mod::get()->setSavedValue<std::string>("authtoken", token);
+                log::debug("Token: {}", token);
+
+                log::debug("Sending click tracking request for ad_id={}, user_id={}", s->m_impl->ad.getID(), s->m_impl->ad.getUser());
+
+                auto clickRequest = web::WebRequest();
+                clickRequest.userAgent("PlayerAdvertisements/1.2");
+                clickRequest.timeout(std::chrono::seconds(15));
+
+                matjson::Value clickBody = matjson::Value::object();
+                clickBody["ad_id"] = s->m_impl->ad.getID();
+                clickBody["authtoken"] = std::move(token);
+                clickBody["account_id"] = GJAccountManager::sharedState()->m_accountID;
+
+                clickRequest.bodyJSON(clickBody);
+
+                async::spawn(
+                    clickRequest.post("https://ads.cheeseworks.gay/api/click"),
+                    [self](web::WebResponse res) {
+                        if (auto s = self.lock()) {
+                            if (res.ok()) {
+                                log::info("Click passed ad_id={}, user_id={}", s->m_impl->ad.getID(), s->m_impl->ad.getUser());
+                            } else {
+                                log::error(
+                                    "Click failed with code {} for ad_id={}, user_id={}: {}",
+                                    res.code(),
+                                    s->m_impl->ad.getID(),
+                                    s->m_impl->ad.getUser(),
+                                    res.errorMessage());
+                            };
+
+                            log::debug("Click request completed for ad_id={}, user_id={}", s->m_impl->ad.getID(), s->m_impl->ad.getUser());
+                        };
+                    });
+
+                log::debug("Sent click tracking request for ad_id={}, user_id={}", s->m_impl->ad.getID(), s->m_impl->ad.getUser());
             };
-
-            auto token = std::move(res).unwrapOrDefault();
-            Mod::get()->setSavedValue<std::string>("authtoken", token);
-            log::debug("Token: {}", token);
-
-            log::debug("Sending click tracking request for ad_id={}, user_id={}", adId, userId);
-
-            auto clickRequest = web::WebRequest();
-            clickRequest.userAgent("PlayerAdvertisements/1.2");
-            clickRequest.header("Content-Type", "application/json");
-            clickRequest.timeout(std::chrono::seconds(15));
-
-            matjson::Value clickBody = matjson::Value::object();
-            clickBody["ad_id"] = adId;
-            clickBody["authtoken"] = token;
-            clickBody["account_id"] = GJAccountManager::sharedState()->m_accountID;
-
-            clickRequest.bodyJSON(clickBody);
-
-            async::spawn(
-                clickRequest.post("https://ads.cheeseworks.gay/api/click"),
-                [this, adId, userId](web::WebResponse res) {
-                    if (res.ok()) {
-                        log::info("Click passed ad_id={}, user_id={}", adId, userId);
-                    } else {
-                        log::error(
-                            "Click failed with code {} for ad_id={}, user_id={}: {}",
-                            res.code(),
-                            adId,
-                            userId,
-                            res.errorMessage());
-                    };
-
-                    log::debug("Click request completed for ad_id={}, user_id={}", adId, userId);
-                });
-
-            log::debug("Sent click tracking request for ad_id={}, user_id={}", adId, userId);
         });
 };
 
@@ -301,7 +288,7 @@ void AdPreview::tryOpenOrFetchLevel(CCMenuItemSpriteExtra* menuItem, int levelId
     };
 
     // prepare pending state
-    m_impl->pendingKey = key;
+    m_impl->pendingKey = std::move(key);
     m_impl->pendingLevelId = levelId;
     m_impl->pendingTimeout = 10.0f;  // seconds
 
@@ -309,13 +296,13 @@ void AdPreview::tryOpenOrFetchLevel(CCMenuItemSpriteExtra* menuItem, int levelId
     if (m_impl->pendingSpinner) {
         m_impl->pendingSpinner->removeFromParent();
         m_impl->pendingSpinner = nullptr;
-        m_playAdLevelBtn->setVisible(true);
+        m_impl->playBtn->setVisible(true);
     };
 
     if (auto spinner = LoadingSpinner::create(100.f)) {
         spinner->setPosition(menuItem->getPosition());
         spinner->setVisible(true);
-        m_playAdLevelBtn->setVisible(false);
+        m_impl->playBtn->setVisible(false);
 
         m_buttonMenu->addChild(spinner);
 
@@ -342,14 +329,14 @@ void AdPreview::update(float dt) {
                     FMODAudioEngine::sharedEngine()->resumeAllAudio();
                 } else {
                     CCDirector::sharedDirector()->pushScene(transitionFade);
-                }
+                };
 
                 // cleanup pending state and spinner
                 if (m_impl->pendingSpinner) {
                     m_impl->pendingSpinner->removeFromParent();
                     m_impl->pendingSpinner = nullptr;
                 };
-                m_playAdLevelBtn->setVisible(true);
+                m_impl->playBtn->setVisible(true);
 
                 m_impl->pendingKey.clear();
                 m_impl->pendingLevelId = -1;
@@ -366,7 +353,8 @@ void AdPreview::update(float dt) {
                 m_impl->pendingSpinner->removeFromParent();
                 m_impl->pendingSpinner = nullptr;
             };
-            m_playAdLevelBtn->setVisible(true);
+
+            m_impl->playBtn->setVisible(true);
 
             Notification::create("Level not found", NotificationIcon::Warning)->show();
 
@@ -377,10 +365,9 @@ void AdPreview::update(float dt) {
     };
 };
 
-AdPreview* AdPreview::create(uint64_t adId, int levelId, std::string userId, AdType type, uint64_t viewCount, uint64_t clickCount) {
+AdPreview* AdPreview::create(Ad ad) {
     auto ret = new AdPreview();
-
-    if (ret->init(adId, levelId, userId, type, viewCount, clickCount)) {
+    if (ret->init(std::move(ad))) {
         ret->autorelease();
         return ret;
     };

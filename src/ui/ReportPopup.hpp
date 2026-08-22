@@ -2,21 +2,21 @@
 
 #include <Geode/Geode.hpp>
 
-using namespace geode::prelude;
-using namespace cw::ads;
+namespace cw::ads {
+    class ReportPopup final : public geode::Popup {
+    private:
+        struct Impl;
+        std::unique_ptr<Impl> m_impl;
 
-class ReportPopup final : public Popup {
-private:
-    class Impl;
-    std::unique_ptr<Impl> m_impl;
+    protected:
+        ReportPopup();
+        ~ReportPopup();
 
-protected:
-    ReportPopup();
-    ~ReportPopup();
+        void onSubmitButton(cocos2d::CCObject* sender);
 
-    bool init(uint64_t adId, int levelId, std::string description);
-    void onSubmitButton(CCObject* sender);
+        bool init(Ad ad);
 
-public:
-    static ReportPopup* create(uint64_t adId, int levelId, std::string description);
+    public:
+        static ReportPopup* create(Ad ad);
+    };
 };
