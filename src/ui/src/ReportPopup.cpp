@@ -72,7 +72,7 @@ void ReportPopup::onSubmitButton(CCObject* sender) {
 
     std::string desc = m_impl->descInput->getString();
 
-    if (desc.size < 10) {
+    if (desc.size() < 10) {
         upopup->showFailMessage("Report reason is too short");
         return;
     };
