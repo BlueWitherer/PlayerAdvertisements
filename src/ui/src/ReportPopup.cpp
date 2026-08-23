@@ -43,15 +43,27 @@ bool ReportPopup::init(Ad ad) {
 
     m_mainLayer->addChild(m_impl->descInput);
 
-    auto menu = CCMenu::create();
-    menu->setPosition({m_mainLayer->getScaledContentWidth() / 2, 0.f});
-
     auto submitButtonSprite = ButtonSprite::create("Submit Report", 0, false, "goldFont.fnt", "geode.loader/GE_button_05.png", 0.f, 1.f);
-    auto submitButton = CCMenuItemSpriteExtra::create(submitButtonSprite, this, menu_selector(ReportPopup::onSubmitButton));
 
-    menu->addChild(submitButton);
+    auto submitSpinner = LoadingSpinner::create(submitButtonSprite->getScaledContentHeight());
+    submitSpinner->setVisible(false);
 
-    m_mainLayer->addChild(menu);
+    auto submitButton = Button::createWithNode(
+        submitButtonSprite,
+        [this, submitSpinner](Button* sender) {
+            submitSpinner->setVisible(true);
+            sender->setVisible(false);
+
+            onSubmitButton(sender, submitSpinner);
+        });
+    submitButton->setID("submit-report-btn");
+    submitButton->setScale(0.875f);
+
+    m_mainLayer->addChildAtPosition(submitButton, Anchor::Bottom);
+
+    submitSpinner->setPosition(submitButton->getPosition());
+
+    m_mainLayer->addChild(submitSpinner, 1);
 
     auto textArea = MDTextArea::create(
         "Make sure to report this advertisement if you believe it violates the rules.\n\n"
@@ -64,7 +76,7 @@ bool ReportPopup::init(Ad ad) {
     return true;
 };
 
-void ReportPopup::onSubmitButton(CCObject* sender) {
+void ReportPopup::onSubmitButton(Button* sender, LoadingSpinner* spinner) {
     if (!m_impl->descInput) return;
 
     auto upopup = UploadActionPopup::create(nullptr, "Submitting Report...");
@@ -79,7 +91,7 @@ void ReportPopup::onSubmitButton(CCObject* sender) {
 
     async::spawn(
         argon::startAuth(),
-        [self = WeakRef(this), desc = std::move(desc), upopup = WeakRef(upopup)](Result<std::string> res) {
+        [self = WeakRef(this), btn = WeakRef(sender), btnLoad = WeakRef(spinner), desc = std::move(desc), upopup = WeakRef(upopup)](Result<std::string> res) {
             if (auto s = self.lock()) {
                 if (res.isErr()) {
                     log::warn("Auth failed: {}", std::move(res).unwrapErr());
@@ -107,7 +119,7 @@ void ReportPopup::onSubmitButton(CCObject* sender) {
 
                 async::spawn(
                     reportReq.post("https://ads.cheeseworks.gay/api/report"),
-                    [self, upopup](web::WebResponse res) {
+                    [self, upopup, btn, btnLoad](web::WebResponse res) {
                         if (auto s = self.lock()) {
                             if (res.ok()) {
                                 s->onClose(nullptr);
@@ -115,6 +127,9 @@ void ReportPopup::onSubmitButton(CCObject* sender) {
                             } else {
                                 if (auto up = upopup.lock()) up->showFailMessage(res.code() == 403 ? "You've been banned from reporting ads." : "Failed to send report!");
                             };
+
+                            if (auto b = btn.lock()) b->setVisible(true);
+                            if (auto bLoad = btnLoad.lock()) bLoad->setVisible(false);
                         };
                     });
             };

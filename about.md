@@ -1,5 +1,5 @@
-# Rhatt's Mod Template
-**My mod template for convenience!**
+# ![💰](frame:GJ_achImage_001.png?scale=0.625) Player Advertisements
+**Community-led exposure platform for levels!**
 
 *by [Cheeseworks](user:6408873)!*
 
@@ -8,22 +8,41 @@
 ---
 
 ## About
-This mod template is intended to fit my very strangely specific needs.
+This mod serves as **the place for people to share their levels**! Promote your hard work, or find some strange levels you wouldn't have known about otherwise!
+
+> ![ℹ️](frame:GJ_infoIcon_001.png?scale=0.5) <cj>*This is an **online** mod. **Check [status.cheeseworks.gay](https://status.cheeseworks.gay/)** before reporting any connectivity issues!*</c>
 
 ---
 
-### Features
-Here I ramble on about <cg>features</c>. Don't <cy>forget</c> very specific color coding! Sometimes I also tell people to <cl>press buttons</c> and <cf>use their keybinds</c>. Wow.
+### Promote Your Levels!
+Start off by <cy>going to the Player Ads Manager at **[ads.cheeseworks.gay](https://ads.cheeseworks.gay/)**</c>! <cr>You'll be required to log in with your [Discord account](https://discord.com/login)</c>.
 
-### Another Feature
-There's MORE?! Shut up...
+Head to <cg>the *Create* tab</c>, and <cy>upload an ad image that fits one of these resolutions</c> in **`px`**.
+- `1456`x`180` (Banner)
+- `180`x`1456` (Skyscraper)
+- `1456`x`1456` (Square)
 
-> ![⚠](frame:geode.loader/info-warning.png?scale=0.375) <cy>*This is a warning. Be warned.*</c>
+Next, get <cg>the ID of the level you want to promote</c> and <cy>paste it into the *Level ID* field</c>. <cr>Be sure to check its validity before submitting your ad for review</c>.
+
+> ![⚠](frame:geode.loader/info-warning.png?scale=0.375) <cy>*Unlisted or friends-only levels will **not be accepted**.*</c>
+
+### Supporter Perks
+By **<cd>supporting this mod [through Ko-fi](https://ko-fi.com/playerads)</c>**, you can <cy>unlock some very nice perks</c>! These include...
+- Visibility boost
+- Animated ads
+- Special Discord access
+- More ad slots
+
+...and more!
+
+> ![⚠](frame:geode.loader/info-warning.png?scale=0.375) <cy>*Before making purchases, **remember to link your Discord account with your Ko-fi account**.*</c>
+
+Happy advertising!
 
 ---
 
 ### Credits
-- **[ArcticWoof](user:7689052)**: guy i met next to a dumpster :P
+- **[ArcticWoof](user:7689052)**: Co-founder
 
 ---
 

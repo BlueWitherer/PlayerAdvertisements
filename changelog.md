@@ -1,6 +1,7 @@
 # v1.2.3 
-- Supersede original Player Advertisements
+- Supersede original [Player Advertisements](https://geode-sdk.org/mods/arcticwoof.player_advertisements) mod
 - Huge internal refactor & optimizations
+- UI improvements
 
 # v1.2.2 
 - Directly support new ads servers

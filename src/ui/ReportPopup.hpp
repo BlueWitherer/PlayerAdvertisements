@@ -12,7 +12,7 @@ namespace cw::ads {
         ReportPopup();
         ~ReportPopup();
 
-        void onSubmitButton(cocos2d::CCObject* sender);
+        void onSubmitButton(geode::Button* sender, geode::LoadingSpinner* spinner);
 
         bool init(Ad ad);
 

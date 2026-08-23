@@ -177,7 +177,7 @@ bool AdPreview::init(Ad ad) {
                 [](auto) {
                     createQuickPopup(
                         "Support Discord",
-                        "Join <cy>Cheeze Gang</c> on <cb>Discord</c> for help with using this mod?",
+                        "Join the <cb>support Discord server</c> for help with using this mod?",
                         "Cancel",
                         "OK",
                         [](auto, bool ok) {
