@@ -13,8 +13,6 @@
 #include <Geode/utils/async.hpp>
 
 using namespace geode::prelude;
-using namespace geode::utils;
-
 using namespace cw::ads;
 
 struct AdPreview::Impl final {
@@ -42,11 +40,11 @@ bool AdPreview::init(Ad ad) {
     if (!Popup::init(250.f, 200.f, "geode.loader/GE_square03.png")) return false;
 
     setID("preview"_spr);
-    setTitle("Ad ID: " + numToString(m_impl->ad.getID()));
+    setTitle(fmt::format("Ad ID | {}", m_impl->ad.getID()));
     setCloseButtonSpr(CircleButtonSprite::createWithSpriteFrameName("geode.loader/close.png", 0.875f, CircleBaseColor::DarkAqua, CircleBaseSize::Small));
 
     auto levelIdLabel = Label::create(
-        fmt::format("Level ID | {}", numToString(m_impl->ad.getLevel())),
+        fmt::format("Level ID | {}", m_impl->ad.getLevel()),
         "bigFont.fnt");
     levelIdLabel->setID("level-id-label");
     levelIdLabel->setPosition({m_mainLayer->getScaledContentWidth() / 2, m_mainLayer->getScaledContentHeight() - 40});
@@ -60,27 +58,26 @@ bool AdPreview::init(Ad ad) {
         this,
         menu_selector(AdPreview::onPlayButton));
     m_impl->playBtn->setID("play-btn");
-    m_impl->playBtn->setPosition({m_mainLayer->getScaledContentWidth() / 2, m_mainLayer->getScaledContentHeight() / 2});
 
-    m_buttonMenu->addChild(m_impl->playBtn);
+    m_buttonMenu->addChildAtPosition(m_impl->playBtn, Anchor::Center, {0.f, 3.75f});
 
     auto viewCountLabel = Label::create(
-        fmt::format("Views | {}", numToString(m_impl->ad.getViews())),
-        "goldFont.fnt");
+        fmt::format("{} View{}", GameToolbox::pointsToString(m_impl->ad.getViews()), m_impl->ad.getViews() != 1 ? "s" : ""),  // this is so dumb
+        "geode.loader/mdFont.fnt");
     viewCountLabel->setID("view-count-label");
-    viewCountLabel->setColor({255, 125, 0});
-    viewCountLabel->setScale(0.625f);
+    viewCountLabel->setColor({255, 193, 136});
+    viewCountLabel->setScale(0.425f);
 
     m_mainLayer->addChildAtPosition(viewCountLabel, Anchor::Center, {0.f, -45.f});
 
     auto clickCountLabel = Label::create(
-        fmt::format("Clicks | {}", numToString(m_impl->ad.getClicks())),
-        "goldFont.fnt");
+        fmt::format("{} Click{}", GameToolbox::pointsToString(m_impl->ad.getClicks()), m_impl->ad.getClicks() != 1 ? "s" : ""),  // this is still very dumb
+        "geode.loader/mdFontB.fnt");
     clickCountLabel->setID("click-count-label");
-    clickCountLabel->setColor({0, 175, 255});
-    clickCountLabel->setScale(0.625f);
+    clickCountLabel->setColor({96, 167, 206});
+    clickCountLabel->setScale(0.375f);
 
-    m_mainLayer->addChildAtPosition(clickCountLabel, Anchor::Center, {0.f, -65.f});
+    m_mainLayer->addChildAtPosition(clickCountLabel, Anchor::Center, {0.f, -55.f});
 
     // report button
     auto reportBtn = Button::createWithNode(
@@ -159,6 +156,76 @@ bool AdPreview::init(Ad ad) {
     announcementBtnLoading->setPosition(announcementBtn->getPosition());
 
     m_mainLayer->addChild(announcementBtnLoading, 1);
+
+    auto btnContainerLayout = RowLayout::create()
+                                  ->setGap(2.5f)
+                                  ->setAutoScale(false)
+                                  ->setAutoGrowAxis(1.25f);
+
+    auto btnContainer = CCNode::create();
+    btnContainer->setID("btn-container");
+    btnContainer->setAnchorPoint({0.5, 0});
+    btnContainer->setLayout(btnContainerLayout);
+
+    m_mainLayer->addChildAtPosition(btnContainer, Anchor::Bottom, {0.f, 7.5f});
+
+    auto btns = std::to_array<LinkButton>(
+        {
+            {
+                "discord-btn",
+                "gj_discordIcon_001.png",
+                [](auto) {
+                    createQuickPopup(
+                        "Support Discord",
+                        "Join <cy>Cheeze Gang</c> on <cb>Discord</c> for help with using this mod?",
+                        "Cancel",
+                        "OK",
+                        [](auto, bool ok) {
+                            if (ok) web::openLinkInBrowser("https://www.dsc.gg/cheeseworks");
+                        });
+                },
+            },
+            {
+                "ads-dashboard-btn",
+                "btn_dashboard.png"_spr,
+                [](auto) {
+                    createQuickPopup(
+                        "Ads Manager",
+                        "Go to the <co>Player Ads Manager</c> dashboard?",
+                        "Cancel",
+                        "OK",
+                        [](auto, bool ok) {
+                            if (ok) web::openLinkInBrowser("https://ads.cheeseworks.gay/");
+                        });
+                },
+            },
+            {
+                "kofi-btn",
+                "btn_kofi.png"_spr,
+                [](auto) {
+                    createQuickPopup(
+                        "Ko-fi",
+                        "Would you like to <cd>support the mod through Ko-fi</c>?",
+                        "Cancel",
+                        "OK",
+                        [](auto, bool ok) {
+                            if (ok) web::openLinkInBrowser("https://ko-fi.com/playerads");
+                        });
+                },
+            },
+        });
+
+    for (auto& b : btns) {
+        auto btn = Button::createWithSpriteFrameName(
+            b.sprite,
+            std::move(b.callback));
+        btn->setID(std::move(b.id));
+        btn->setScale(0.875f);
+
+        btnContainer->addChild(btn);
+    };
+
+    btnContainer->updateLayout();
 
     scheduleUpdate();
 

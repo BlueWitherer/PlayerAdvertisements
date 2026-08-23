@@ -1,25 +1,51 @@
-# Player Advertisements
-**Community-made ads for awesome levels!**
+# [<img src="logo.png" width="25" alt="The mod's logo." />](https://geode-sdk.org/mods/cheeseworks.template) Template
+My mod template for convenience!
 
-> [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/W7W31QRZA4)
+> [<img alt="YouTube" src="https://img.shields.io/youtube/channel/subscribers/UCi2M6N_ff1UC6MyfWzKQvgg?style=for-the-badge&logo=youtube&logoColor=ffffff&label=YouTube">](https://www.youtube.com/@cheese_works/) [<img alt="Bluesky" src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fpublic.api.bsky.app%2Fxrpc%2Fapp.bsky.actor.getProfile%2F%3Factor%3Dcheeseworks.gay&query=%24.followersCount&style=for-the-badge&logo=bluesky&logoColor=ffffff&label=Bluesky">](https://bsky.app/profile/cheeseworks.gay) [<img alt="Discord" src="https://img.shields.io/discord/460081436637134859?style=for-the-badge&logo=discord&logoColor=ffffff&label=Discord">](https://dsc.gg/cubic)
 
-###### Entry for Modtober 2025: What The Heck!?
+> [<img alt="Latest Version" src="https://img.shields.io/github/v/release/BlueWitherer/Template?include_prereleases&sort=semver&display_name=release&style=for-the-badge&logo=github&logoColor=ffffff&label=Version">](../../releases/) [<img alt="Code License" src="https://img.shields.io/github/license/BlueWitherer/Template?style=for-the-badge&logo=gnu&logoColor=ffffff&label=License">](LICENSE.md)
+>  
+> [<img alt="Downloads" src="https://img.shields.io/github/downloads/BlueWitherer/Template/total?style=for-the-badge&logo=geode&logoColor=ffffff&label=Downloads">](https://geode-sdk.org/mods/cheeseworks.template)
 
-You looove advertisements, right? Who doesn't?! Well, maybe you want to *promote some of your own levels* with over-the-top, eye catching, MrBeast-type clickbaity advertisements! Or, maybe you just wanna *find some new, rather interesting levels to play* and enjoy... Either way, this mod is for everyone!
-
-This cool mod adds advertisements for levels everywhere in the game! In most areas of the game, you will likely find an advertisement for someone's level! You can also click on these advertisements to get sent to their totally awesome levels as advertised.
-
-With just a few great ads, you could likely get *dozens to hundreds of players* to check out your level!
-
-This mod is the perfect tool to find some very awesome levels that you otherwise may not have ever heard of! So, what are you waiting for? **DOWNLOAD NOW!**
-
-#### Ready to advertise YOUR OWN levels? Create and manage your ads at the [Ads Manager](https://ads.cheeseworks.gay)!
-*Authorization via [Discord account](https://discord.com/login) will be required.*
-
-##### If you need help, join our [support Discord server](https://www.dsc.gg/cheeseworks) and ask! :)
-
-##### Buy boosts or subscribe to Verified on [our Ko-fi](https://ko-fi.com/playerads) to expand your reach!
+> [!TIP]
+> *This mod has settings you can utilize to customize your experience.*
 
 ---
 
-### [<img alt="Trailer Likes" height="15" src="https://img.shields.io/youtube/likes/PI_poDUUauw?style=for-the-badge&logo=youtube">](https://www.youtube.com/watch?v=PI_poDUUauw&list=PL0dsSu2pR5cERnq7gojZTKVRvUwWo2Ohu) Watch the [Horrible Mods](https://www.youtube.com/watch?v=Ssl49pNmW_0&list=PL0dsSu2pR5cERnq7gojZTKVRvUwWo2Ohu) series out now on YouTube!
+## About
+This mod template is intended to fit my very strangely specific needs.
+
+---
+
+### Features
+Here I ramble on about features. Don't forget very specific color coding! Sometimes I also tell people to press buttons and use their keybinds. Wow.
+
+### Another Feature
+There's MORE?! Shut up...
+
+> [!WARNING]
+> *This is a warning. Be warned.*
+
+---
+
+### Credits
+- **[ArcticWoof](https://www.github.com/DumbCaveSpider/)**: guy i met next to a dumpster :P
+
+---
+
+![preview](previews/preview-1.png)
+![preview](previews/preview-2.png)
+
+---
+
+### Changelog
+###### What's new?!
+**[📜 View the latest updates and patches](./changelog.md)**
+
+### Issues
+###### What's wrong?!
+**[⚠️ Report a problem with the mod](../../issues/)**
+
+### Development
+###### Work with the mod directly.
+**[⌨️ Check the API out](./include/)**

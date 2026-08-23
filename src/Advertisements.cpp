@@ -9,7 +9,6 @@
 #include <Geode/Geode.hpp>
 
 using namespace geode::prelude;
-using namespace geode::utils;
 using namespace cw::ads;
 
 namespace particles {

@@ -32,7 +32,7 @@ bool ReportPopup::init(Ad ad) {
     if (!Popup::init(300.f, 200.f, "geode.loader/GE_square03.png")) return false;
 
     setID("report"_spr);
-    setTitle("Report Ad ID: " + numToString(m_impl->ad.getID()));
+    setTitle("Report this ad?");
     setCloseButtonSpr(CircleButtonSprite::createWithSpriteFrameName("geode.loader/close.png", 0.875f, CircleBaseColor::DarkAqua, CircleBaseSize::Small));
 
     m_impl->descInput = TextInput::create(260.f, "Report Reason...", "chatFont.fnt");

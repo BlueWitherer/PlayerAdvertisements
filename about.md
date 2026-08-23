@@ -1,33 +1,30 @@
-# Player Advertisements
-#### Community-made ads for awesome levels!
+# Rhatt's Mod Template
+**My mod template for convenience!**
 
-*by **[a rat](user:6408873)** & [a dog](user:7689052)!*
+*by [Cheeseworks](user:6408873)!*
 
-###### ![?!](frame:geode.loader/tag-modtober25.png?scale=0.125) <co>Entry for Modtober 2025: What The Heck!?</c>
+> ![✳️](frame:collaborationIcon_001.png) <cg>*This mod has settings you can utilize to customize your experience.*</c>
 
 ---
 
-### About
-<cj>You looove advertisements, right?</c> Who doesn't?! Well, maybe you want to <cg>*promote some of your own levels*</c> with over-the-top, eye catching, MrBeast-type clickbaity advertisements! Or, maybe you just wanna <cy>*find some new, rather interesting levels to play* and enjoy</c>... Either way, <cc>this mod is for **everyone**</c>!
+## About
+This mod template is intended to fit my very strangely specific needs.
 
-<cl>This mod adds advertisements for levels everywhere in the game!</c> In most areas of the game, you will likely find an advertisement for someone's level! You can also click on these advertisements to get sent to their totally awesome levels.
+---
 
-<cy>With just a few great ads, you could likely get *dozens to hundreds of players* to check out your level!</c>
+### Features
+Here I ramble on about <cg>features</c>. Don't <cy>forget</c> very specific color coding! Sometimes I also tell people to <cl>press buttons</c> and <cf>use their keybinds</c>. Wow.
 
-This mod is <cp>the perfect tool to find some very awesome levels that you otherwise may not have ever heard of</c>! So, what are you waiting for? ![$](frame:geode.loader/tag-paid.png?scale=0.25)<cg>**DOWNLOAD NOW!**</c>![$](frame:geode.loader/tag-paid.png?scale=0.25)
+### Another Feature
+There's MORE?! Shut up...
 
-#### ![**$**](frame:GJ_achImage_001.png?scale=0.3) <cy>Ready to advertise YOUR OWN levels? Create and manage your ads at the [Ads Manager](https://ads.cheeseworks.gay)!</c>
-<cr>*Authorization via [Discord account](https://discord.com/login) will be required.*</c>
-
-##### ![🗨️](frame:gj_discordIcon_001.png?scale=0.25) If you need help, join our [support Discord server](https://www.dsc.gg/cheeseworks) and ask! :)
-
-##### ![$](frame:shard0205ShardBig_001.png?scale=0.25) <cp>Buy boosts or subscribe to Verified on [our Ko-fi](https://ko-fi.com/playerads) to expand your reach!</c>
+> ![⚠](frame:geode.loader/info-warning.png?scale=0.375) <cy>*This is a warning. Be warned.*</c>
 
 ---
 
 ### Credits
-- [ArcticWoof](user:7689052): Co-founder
+- **[ArcticWoof](user:7689052)**: guy i met next to a dumpster :P
 
 ---
 
-**![YT](frame:gj_ytIcon_001.png?scale=0.375) Watch the [Horrible Mods](https://www.youtube.com/watch?v=Ssl49pNmW_0&list=PL0dsSu2pR5cERnq7gojZTKVRvUwWo2Ohu) series out now on YouTube!**
+![🗨️](frame:gj_discordIcon_001.png?scale=0.375) **If you need help, join my [support Discord server](https://www.dsc.gg/cheeseworks) and ask! :)**

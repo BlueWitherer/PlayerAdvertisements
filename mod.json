@@ -24,11 +24,13 @@
         "spritesheets": {
             "ADS_icons": [
                 "resources/icons/*.png"
+            ],
+            "ADS_btns": [
+                "resources/buttons/*.png"
             ]
         }
     },
     "tags": [
-        "modtober25",
         "universal",
         "content",
         "online"
