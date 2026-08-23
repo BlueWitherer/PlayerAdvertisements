@@ -17,6 +17,9 @@ namespace cw::ads {
         Advertisement();
         ~Advertisement();
 
+        void onEnter() override;
+        void onExit() override;
+
         bool init(AdType type);
 
     public:
@@ -47,7 +50,7 @@ namespace cw::ads {
         /**
          * Get the LazySprite associated with the advertisement
          */
-        geode::LazySprite* getAdSprite() const;
+        geode::LazySprite* getAdSprite() const noexcept;
 
         /**
          * Handle the response from the advertisement fetch request

@@ -18,7 +18,7 @@ namespace particles {
 };
 
 struct Advertisement::Impl final {
-    Ad ad = Ad();
+    Ad ad;
     AdType type = AdType::Banner;
 
     Button* adButton = nullptr;
@@ -26,6 +26,8 @@ struct Advertisement::Impl final {
     CCSprite* adIcon = nullptr;
 
     std::string token;
+
+    TaskHolder<web::WebResponse> adListener;
 
     constexpr CCSize getAdSize(AdType type) noexcept {
         static constexpr auto banner = CCSize(364.f, 45.f);
@@ -143,7 +145,7 @@ void Advertisement::reloadType() {
 
                 s->reload();
 
-                async::spawn(
+                s->m_impl->adListener.spawn(
                     req.get("https://ads.cheeseworks.gay/api/ad"),
                     [self](web::WebResponse res) {
                         if (auto s = self.lock()) s->handleAdResponse(res);
@@ -374,11 +376,6 @@ void Advertisement::handleAdResponse(web::WebResponse const& res) {
     };
 };
 
-void Advertisement::setType(AdType type) {
-    m_impl->type = type;
-    reloadType();
-};
-
 void Advertisement::loadRandom() {
     reloadType();  // refresh any existing nodes
 
@@ -417,7 +414,26 @@ void Advertisement::load(int id) {
     log::info("Sent request for advertisement of ID {}", id);
 };
 
-LazySprite* Advertisement::getAdSprite() const {
+void Advertisement::setType(AdType type) {
+    if (m_impl->type != type) return;
+
+    m_impl->type = type;
+    reloadType();
+};
+
+void Advertisement::onEnter() {
+    m_impl->adListener.cancel();
+    reloadType();
+
+    CCNode::onEnter();
+};
+
+void Advertisement::onExit() {
+    m_impl->adListener.cancel();
+    CCNode::onExit();
+};
+
+LazySprite* Advertisement::getAdSprite() const noexcept {
     return m_impl->adSprite;
 };
 
