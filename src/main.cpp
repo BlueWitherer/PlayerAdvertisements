@@ -50,7 +50,7 @@ Result<Ad> matjson::Serialize<Ad>::fromJson(matjson::Value const& value) {
 
 matjson::Value matjson::Serialize<Ad>::toJson(Ad const& value) {
     auto obj = matjson::Value();
-    obj["id"] = value.getID();
+    obj["ad_id"] = value.getID();
     obj["image_url"] = value.getImage();
     obj["level_id"] = value.getLevel();
     obj["type"] = static_cast<uint8_t>(value.getType());
