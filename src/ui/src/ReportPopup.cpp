@@ -79,13 +79,17 @@ bool ReportPopup::init(Ad ad) {
 void ReportPopup::onSubmitButton(Button* sender, LoadingSpinner* spinner) {
     if (!m_impl->descInput) return;
 
-    auto upopup = UploadActionPopup::create(nullptr, "Submitting Report...");
+    auto upopup = UploadActionPopup::create(nullptr, "Submitting report...");
     upopup->show();
 
     std::string desc = m_impl->descInput->getString();
 
     if (desc.size() < 10) {
         upopup->showFailMessage("Report reason is too short");
+
+        sender->setVisible(true);
+        spinner->setVisible(false);
+
         return;
     };
 
