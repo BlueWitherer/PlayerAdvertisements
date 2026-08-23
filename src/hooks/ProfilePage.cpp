@@ -1,3 +1,5 @@
+#include <AdsUtils.h>
+
 #include <Advertisements.h>
 
 #include <Geode/Geode.hpp>
@@ -7,34 +9,39 @@
 using namespace geode::prelude;
 using namespace cw::ads;
 
+#define THIS_ID "ProfilePage"
+static constexpr auto g_hookId = THIS_ID;
+
 class $modify(AdsProfilePage, ProfilePage) {
+    PLAYERADS_DELEGATE_HOOKS(THIS_ID);
+
     bool init(int p0, bool p1) {
         if (!ProfilePage::init(p0, p1)) return false;
 
-        if (Mod::get()->getSettingValue<bool>("ProfilePage")) {
-            auto const winSize = CCDirector::sharedDirector()->getWinSize();
+        auto const winSize = CCDirector::sharedDirector()->getWinSize();
 
-            // skyscraper ad on the right side
-            if (auto adSkyscraperRight = Advertisement::create(AdType::Skyscraper)) {
-                adSkyscraperRight->setID("skyscraper-right"_spr);
-                adSkyscraperRight->setPosition({winSize.width - 30.f, winSize.height / 2.f});
+        // skyscraper ad on the right side
+        if (auto adSkyscraperRight = Advertisement::create(AdType::Skyscraper)) {
+            adSkyscraperRight->setID("skyscraper-right"_spr);
+            adSkyscraperRight->setPosition({winSize.width - 30.f, winSize.height / 2.f});
 
-                m_mainLayer->addChild(adSkyscraperRight);
+            m_mainLayer->addChild(adSkyscraperRight);
 
-                adSkyscraperRight->loadRandom();
-            };
+            adSkyscraperRight->loadRandom();
+        };
 
-            // skyscraper ad on the left side
-            if (auto adSkyscraperLeft = Advertisement::create(AdType::Skyscraper)) {
-                adSkyscraperLeft->setID("skyscraper-left"_spr);
-                adSkyscraperLeft->setPosition({30.f, winSize.height / 2.f});
+        // skyscraper ad on the left side
+        if (auto adSkyscraperLeft = Advertisement::create(AdType::Skyscraper)) {
+            adSkyscraperLeft->setID("skyscraper-left"_spr);
+            adSkyscraperLeft->setPosition({30.f, winSize.height / 2.f});
 
-                m_mainLayer->addChild(adSkyscraperLeft);
+            m_mainLayer->addChild(adSkyscraperLeft);
 
-                adSkyscraperLeft->loadRandom();
-            };
+            adSkyscraperLeft->loadRandom();
         };
 
         return true;
     };
 };
+
+PLAYERADS_HOOK_LISTENER(g_hookId);

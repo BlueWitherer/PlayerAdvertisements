@@ -1,3 +1,5 @@
+#include <AdsUtils.h>
+
 #include <Advertisements.h>
 
 #include <argon/argon.hpp>
@@ -9,7 +11,12 @@
 using namespace geode::prelude;
 using namespace cw::ads;
 
+#define THIS_ID "MenuLayer"
+static constexpr auto g_hookId = THIS_ID;
+
 class $modify(AdsMenuLayer, MenuLayer) {
+    PLAYERADS_DELEGATE_HOOKS(THIS_ID);
+
     bool init() {
         if (!MenuLayer::init()) return false;
 
@@ -26,18 +33,18 @@ class $modify(AdsMenuLayer, MenuLayer) {
 
         auto const winSize = CCDirector::sharedDirector()->getWinSize();
 
-        if (Mod::get()->getSettingValue<bool>("MenuLayer")) {
-            if (auto adBanner = Advertisement::create()) {
-                adBanner->setID("banner"_spr);
-                adBanner->setType(AdType::Banner);
-                adBanner->setPosition({winSize.width / 2.f, winSize.height / 2.f - 70.f});
+        if (auto adBanner = Advertisement::create()) {
+            adBanner->setID("banner"_spr);
+            adBanner->setType(AdType::Banner);
+            adBanner->setPosition({winSize.width / 2.f, winSize.height / 2.f - 70.f});
 
-                this->addChild(adBanner);
+            this->addChild(adBanner);
 
-                adBanner->loadRandom();
-            };
+            adBanner->loadRandom();
         };
 
         return true;
     };
 };
+
+PLAYERADS_HOOK_LISTENER(g_hookId);

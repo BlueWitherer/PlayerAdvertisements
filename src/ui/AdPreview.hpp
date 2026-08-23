@@ -5,8 +5,13 @@
 #include <Geode/Geode.hpp>
 
 namespace cw::ads {
-
     class AdPreview final : public geode::Popup {
+        struct LinkButton final {
+            std::string id;
+            std::string sprite;
+            geode::Button::ButtonCallback callback = nullptr;
+        };
+
     private:
         struct Impl;
         std::unique_ptr<Impl> m_impl;
@@ -15,7 +20,7 @@ namespace cw::ads {
         AdPreview();
         ~AdPreview();
 
-        bool init(cw::ads::Ad ad);
+        bool init(Ad ad);
 
         void onPlayButton(cocos2d::CCObject* sender);
 
@@ -25,6 +30,6 @@ namespace cw::ads {
         void update(float dt) override;
 
     public:
-        static AdPreview* create(cw::ads::Ad ad);
+        static AdPreview* create(Ad ad);
     };
 };

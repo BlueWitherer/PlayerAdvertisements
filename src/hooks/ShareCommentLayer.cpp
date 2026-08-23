@@ -1,3 +1,5 @@
+#include <AdsUtils.h>
+
 #include <Advertisements.h>
 
 #include <Geode/Geode.hpp>
@@ -7,66 +9,69 @@
 using namespace geode::prelude;
 using namespace cw::ads;
 
+#define THIS_ID "ShareCommentLayer"
+static constexpr auto g_hookId = THIS_ID;
+
 class $modify(AdsShareCommentLayer, ShareCommentLayer) {
+    PLAYERADS_DELEGATE_HOOKS(THIS_ID);
+
     bool init(gd::string title, int charLimit, CommentType type, int ID, gd::string desc) {
         if (!ShareCommentLayer::init(title, charLimit, type, ID, desc)) return false;
 
-        if (Mod::get()->getSettingValue<bool>("ShareCommentLayer")) {
-            auto const winSize = CCDirector::sharedDirector()->getWinSize();
+        auto const winSize = CCDirector::sharedDirector()->getWinSize();
 
-            // square ad left
-            if (auto adSquareLeft = Advertisement::create(AdType::Square)) {
-                adSquareLeft->setID("square-left"_spr);
-                adSquareLeft->setPosition({winSize.width / 2.f - 140.f, winSize.height / 2.f - 70.f});
+        // square ad left
+        if (auto adSquareLeft = Advertisement::create(AdType::Square)) {
+            adSquareLeft->setID("square-left"_spr);
+            adSquareLeft->setPosition({winSize.width / 2.f - 140.f, winSize.height / 2.f - 70.f});
 
-                m_mainLayer->addChild(adSquareLeft);
-                positionForCommentType(adSquareLeft, type);
+            m_mainLayer->addChild(adSquareLeft);
+            positionForCommentType(adSquareLeft, type);
 
-                adSquareLeft->loadRandom();
-            };
+            adSquareLeft->loadRandom();
+        };
 
-            // square ad center
-            if (auto adSquareCenter = Advertisement::create(AdType::Square)) {
-                adSquareCenter->setID("square-center"_spr);
-                adSquareCenter->setPosition({winSize.width / 2.f, winSize.height / 2.f - 70.f});
+        // square ad center
+        if (auto adSquareCenter = Advertisement::create(AdType::Square)) {
+            adSquareCenter->setID("square-center"_spr);
+            adSquareCenter->setPosition({winSize.width / 2.f, winSize.height / 2.f - 70.f});
 
-                m_mainLayer->addChild(adSquareCenter);
-                positionForCommentType(adSquareCenter, type);
+            m_mainLayer->addChild(adSquareCenter);
+            positionForCommentType(adSquareCenter, type);
 
-                adSquareCenter->loadRandom();
-            };
+            adSquareCenter->loadRandom();
+        };
 
-            // square ad right
-            if (auto adSquareRight = Advertisement::create(AdType::Square)) {
-                adSquareRight->setID("advertisement-menu"_spr);
-                adSquareRight->setPosition({winSize.width / 2.f + 140.f, winSize.height / 2.f - 70.f});
+        // square ad right
+        if (auto adSquareRight = Advertisement::create(AdType::Square)) {
+            adSquareRight->setID("advertisement-menu"_spr);
+            adSquareRight->setPosition({winSize.width / 2.f + 140.f, winSize.height / 2.f - 70.f});
 
-                m_mainLayer->addChild(adSquareRight);
+            m_mainLayer->addChild(adSquareRight);
 
-                positionForCommentType(adSquareRight, type);
+            positionForCommentType(adSquareRight, type);
 
-                adSquareRight->loadRandom();
-            };
+            adSquareRight->loadRandom();
+        };
 
-            // skyscraper ad on the right side
-            if (auto adSkyscraperRight = Advertisement::create(AdType::Skyscraper)) {
-                adSkyscraperRight->setID("skyscraper-right"_spr);
-                adSkyscraperRight->setPosition({winSize.width - 30.f, winSize.height / 2.f});
+        // skyscraper ad on the right side
+        if (auto adSkyscraperRight = Advertisement::create(AdType::Skyscraper)) {
+            adSkyscraperRight->setID("skyscraper-right"_spr);
+            adSkyscraperRight->setPosition({winSize.width - 30.f, winSize.height / 2.f});
 
-                m_mainLayer->addChild(adSkyscraperRight);
+            m_mainLayer->addChild(adSkyscraperRight);
 
-                adSkyscraperRight->loadRandom();
-            };
+            adSkyscraperRight->loadRandom();
+        };
 
-            // skyscraper ad on the left side
-            if (auto adSkyscraperLeft = Advertisement::create(AdType::Skyscraper)) {
-                adSkyscraperLeft->setID("skyscraper-left"_spr);
-                adSkyscraperLeft->setPosition({30.f, winSize.height / 2.f});
+        // skyscraper ad on the left side
+        if (auto adSkyscraperLeft = Advertisement::create(AdType::Skyscraper)) {
+            adSkyscraperLeft->setID("skyscraper-left"_spr);
+            adSkyscraperLeft->setPosition({30.f, winSize.height / 2.f});
 
-                m_mainLayer->addChild(adSkyscraperLeft);
+            m_mainLayer->addChild(adSkyscraperLeft);
 
-                adSkyscraperLeft->loadRandom();
-            };
+            adSkyscraperLeft->loadRandom();
         };
 
         return true;
@@ -80,3 +85,5 @@ class $modify(AdsShareCommentLayer, ShareCommentLayer) {
         };
     };
 };
+
+PLAYERADS_HOOK_LISTENER(g_hookId);

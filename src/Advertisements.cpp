@@ -12,129 +12,10 @@ using namespace geode::prelude;
 using namespace geode::utils;
 using namespace cw::ads;
 
-Result<Ad> matjson::Serialize<Ad>::fromJson(matjson::Value const& value) {
-    if (!value.isObject()) return Err("Expected an object");
-
-    GEODE_UNWRAP_INTO(uint64_t id, value["ad_id"].asUInt());
-    GEODE_UNWRAP_INTO(std::string image, value["image_url"].asString());
-    GEODE_UNWRAP_INTO(int level, value["level_id"].asInt());
-    GEODE_UNWRAP_INTO(uint8_t type, value["type"].asUInt());
-    GEODE_UNWRAP_INTO(std::string user, value["user_id"].asString());
-    GEODE_UNWRAP_INTO(uint64_t viewCount, value["views"].asUInt());
-    GEODE_UNWRAP_INTO(uint64_t clickCount, value["clicks"].asUInt());
-
-    uint8_t glow = 0;
-    GEODE_UNWRAP_INTO_IF_OK(glow, value["glow"].asUInt());
-
-    return Ok(
-        Ad{
-            id,
-            std::move(image),
-            level,
-            static_cast<AdType>(type),
-            std::move(user),
-            viewCount,
-            clickCount,
-            glow,
-        });
-};
-
-matjson::Value matjson::Serialize<Ad>::toJson(Ad const& value) {
-    auto obj = matjson::Value();
-    obj["id"] = value.getID();
-    obj["image_url"] = value.getImage();
-    obj["level_id"] = value.getLevel();
-    obj["type"] = static_cast<uint8_t>(value.getType());
-    obj["user_id"] = value.getUser();
-    obj["views"] = value.getViews();
-    obj["clicks"] = value.getClicks();
-    obj["glow"] = value.getGlowLevel();
-
-    return obj;
-};
-
-Ad::Ad(
-    uint64_t id,
-    std::string image,
-    int level,
-    AdType type,
-    std::string user,
-    uint64_t viewCount,
-    uint64_t clickCount,
-    uint8_t glowLevel) :
-    m_id(id),
-    m_image(std::move(image)),
-    m_level(level),
-    m_type(type),
-    m_user(std::move(user)),
-    m_viewCount(viewCount),
-    m_clickCount(clickCount),
-    m_glowLevel(glowLevel) {};
-
 namespace particles {
     constexpr auto banner = "50,2065,2,4515,3,855,155,1,156,20,145,20a-1a1a0.3a15a90a0a20a0a100a25a0a25a0a0a0a0a10a5a0a180a1a0a1a0a1a0a1a0a5a0a180a0a1a0a1a0a1a0a1a0a0a1a1a0a0a0a0a0a0a0a0a2a1a0a0a0a41a0a0a0a0a0a0a0a0a0a0a0a0a0a0;";
     constexpr auto square = "50,2065,2,4515,3,855,155,1,156,20,145,20a-1a1a0.3a15a90a0a20a0a50a50a0a25a0a0a0a0a10a5a0a180a1a0a1a0a1a0a1a0a5a0a180a0a1a0a1a0a1a0a1a0a0a1a1a0a0a0a0a0a0a0a0a2a1a0a0a0a41a0a0a0a0a0a0a0a0a0a0a0a0a0a0;";
     constexpr auto skyscraper = "50,2065,2,4515,3,855,155,1,156,20,145,20a-1a1a0.3a15a90a0a20a0a25a100a0a25a0a0a0a0a10a5a0a180a1a0a1a0a1a0a1a0a5a0a180a0a1a0a1a0a1a0a1a0a0a1a1a0a0a0a0a0a0a0a0a2a1a0a0a0a41a0a0a0a0a0a0a0a0a0a0a0a0a0a0;";
-};
-
-constexpr CCSize cw::ads::getAdSize(AdType type) noexcept {
-    static constexpr auto banner = CCSize(364.f, 45.f);
-    static constexpr auto square = CCSize(122.6f, 122.6f);
-    static constexpr auto skyscraper = CCSize(41.f, 314.f);
-
-    CCSize contentSize = banner;
-
-    switch (type) {
-        default: [[fallthrough]];
-
-        case AdType::Banner: contentSize = banner; break;
-        case AdType::Square: contentSize = square; break;
-        case AdType::Skyscraper: contentSize = skyscraper; break;
-    };
-
-    return contentSize;
-};
-
-constexpr const char* cw::ads::getParticlesForAdType(AdType type) noexcept {
-    switch (type) {
-        default: [[fallthrough]];
-
-        case AdType::Banner: return particles::banner;
-        case AdType::Square: return particles::square;
-        case AdType::Skyscraper: return particles::skyscraper;
-    };
-};
-
-uint64_t Ad::getID() const noexcept {
-    return m_id;
-};
-
-ZStringView Ad::getImage() const noexcept {
-    return m_image;
-};
-
-int Ad::getLevel() const noexcept {
-    return m_level;
-};
-
-AdType Ad::getType() const noexcept {
-    return m_type;
-};
-
-ZStringView Ad::getUser() const noexcept {
-    return m_user;
-};
-
-uint64_t Ad::getViews() const noexcept {
-    return m_viewCount;
-};
-
-uint64_t Ad::getClicks() const noexcept {
-    return m_clickCount;
-};
-
-uint8_t Ad::getGlowLevel() const noexcept {
-    return m_glowLevel;
 };
 
 struct Advertisement::Impl final {
@@ -146,6 +27,34 @@ struct Advertisement::Impl final {
     CCSprite* adIcon = nullptr;
 
     std::string token;
+
+    constexpr CCSize getAdSize(AdType type) noexcept {
+        static constexpr auto banner = CCSize(364.f, 45.f);
+        static constexpr auto square = CCSize(122.6f, 122.6f);
+        static constexpr auto skyscraper = CCSize(41.f, 314.f);
+
+        CCSize contentSize = banner;
+
+        switch (type) {
+            default: [[fallthrough]];
+
+            case AdType::Banner: contentSize = banner; break;
+            case AdType::Square: contentSize = square; break;
+            case AdType::Skyscraper: contentSize = skyscraper; break;
+        };
+
+        return contentSize;
+    };
+
+    constexpr const char* getParticlesForAdType(AdType type) noexcept {
+        switch (type) {
+            default: [[fallthrough]];
+
+            case AdType::Banner: return particles::banner;
+            case AdType::Square: return particles::square;
+            case AdType::Skyscraper: return particles::skyscraper;
+        };
+    };
 };
 
 Advertisement::Advertisement() : m_impl(std::make_unique<Impl>()) {};
@@ -157,7 +66,7 @@ bool Advertisement::init(AdType type) {
     if (!CCNode::init()) return false;
 
     setAnchorPoint({0.5, 0.5});
-    setContentSize(getAdSize(type));
+    setContentSize(m_impl->getAdSize(type));
 
     reloadType();
 
@@ -206,7 +115,7 @@ void Advertisement::reload() {
 void Advertisement::reloadType() {
     if (m_impl->adSprite) m_impl->adSprite->removeFromParent();
 
-    setContentSize(getAdSize(m_impl->type));
+    setContentSize(m_impl->getAdSize(m_impl->type));
 
     m_impl->adSprite = LazySprite::create(getScaledContentSize(), Mod::get()->getSettingValue<bool>("loading-circles"));
     if (!m_impl->adSprite) {
@@ -317,7 +226,7 @@ void Advertisement::reloadType() {
 
                     if (s->m_impl->adButton) glowNode->setPosition(s->m_impl->adButton->getContentSize() / 2);
 
-                    auto particles = GameToolbox::particleFromString(getParticlesForAdType(s->m_impl->ad.getType()), CCParticleSystemQuad::create(), false);
+                    auto particles = GameToolbox::particleFromString(s->m_impl->getParticlesForAdType(s->m_impl->ad.getType()), CCParticleSystemQuad::create(), false);
                     particles->setScale(1.25f);
                     particles->setAnchorPoint({0.5, 0.5});
                     particles->setPosition(glowNode->getPosition());

@@ -1,3 +1,5 @@
+#include <AdsUtils.h>
+
 #include <Advertisements.h>
 
 #include <Geode/Geode.hpp>
@@ -7,7 +9,12 @@
 using namespace geode::prelude;
 using namespace cw::ads;
 
+#define THIS_ID "PlayLayer"
+static constexpr auto g_hookId = THIS_ID;
+
 class $modify(AdsPlayLayer, PlayLayer) {
+    PLAYERADS_DELEGATE_HOOKS(THIS_ID);
+
     struct Fields {
         Advertisement* bannerTop = nullptr;
         Advertisement* bannerBottom = nullptr;
@@ -16,57 +23,54 @@ class $modify(AdsPlayLayer, PlayLayer) {
     };
 
     void setupHasCompleted() {
-        // dont show ads ingame if the setting is false
-        if (Mod::get()->getSettingValue<bool>("PlayLayer")) {
-            auto const winSize = CCDirector::sharedDirector()->getWinSize();
+        auto const winSize = CCDirector::sharedDirector()->getWinSize();
 
-            // banner ad at the top
-            if (!m_fields->bannerTop) {
-                m_fields->bannerTop = Advertisement::create(AdType::Banner);
-                m_fields->bannerTop->setID("banner-top"_spr);
-                m_fields->bannerTop->setPosition({winSize.width / 2.f, winSize.height - 30.f});
+        // banner ad at the top
+        if (!m_fields->bannerTop) {
+            m_fields->bannerTop = Advertisement::create(AdType::Banner);
+            m_fields->bannerTop->setID("banner-top"_spr);
+            m_fields->bannerTop->setPosition({winSize.width / 2.f, winSize.height - 30.f});
 
-                m_uiLayer->addChild(m_fields->bannerTop);
+            m_uiLayer->addChild(m_fields->bannerTop);
 
-                m_fields->bannerTop->loadRandom();
-            };
-
-            // banner at the bottom
-            if (!m_fields->bannerBottom) {
-                m_fields->bannerBottom = Advertisement::create(AdType::Banner);
-                m_fields->bannerBottom->setID("banner-bottom"_spr);
-                m_fields->bannerBottom->setPosition({winSize.width / 2.f, 30.f});
-
-                m_uiLayer->addChild(m_fields->bannerBottom);
-
-                m_fields->bannerBottom->loadRandom();
-            };
-
-            // skyscraper ad on the right
-            if (!m_fields->skyscraperRight) {
-                m_fields->skyscraperRight = Advertisement::create(AdType::Skyscraper);
-                m_fields->skyscraperRight->setID("skyscraper-right"_spr);
-                m_fields->skyscraperRight->setPosition({winSize.width - 30.f, winSize.height / 2.f});
-
-                m_uiLayer->addChild(m_fields->skyscraperRight);
-
-                m_fields->skyscraperRight->loadRandom();
-            };
-
-            // skyscraper ad on the left
-            if (!m_fields->skyscraperLeft) {
-                m_fields->skyscraperLeft = Advertisement::create(AdType::Skyscraper);
-                m_fields->skyscraperLeft->setID("skyscraper-left"_spr);
-                m_fields->skyscraperLeft->setPosition({30.f, winSize.height / 2.f});
-
-                m_uiLayer->addChild(m_fields->skyscraperLeft);
-
-                m_fields->skyscraperLeft->loadRandom();
-            };
-
-            log::info("setting up scheduler for auto ad refresh");
-            schedule(schedule_selector(AdsPlayLayer::schedReload), 12.5f);
+            m_fields->bannerTop->loadRandom();
         };
+
+        // banner at the bottom
+        if (!m_fields->bannerBottom) {
+            m_fields->bannerBottom = Advertisement::create(AdType::Banner);
+            m_fields->bannerBottom->setID("banner-bottom"_spr);
+            m_fields->bannerBottom->setPosition({winSize.width / 2.f, 30.f});
+
+            m_uiLayer->addChild(m_fields->bannerBottom);
+
+            m_fields->bannerBottom->loadRandom();
+        };
+
+        // skyscraper ad on the right
+        if (!m_fields->skyscraperRight) {
+            m_fields->skyscraperRight = Advertisement::create(AdType::Skyscraper);
+            m_fields->skyscraperRight->setID("skyscraper-right"_spr);
+            m_fields->skyscraperRight->setPosition({winSize.width - 30.f, winSize.height / 2.f});
+
+            m_uiLayer->addChild(m_fields->skyscraperRight);
+
+            m_fields->skyscraperRight->loadRandom();
+        };
+
+        // skyscraper ad on the left
+        if (!m_fields->skyscraperLeft) {
+            m_fields->skyscraperLeft = Advertisement::create(AdType::Skyscraper);
+            m_fields->skyscraperLeft->setID("skyscraper-left"_spr);
+            m_fields->skyscraperLeft->setPosition({30.f, winSize.height / 2.f});
+
+            m_uiLayer->addChild(m_fields->skyscraperLeft);
+
+            m_fields->skyscraperLeft->loadRandom();
+        };
+
+        log::info("setting up scheduler for auto ad refresh");
+        schedule(schedule_selector(AdsPlayLayer::schedReload), 12.5f);
 
         PlayLayer::setupHasCompleted();
     };
@@ -102,3 +106,5 @@ class $modify(AdsPlayLayer, PlayLayer) {
         reloadAllAds();
     };
 };
+
+PLAYERADS_HOOK_LISTENER(g_hookId);

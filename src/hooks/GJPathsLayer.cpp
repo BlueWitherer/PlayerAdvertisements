@@ -1,3 +1,5 @@
+#include <AdsUtils.h>
+
 #include <Advertisements.h>
 
 #include <Geode/Geode.hpp>
@@ -7,34 +9,39 @@
 using namespace geode::prelude;
 using namespace cw::ads;
 
+#define THIS_ID "GJPathsLayer"
+static constexpr auto g_hookId = THIS_ID;
+
 class $modify(AdsGJPathsLayer, GJPathsLayer) {
+    PLAYERADS_DELEGATE_HOOKS(THIS_ID);
+
     bool init() {
         if (!GJPathsLayer::init()) return false;
 
-        if (Mod::get()->getSettingValue<bool>("GJPathsLayer")) {
-            auto const winSize = CCDirector::sharedDirector()->getWinSize();
+        auto const winSize = CCDirector::sharedDirector()->getWinSize();
 
-            // square ad at the left side
-            if (auto adBannerLeft = Advertisement::create(AdType::Skyscraper)) {
-                adBannerLeft->setID("banner-left"_spr);
-                adBannerLeft->setPosition({30.f, winSize.height / 2.f});
+        // square ad at the left side
+        if (auto adBannerLeft = Advertisement::create(AdType::Skyscraper)) {
+            adBannerLeft->setID("banner-left"_spr);
+            adBannerLeft->setPosition({30.f, winSize.height / 2.f});
 
-                addChild(adBannerLeft);
+            addChild(adBannerLeft);
 
-                adBannerLeft->loadRandom();
-            };
+            adBannerLeft->loadRandom();
+        };
 
-            // square ad at the right side
-            if (auto adBannerRight = Advertisement::create(AdType::Skyscraper)) {
-                adBannerRight->setID("banner-right"_spr);
-                adBannerRight->setPosition({winSize.width - 30.f, winSize.height / 2.f});
+        // square ad at the right side
+        if (auto adBannerRight = Advertisement::create(AdType::Skyscraper)) {
+            adBannerRight->setID("banner-right"_spr);
+            adBannerRight->setPosition({winSize.width - 30.f, winSize.height / 2.f});
 
-                addChild(adBannerRight);
+            addChild(adBannerRight);
 
-                adBannerRight->loadRandom();
-            };
+            adBannerRight->loadRandom();
         };
 
         return true;
     };
 };
+
+PLAYERADS_HOOK_LISTENER(g_hookId);

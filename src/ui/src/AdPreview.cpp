@@ -39,7 +39,6 @@ AdPreview::~AdPreview() {};
 bool AdPreview::init(Ad ad) {
     m_impl->ad = std::move(ad);
 
-    // @geode-ignore(unknown-resource)
     if (!Popup::init(250.f, 200.f, "geode.loader/GE_square03.png")) return false;
 
     setID("preview"_spr);
@@ -47,7 +46,7 @@ bool AdPreview::init(Ad ad) {
     setCloseButtonSpr(CircleButtonSprite::createWithSpriteFrameName("geode.loader/close.png", 0.875f, CircleBaseColor::DarkAqua, CircleBaseSize::Small));
 
     auto levelIdLabel = Label::create(
-        ("Level ID: " + numToString(m_impl->ad.getLevel())).c_str(),
+        fmt::format("Level ID | {}", numToString(m_impl->ad.getLevel())),
         "bigFont.fnt");
     levelIdLabel->setID("level-id-label");
     levelIdLabel->setPosition({m_mainLayer->getScaledContentWidth() / 2, m_mainLayer->getScaledContentHeight() - 40});
@@ -63,34 +62,29 @@ bool AdPreview::init(Ad ad) {
     m_impl->playBtn->setID("play-btn");
     m_impl->playBtn->setPosition({m_mainLayer->getScaledContentWidth() / 2, m_mainLayer->getScaledContentHeight() / 2});
 
-    // store the menu for spinner placement / restoring state
     m_buttonMenu->addChild(m_impl->playBtn);
 
-    // view and click counts
     auto viewCountLabel = Label::create(
-        ("Views: " + numToString(m_impl->ad.getViews())).c_str(),
+        fmt::format("Views | {}", numToString(m_impl->ad.getViews())),
         "goldFont.fnt");
     viewCountLabel->setID("view-count-label");
     viewCountLabel->setColor({255, 125, 0});
-    viewCountLabel->setPosition({m_mainLayer->getScaledContentWidth() / 2, m_mainLayer->getScaledContentHeight() / 2 - 55});
-    viewCountLabel->setScale(0.7f);
+    viewCountLabel->setScale(0.625f);
 
-    m_mainLayer->addChild(viewCountLabel);
+    m_mainLayer->addChildAtPosition(viewCountLabel, Anchor::Center, {0.f, -45.f});
 
     auto clickCountLabel = Label::create(
-        ("Clicks: " + numToString(m_impl->ad.getClicks())).c_str(),
+        fmt::format("Clicks | {}", numToString(m_impl->ad.getClicks())),
         "goldFont.fnt");
     clickCountLabel->setID("click-count-label");
     clickCountLabel->setColor({0, 175, 255});
-    clickCountLabel->setPosition({m_mainLayer->getScaledContentWidth() / 2, m_mainLayer->getScaledContentHeight() / 2 - 75});
-    clickCountLabel->setScale(0.7f);
+    clickCountLabel->setScale(0.625f);
 
-    m_mainLayer->addChild(clickCountLabel);
+    m_mainLayer->addChildAtPosition(clickCountLabel, Anchor::Center, {0.f, -65.f});
 
     // report button
     auto reportBtn = Button::createWithNode(
         CircleButtonSprite::createWithSpriteFrameName(
-            // @geode-ignore(unknown-resource)
             "exMark_001.png",
             0.875f,
             CircleBaseColor::DarkAqua,
@@ -104,55 +98,67 @@ bool AdPreview::init(Ad ad) {
 
     m_mainLayer->addChild(reportBtn);
 
+    auto announcementBtnSprite = CircleButtonSprite::createWithSpriteFrameName(
+        "geode.loader/news.png",
+        0.75f,
+        CircleBaseColor::DarkAqua);
+
+    auto announcementBtnLoading = LoadingSpinner::create(announcementBtnSprite->getScaledContentHeight() * 0.5f);
+    announcementBtnLoading->setVisible(false);
+
     auto announcementBtn = Button::createWithNode(
-        CircleButtonSprite::createWithSpriteFrameName(
-            // @geode-ignore(unknown-resource)
-            "geode.loader/news.png",
-            0.75f,
-            CircleBaseColor::DarkAqua,
-            CircleBaseSize::Medium),
-        [](auto) {
-            // fetch from /api/announcement
-            auto request = web::WebRequest();
-            request.userAgent("PlayerAdvertisements/1.2");
-            request.timeout(std::chrono::seconds(15));
+        announcementBtnSprite,
+        [announcementBtnLoading](Button* sender) {
+            announcementBtnLoading->setVisible(true);
+            sender->setVisible(false);
+
+            auto req = web::WebRequest()
+                           .userAgent("PlayerAdvertisements/1.2")
+                           .timeout(std::chrono::seconds(15));
 
             async::spawn(
-                request.get("https://ads.cheeseworks.gay/api/announcement"),
-                [](web::WebResponse res) {
-                    if (res.ok()) {
-                        auto data = res.json();
-                        if (!data.isOk()) {
-                            log::error("Failed to parse announcement JSON");
+                req.get("https://ads.cheeseworks.gay/api/announcement"),
+                [btn = WeakRef(sender), btnLoad = WeakRef(announcementBtnLoading)](web::WebResponse res) {
+                    if (auto b = btn.lock()) {
+                        if (res.error()) {
+                            log::error("Failed to get announcement ({}): {}", res.code(), res.errorMessage());
+                            Notification::create("Failed to get announcement", NotificationIcon::Error)->show();
+
+                            if (auto b = btn.lock()) b->setVisible(true);
+                            if (auto bLoad = btnLoad.lock()) bLoad->setVisible(false);
+
                             return;
                         };
 
-                        auto const val = data.unwrap();
+                        auto jsonRes = res.json();
+                        if (jsonRes.isErr()) return log::error("Failed to parse announcement JSON: {}", std::move(jsonRes).unwrapErr());
 
-                        std::string const title =
-                            val.contains("title") && val["title"].asString().isOk()
-                                ? val["title"].asString().unwrap()
-                                : "Announcement";
+                        auto const json = std::move(jsonRes).unwrap();
 
-                        std::string const content =
-                            val.contains("content") && val["content"].asString().isOk()
-                                ? val["content"].asString().unwrap()
-                                : "";
+                        auto titleRes = json["title"].asString();
+                        if (titleRes.isErr()) return log::error("Failed to parse announcement title JSON: {}", std::move(titleRes).unwrapErr());
 
-                        if (auto popup = MDPopup::create(title.c_str(), content.c_str(), "Close")) popup->show();
-                    } else {
-                        log::error("Failed to fetch announcement: (code: {})", res.code());
-                        Notification::create("Failed to fetch announcement",
-                            NotificationIcon::Error)
-                            ->show();
+                        auto contentRes = json["content"].asString();
+                        if (contentRes.isErr()) return log::error("Failed to parse announcement content JSON: {}", std::move(contentRes).unwrapErr());
+
+                        auto const title = std::move(titleRes).unwrap();
+                        auto const content = std::move(contentRes).unwrap();
+
+                        b->setVisible(true);
+                        if (auto bLoad = btnLoad.lock()) bLoad->setVisible(false);
+
+                        if (auto popup = MDPopup::create(title, content, "Close")) popup->show();
                     };
                 });
         });
     announcementBtn->setID("latest-announcement-btn");
     announcementBtn->setScale(0.625f);
-    announcementBtn->setPosition({m_mainLayer->getScaledContentWidth(), 0});
 
-    m_mainLayer->addChild(announcementBtn);
+    m_mainLayer->addChildAtPosition(announcementBtn, Anchor::BottomRight, {}, false);
+
+    announcementBtnLoading->setPosition(announcementBtn->getPosition());
+
+    m_mainLayer->addChild(announcementBtnLoading, 1);
 
     scheduleUpdate();
 
@@ -261,7 +267,6 @@ void AdPreview::registerClick() {
         });
 };
 
-// open LevelInfo if stored otherwise prepare pending state and request
 void AdPreview::tryOpenOrFetchLevel(CCMenuItemSpriteExtra* menuItem, int levelId) {
     if (!menuItem) return;
 
@@ -321,7 +326,6 @@ void AdPreview::update(float dt) {
             auto level = typeinfo_cast<GJGameLevel*>(stored->objectAtIndex(0));
 
             if (level && level->m_levelID == m_impl->pendingLevelId) {
-                // open level info
                 auto scene = LevelInfoLayer::scene(level, false);
                 auto transitionFade = CCTransitionFade::create(0.5f, scene);
                 if (PlayLayer::get()) {
@@ -331,11 +335,11 @@ void AdPreview::update(float dt) {
                     CCDirector::sharedDirector()->pushScene(transitionFade);
                 };
 
-                // cleanup pending state and spinner
                 if (m_impl->pendingSpinner) {
                     m_impl->pendingSpinner->removeFromParent();
                     m_impl->pendingSpinner = nullptr;
                 };
+
                 m_impl->playBtn->setVisible(true);
 
                 m_impl->pendingKey.clear();
