@@ -29,7 +29,7 @@ struct Advertisement::Impl final {
 
     TaskHolder<web::WebResponse> adListener;
 
-    constexpr CCSize getAdSize(AdType type) noexcept {
+    constexpr auto getAdSize(AdType type) noexcept {
         static constexpr auto banner = CCSize(364.f, 45.f);
         static constexpr auto square = CCSize(122.6f, 122.6f);
         static constexpr auto skyscraper = CCSize(41.f, 314.f);
@@ -47,7 +47,7 @@ struct Advertisement::Impl final {
         return contentSize;
     };
 
-    constexpr const char* getParticlesForAdType(AdType type) noexcept {
+    constexpr auto getParticlesForAdType(AdType type) noexcept {
         switch (type) {
             default: [[fallthrough]];
 
@@ -61,60 +61,8 @@ struct Advertisement::Impl final {
 Advertisement::Advertisement() : m_impl(std::make_unique<Impl>()) {};
 Advertisement::~Advertisement() {};
 
-bool Advertisement::init(AdType type) {
-    m_impl->type = type;
-
-    if (!CCNode::init()) return false;
-
-    setAnchorPoint({0.5, 0.5});
-    setContentSize(m_impl->getAdSize(type));
-
-    reloadType();
-
-    return true;
-};
-
 void Advertisement::reload() {
-    removeAllChildrenWithCleanup(true);
-
-    if (!m_impl->adSprite) {
-        log::warn("ad sprite is null");
-        return;
-    };
-
-    log::info("Reloading advertisement");
-
-    m_impl->adButton = Button::createWithNode(
-        m_impl->adSprite,
-        [this](auto) {
-            auto const& ad = m_impl->ad;
-
-            if (ad.getID() == 0) {
-                log::warn("Ad not loaded yet or ad ID is invalid");
-                Notification::create("Invalid Ad", NotificationIcon::Error)->show();
-                return;
-            };
-
-            log::info("Opening AdPreview popup: ad_id={}, level_id={}, user_id={}, type={}", ad.getID(), ad.getLevel(), ad.getUser(), static_cast<uint8_t>(ad.getType()));
-            if (auto popup = AdPreview::create(ad)) {
-                popup->show();
-            } else {
-                log::error("Failed to create AdPreview popup");
-            };
-        });
-    m_impl->adButton->setPosition(getScaledContentSize() / 2.f);
-
-    if (m_impl->adButton) {
-        addChild(m_impl->adButton, 1);
-        m_impl->adButton->setScaleMultiplier(1.05f);
-        log::info("Advertisement button created and added to menu");
-    } else {
-        log::error("Failed to create button");
-    };
-};
-
-void Advertisement::reloadType() {
-    if (m_impl->adSprite) m_impl->adSprite->removeFromParent();
+    removeAllChildren();
 
     setContentSize(m_impl->getAdSize(m_impl->type));
 
@@ -124,34 +72,12 @@ void Advertisement::reloadType() {
         return;
     };
 
-    log::info("Created LazySprite with size: {}x{}", getScaledContentSize().width, getScaledContentSize().height);
+    log::debug("Created LazySprite with size: {}x{}", getScaledContentSize().width, getScaledContentSize().height);
 
     m_impl->adSprite->setPosition({getScaledContentWidth() / 2.f, getScaledContentHeight() / 2.f});
     m_impl->adSprite->setVisible(true);
 
-    log::info("setting up callbacks");
-
-    async::spawn(
-        argon::startAuth(),
-        [self = WeakRef(this)](geode::Result<std::string> res) {
-            if (auto s = self.lock()) {
-                if (res.isOk()) s->m_impl->token = std::move(res).unwrap();
-
-                auto req = web::WebRequest();
-                req.userAgent("PlayerAdvertisements/1.2");
-                req.timeout(std::chrono::seconds(15));
-
-                req.param("type", static_cast<uint8_t>(s->m_impl->type));
-
-                s->reload();
-
-                s->m_impl->adListener.spawn(
-                    req.get("https://ads.cheeseworks.gay/api/ad"),
-                    [self](web::WebResponse res) {
-                        if (auto s = self.lock()) s->handleAdResponse(res);
-                    });
-            };
-        });
+    log::trace("setting up callbacks");
 
     m_impl->adSprite->setLoadCallback([self = WeakRef(this)](Result<> res) {
         if (auto s = self.lock()) {
@@ -193,7 +119,7 @@ void Advertisement::reloadType() {
                     log::warn("Ad sprite has invalid natural size ({}x{})", natural.width, natural.height);
                 } else {
                     // try to determine target size from adButton if available, otherwise use sprite's container size
-                    CCSize target = s->m_impl->adSprite->getContentSize();
+                    auto target = s->m_impl->adSprite->getContentSize();
                     if (s->m_impl->adButton) target = s->m_impl->adButton->getContentSize();
 
                     float sx = target.width / natural.width;
@@ -202,7 +128,7 @@ void Advertisement::reloadType() {
                     float scale = std::min(sx, sy);
 
                     s->m_impl->adSprite->setScale(scale);
-                    log::info("Scaled ad sprite by {} to fit target {}x{} (natural {}x{})", scale, target.width, target.height, natural.width, natural.height);
+                    log::debug("Scaled ad sprite by {} to fit target {}x{} (natural {}x{})", scale, target.width, target.height, natural.width, natural.height);
                 };
 
                 if (s->m_impl->ad.getGlowLevel() > 0) {
@@ -279,9 +205,9 @@ void Advertisement::reloadType() {
                         } break;
 
                         default: {
-                            if (glowNode) glowNode->removeMeAndCleanup();
-                            if (particles) particles->removeMeAndCleanup();
-                            if (tag) tag->removeMeAndCleanup();
+                            if (glowNode) glowNode->removeFromParent();
+                            if (particles) particles->removeFromParent();
+                            if (tag) tag->removeFromParent();
                         } break;
                     };
 
@@ -306,14 +232,34 @@ void Advertisement::reloadType() {
                 if (s->m_impl->adSprite) {
                     s->m_impl->adSprite->setVisible(false);
                     s->m_impl->adSprite->cancelLoad();
-                }
-                if (s->m_impl->adButton) s->m_impl->adButton->setEnabled(false);
+                };
 
+                if (s->m_impl->adButton) s->m_impl->adButton->setEnabled(false);
             } else {
                 log::error("Unknown error loading ad image");
             };
         };
     });
+
+    m_impl->adButton = Button::createWithNode(
+        m_impl->adSprite,
+        [this](auto) {
+            if (auto popup = AdPreview::create(m_impl->ad)) popup->show();
+        });
+    m_impl->adButton->setID("advertisement-btn");
+
+    addChildAtPosition(m_impl->adButton, Anchor::Center);
+};
+
+bool Advertisement::init(AdType type) {
+    m_impl->type = type;
+
+    if (!CCNode::init()) return false;
+
+    setAnchorPoint({0.5, 0.5});
+    setContentSize(m_impl->getAdSize(type));
+
+    return true;
 };
 
 void Advertisement::handleAdResponse(web::WebResponse const& res) {
@@ -367,8 +313,8 @@ void Advertisement::handleAdResponse(web::WebResponse const& res) {
     log::debug("Sent view tracking request for ad_id={}, user_id={}", m_impl->ad.getID(), m_impl->ad.getUser());
 
     if (m_impl->adSprite && !m_impl->ad.getImage().empty()) {
-        log::info("Loading ad image from URL: {}", m_impl->ad.getImage());
-        m_impl->adSprite->loadFromUrl(utils::string::replace(m_impl->ad.getImage().c_str(), "arcticwoof.xyz", "cheeseworks.gay"), CCImage::kFmtUnKnown);
+        log::debug("Loading ad image from URL: {}", m_impl->ad.getImage());
+        m_impl->adSprite->loadFromUrl(utils::string::replace(m_impl->ad.getImage(), "arcticwoof.xyz", "cheeseworks.gay"), CCImage::kFmtUnKnown, true);
     } else if (m_impl->ad.getImage().empty()) {
         log::warn("Ad image URL is empty, skipping image load");
     } else {
@@ -377,9 +323,9 @@ void Advertisement::handleAdResponse(web::WebResponse const& res) {
 };
 
 void Advertisement::loadRandom() {
-    reloadType();  // refresh any existing nodes
+    reload();  // refresh any existing nodes :3
 
-    log::debug("Preparing request for random advertisement...");
+    log::trace("Preparing request for random advertisement...");
 
     auto request = web::WebRequest();
     request.userAgent("PlayerAdvertisements/1.2");
@@ -392,40 +338,16 @@ void Advertisement::loadRandom() {
             if (auto s = self.lock()) s->handleAdResponse(res);
         });
 
-    log::info("Sent request for random advertisement");
-};
-
-void Advertisement::load(int id) {
-    reloadType();  // refresh any existing nodes
-
-    log::debug("Preparing request for advertisement of ID {}...", id);
-
-    auto request = web::WebRequest();
-    request.userAgent("PlayerAdvertisements/1.2");
-    request.timeout(std::chrono::seconds(15));
-    request.param("id", id);
-
-    async::spawn(
-        request.get("https://ads.cheeseworks.gay/api/ad/get"),
-        [self = WeakRef(this)](web::WebResponse res) {
-            if (auto s = self.lock()) s->handleAdResponse(res);
-        });
-
-    log::info("Sent request for advertisement of ID {}", id);
-};
-
-void Advertisement::setType(AdType type) {
-    if (m_impl->type != type) return;
-
-    m_impl->type = type;
-    reloadType();
+    log::debug("Sent request for random advertisement");
 };
 
 void Advertisement::onEnter() {
-    m_impl->adListener.cancel();
-    reloadType();
-
     CCNode::onEnter();
+
+    m_impl->adSprite->cancelLoad();
+    m_impl->adListener.cancel();
+
+    loadRandom();
 };
 
 void Advertisement::onExit() {

@@ -1,5 +1,5 @@
 # v1.2.4 
-- Bug fixes
+- Bug fixes & optimizations
 
 # v1.2.3 
 - Supersede original [Player Advertisements](https://geode-sdk.org/mods/arcticwoof.player_advertisements) mod

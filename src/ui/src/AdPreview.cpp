@@ -21,12 +21,8 @@ struct AdPreview::Impl final {
     async::TaskHolder<web::WebResponse> announcementListener;
     async::TaskHolder<web::WebResponse> clickListener;
 
-    std::string pendingKey;
-    int pendingLevelId = -1;
-    float pendingTimeout = 0.0f;
-
-    LoadingSpinner* pendingSpinner = nullptr;
-    CCMenuItemSprite* playBtn;
+    CCMenuItemSprite* playBtn = nullptr;
+    LoadingSpinner* playBtnLoading = nullptr;
 
     bool hasClicked = false;
 };
@@ -52,14 +48,19 @@ bool AdPreview::init(Ad ad) {
 
     m_mainLayer->addChild(levelIdLabel);
 
-    auto playAdLevelSprite = CCSprite::createWithSpriteFrameName("GJ_playBtn2_001.png");
     m_impl->playBtn = CCMenuItemSpriteExtra::create(
-        playAdLevelSprite,
+        CCSprite::createWithSpriteFrameName("GJ_playBtn2_001.png"),
         this,
         menu_selector(AdPreview::onPlayButton));
     m_impl->playBtn->setID("play-btn");
 
     m_buttonMenu->addChildAtPosition(m_impl->playBtn, Anchor::Center, {0.f, 3.75f});
+
+    m_impl->playBtnLoading = LoadingSpinner::create(m_impl->playBtn->getScaledContentHeight() * 0.875f);
+    m_impl->playBtnLoading->setVisible(false);
+    m_impl->playBtnLoading->setPosition(m_impl->playBtn->getPosition());
+
+    m_buttonMenu->addChild(m_impl->playBtnLoading, 1);
 
     auto viewCountLabel = Label::create(
         fmt::format("{} View{}", GameToolbox::pointsToString(m_impl->ad.getViews()), m_impl->ad.getViews() != 1 ? "s" : ""),  // this is so dumb
@@ -191,7 +192,7 @@ bool AdPreview::init(Ad ad) {
                 [](auto) {
                     createQuickPopup(
                         "Ads Manager",
-                        "Go to the <co>Player Ads Manager</c> dashboard?",
+                        "Go to the <co>Player Ads Manager</c> dashboard?\n<cc>Upload ads for your levels here!</c>",
                         "Cancel",
                         "OK",
                         [](auto, bool ok) {
@@ -205,7 +206,7 @@ bool AdPreview::init(Ad ad) {
                 [](auto) {
                     createQuickPopup(
                         "Ko-fi",
-                        "Would you like to <cd>support the mod through Ko-fi</c>?",
+                        "Would you like to <cd>support the mod through Ko-fi</c>?\n<cy>Earn cool perks like more views on your ads!</c>",
                         "Cancel",
                         "OK",
                         [](auto, bool ok) {
@@ -227,26 +228,37 @@ bool AdPreview::init(Ad ad) {
 
     btnContainer->updateLayout();
 
-    scheduleUpdate();
+    auto infoBtn = Button::createWithSpriteFrameName(
+        "GJ_infoIcon_001.png",
+        [](auto) {
+            createQuickPopup(
+                "Help",
+                "This is the <cg>ad preview</c>. You can see statistics such as the <co>view count</c> & <cl>click count</c>, and <cy>play the level that was advertised</c>!\n\n<cc>If you find issues with the contents of the advertised level</c>, you can <cr>report the advertisement here</c>.",
+                "OK",
+                nullptr,
+                nullptr);
+        });
+    infoBtn->setID("info-btn");
+    infoBtn->setScale(0.75f);
+
+    m_mainLayer->addChildAtPosition(infoBtn, Anchor::TopRight, {-13.75f, -13.75f});
 
     return true;
 };
 
 void AdPreview::onPlayButton(CCObject* sender) {
-    if (CCDirector::sharedDirector()->sceneCount() >= 5 &&
-        Mod::get()->getSettingValue<bool>("scene-protection") == false) {
+    m_impl->playBtn->setVisible(false);
+    m_impl->playBtnLoading->setVisible(true);
+
+    if (CCDirector::sharedDirector()->sceneCount() >= 5 && !Mod::get()->getSettingValue<bool>("scene-protection")) {
         createQuickPopup(
             "Hold up!",
-            "You have <cr>too many scenes loaded</c> because you're opening too "
-            "many ads. This may cause your game to become "
-            "<cr>unstable</c>.\n<cy>Would you like to return to the main menu?</c>",
+            "You have <cr>too many scenes loaded</c> because you're opening too many ads. This may cause your game to become <cr>unstable</c>.\n"
+            "<cy>Would you like to return to the main menu?</c>",
             "Cancel",
             "Yes",
             [](auto, bool ok) {
-                if (ok) {
-                    // pop to root scene
-                    CCDirector::sharedDirector()->popToRootScene();
-                };
+                if (ok) CCDirector::sharedDirector()->popToRootScene();
             });
 
         return;
@@ -255,22 +267,23 @@ void AdPreview::onPlayButton(CCObject* sender) {
     if (PlayLayer::get()) {
         createQuickPopup(
             "Warning",
-            "You are already inside of a level, opening this level will <cr>close your current level</c>.\n<cy>Do you still want to proceed?</c>",
+            "You are already inside of a level, opening this level will <cr>close your current level</c>.\n<cy>Do you still want to proceed</c>?",
             "Cancel",
             "Proceed",
             [this, sender](auto, bool btn) {
                 if (btn) {
-                    auto menuItem = typeinfo_cast<CCMenuItemSpriteExtra*>(sender);
                     registerClick();
-                    tryOpenOrFetchLevel(menuItem, m_impl->ad.getLevel());
+                    tryOpenOrFetchLevel(typeinfo_cast<CCMenuItemSpriteExtra*>(sender), m_impl->ad.getLevel());
                 };
             });
     } else {
         auto menuItem = typeinfo_cast<CCMenuItemSpriteExtra*>(sender);
+
         if (!m_impl->hasClicked) {
+            log::debug("click registered for ad_id={}, user_id={}", m_impl->ad.getID(), m_impl->ad.getUser());
+
             m_impl->hasClicked = true;
             registerClick();
-            log::debug("click registered for ad_id={}, user_id={}", m_impl->ad.getID(), m_impl->ad.getUser());
             tryOpenOrFetchLevel(menuItem, m_impl->ad.getLevel());
         } else {
             log::debug("click already registered for ad_id={}, user_id={}",
@@ -335,105 +348,23 @@ void AdPreview::registerClick() {
 };
 
 void AdPreview::tryOpenOrFetchLevel(CCMenuItemSpriteExtra* menuItem, int levelId) {
-    if (!menuItem) return;
+    fetch::getLevel(levelId, [self = WeakRef(this)](Result<GJGameLevel*> res) {
+        if (auto s = self.lock()) {
+            if (res.isErr()) {
+                log::error("Failed to get level: {}", std::move(res).unwrapErr());
 
-    auto searchObj = GJSearchObject::create(SearchType::Search, numToString(levelId));
-    auto key = std::string(searchObj->getKey());
-    auto glm = GameLevelManager::sharedState();
+                s->m_impl->playBtn->setVisible(true);
+                s->m_impl->playBtnLoading->setVisible(false);
 
-    // check stored cache first
-    auto stored = glm->getStoredOnlineLevels(key.c_str());
-    if (stored && stored->count() > 0) {
-        auto level = typeinfo_cast<GJGameLevel*>(stored->objectAtIndex(0));
-        if (level && level->m_levelID == levelId) {
-            auto scene = LevelInfoLayer::scene(level, false);
-            auto transitionFade = CCTransitionFade::create(0.5f, scene);
-            if (PlayLayer::get()) {
-                CCDirector::sharedDirector()->replaceScene(transitionFade);
-                FMODAudioEngine::sharedEngine()->resumeAllAudio();
-            } else {
-                CCDirector::sharedDirector()->pushScene(transitionFade);
-            }
-            glm->m_levelManagerDelegate = nullptr;
-            return;
-        };
-    };
-
-    // prepare pending state
-    m_impl->pendingKey = std::move(key);
-    m_impl->pendingLevelId = levelId;
-    m_impl->pendingTimeout = 10.0f;  // seconds
-
-    // show spinner on the clicked button and disable it
-    if (m_impl->pendingSpinner) {
-        m_impl->pendingSpinner->removeFromParent();
-        m_impl->pendingSpinner = nullptr;
-        m_impl->playBtn->setVisible(true);
-    };
-
-    if (auto spinner = LoadingSpinner::create(100.f)) {
-        spinner->setPosition(menuItem->getPosition());
-        spinner->setVisible(true);
-        m_impl->playBtn->setVisible(false);
-
-        m_buttonMenu->addChild(spinner);
-
-        m_impl->pendingSpinner = spinner;
-    };
-
-    glm->getOnlineLevels(searchObj);
-};
-
-void AdPreview::update(float dt) {
-    if (!m_impl->pendingKey.empty()) {
-        auto glm = GameLevelManager::sharedState();
-        auto stored = glm->getStoredOnlineLevels(m_impl->pendingKey.c_str());
-
-        if (stored && stored->count() > 0) {
-            auto level = typeinfo_cast<GJGameLevel*>(stored->objectAtIndex(0));
-
-            if (level && level->m_levelID == m_impl->pendingLevelId) {
-                auto scene = LevelInfoLayer::scene(level, false);
-                auto transitionFade = CCTransitionFade::create(0.5f, scene);
-                if (PlayLayer::get()) {
-                    CCDirector::sharedDirector()->replaceScene(transitionFade);
-                    FMODAudioEngine::sharedEngine()->resumeAllAudio();
-                } else {
-                    CCDirector::sharedDirector()->pushScene(transitionFade);
-                };
-
-                if (m_impl->pendingSpinner) {
-                    m_impl->pendingSpinner->removeFromParent();
-                    m_impl->pendingSpinner = nullptr;
-                };
-
-                m_impl->playBtn->setVisible(true);
-
-                m_impl->pendingKey.clear();
-                m_impl->pendingLevelId = -1;
-                m_impl->pendingTimeout = 0.0;
-
-                glm->m_levelManagerDelegate = nullptr;
                 return;
             };
+
+            s->m_impl->playBtn->setVisible(true);
+            s->m_impl->playBtnLoading->setVisible(false);
+
+            pushSceneWithLayer(LevelInfoLayer::create(std::move(res).unwrap(), false));
         };
-
-        m_impl->pendingTimeout -= dt;
-        if (m_impl->pendingTimeout <= 0.0) {
-            if (m_impl->pendingSpinner) {
-                m_impl->pendingSpinner->removeFromParent();
-                m_impl->pendingSpinner = nullptr;
-            };
-
-            m_impl->playBtn->setVisible(true);
-
-            Notification::create("Level not found", NotificationIcon::Warning)->show();
-
-            m_impl->pendingKey.clear();
-            m_impl->pendingLevelId = -1;
-            m_impl->pendingTimeout = 0.0;
-        };
-    };
+    });
 };
 
 AdPreview* AdPreview::create(Ad ad) {

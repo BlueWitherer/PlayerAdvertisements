@@ -35,10 +35,8 @@ class $modify(AdsMenuLayer, MenuLayer) {
 
         if (auto adBanner = Advertisement::create()) {
             adBanner->setID("banner"_spr);
-            adBanner->setType(AdType::Banner);
-            adBanner->setPosition({winSize.width / 2.f, winSize.height / 2.f - 70.f});
 
-            this->addChild(adBanner);
+            addChildAtPosition(adBanner, Anchor::Center, {0.f, -70.f}, false);
 
             adBanner->loadRandom();
         };

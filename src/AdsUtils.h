@@ -60,6 +60,10 @@ namespace cw::ads {
         void delegateHooks(std::string id, geode::utils::StringMap<std::shared_ptr<geode::Hook>> const& hooks);
         void toggleHooks(std::string_view id, bool on);
     };
+
+    namespace fetch {
+        void getLevel(int id, geode::CopyableFunction<void(geode::Result<GJGameLevel*>)>&& callback);
+    };
 };
 
 template <>
@@ -74,7 +78,7 @@ struct matjson::Serialize<cw::ads::Ad> final {
     }
 
 #define PLAYERADS_HOOK_LISTENER(id)                                                    \
-    $on_game(Loaded) {                                                                 \
+    $on_game(ModsLoaded) {                                                             \
         cw::ads::hooks::toggleHooks(id, geode::Mod::get()->getSettingValue<bool>(id)); \
                                                                                        \
         geode::listenForSettingChanges<bool>(                                          \

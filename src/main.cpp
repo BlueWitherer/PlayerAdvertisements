@@ -153,3 +153,32 @@ void hooks::toggleHooks(std::string_view id, bool on) {
         };
     };
 };
+
+void fetch::getLevel(int id, CopyableFunction<void(Result<GJGameLevel*>)>&& callback) {
+    auto req = web::WebRequest()
+                   .bodyString(fmt::format("secret=Wmfd2893gb7&levelID={}", id))
+                   .userAgent("");
+
+    async::spawn(
+        req.post("https://www.boomlings.com/database/downloadGJLevel22.php"),
+        [cb = std::move(callback)](web::WebResponse res) {
+            if (res.error()) {
+                log::error("Error getting user information: {}", res.errorMessage());
+                return cb(Err("An error occurred while fetching user information"));
+            };
+
+            auto strRes = res.string();
+            if (strRes.isErr()) return cb(Err(fmt::format("An error occurred while processing user information: {}", std::move(strRes).unwrapErr())));
+
+            auto const str = std::move(strRes).unwrap();
+
+            log::trace("Received response: {}", str);
+
+            auto dict = CCDictionary::create();
+            auto const splits = asp::iter::split(str, ":")
+                                    .collect();
+
+            for (size_t i = 0; i + 1 < splits.size(); i += 2) dict->setObject(CCString::create(std::string{splits[i + 1]}), std::string{splits[i]});
+            cb(Ok(GJGameLevel::create(dict, true)));
+        });
+};

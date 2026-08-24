@@ -27,8 +27,6 @@ namespace cw::ads {
         void tryOpenOrFetchLevel(CCMenuItemSpriteExtra* menuItem, int levelId);
         void registerClick();
 
-        void update(float dt) override;
-
     public:
         static AdPreview* create(Ad ad);
     };
