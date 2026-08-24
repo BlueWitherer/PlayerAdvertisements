@@ -20,14 +20,11 @@ class $modify(AdsGauntletSelectLayer, GauntletSelectLayer) {
 
         auto const winSize = CCDirector::sharedDirector()->getWinSize();
 
-        // banner at the bottom center
         if (auto adBanner = Advertisement::create(AdType::Banner)) {
             adBanner->setID("banner"_spr);
             adBanner->setPosition({winSize.width / 2.f, 30.f});
 
-            addChild(adBanner, 1);
-
-            adBanner->loadRandom();
+            addChild(adBanner, HIGHEST_Z);
         };
 
         return true;

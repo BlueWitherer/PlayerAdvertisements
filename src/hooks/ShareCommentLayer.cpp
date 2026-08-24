@@ -20,64 +20,48 @@ class $modify(AdsShareCommentLayer, ShareCommentLayer) {
 
         auto const winSize = CCDirector::sharedDirector()->getWinSize();
 
-        // square ad left
         if (auto adSquareLeft = Advertisement::create(AdType::Square)) {
             adSquareLeft->setID("square-left"_spr);
             adSquareLeft->setPosition({winSize.width / 2.f - 140.f, winSize.height / 2.f - 70.f});
 
-            m_mainLayer->addChild(adSquareLeft);
+            m_mainLayer->addChild(adSquareLeft, HIGHEST_Z);
             positionForCommentType(adSquareLeft, type);
-
-            adSquareLeft->loadRandom();
         };
 
-        // square ad center
         if (auto adSquareCenter = Advertisement::create(AdType::Square)) {
             adSquareCenter->setID("square-center"_spr);
             adSquareCenter->setPosition({winSize.width / 2.f, winSize.height / 2.f - 70.f});
 
-            m_mainLayer->addChild(adSquareCenter);
+            m_mainLayer->addChild(adSquareCenter, HIGHEST_Z);
             positionForCommentType(adSquareCenter, type);
-
-            adSquareCenter->loadRandom();
         };
 
-        // square ad right
         if (auto adSquareRight = Advertisement::create(AdType::Square)) {
             adSquareRight->setID("advertisement-menu"_spr);
             adSquareRight->setPosition({winSize.width / 2.f + 140.f, winSize.height / 2.f - 70.f});
 
-            m_mainLayer->addChild(adSquareRight);
-
+            m_mainLayer->addChild(adSquareRight, HIGHEST_Z);
             positionForCommentType(adSquareRight, type);
-
-            adSquareRight->loadRandom();
         };
 
-        // skyscraper ad on the right side
         if (auto adSkyscraperRight = Advertisement::create(AdType::Skyscraper)) {
             adSkyscraperRight->setID("skyscraper-right"_spr);
             adSkyscraperRight->setPosition({winSize.width - 30.f, winSize.height / 2.f});
 
-            m_mainLayer->addChild(adSkyscraperRight);
-
-            adSkyscraperRight->loadRandom();
+            m_mainLayer->addChild(adSkyscraperRight, HIGHEST_Z);
         };
 
-        // skyscraper ad on the left side
         if (auto adSkyscraperLeft = Advertisement::create(AdType::Skyscraper)) {
             adSkyscraperLeft->setID("skyscraper-left"_spr);
             adSkyscraperLeft->setPosition({30.f, winSize.height / 2.f});
 
-            m_mainLayer->addChild(adSkyscraperLeft);
-
-            adSkyscraperLeft->loadRandom();
+            m_mainLayer->addChild(adSkyscraperLeft, HIGHEST_Z);
         };
 
         return true;
     };
 
-    // for da squarez
+    // for da square adz
     void positionForCommentType(Advertisement* ad, CommentType type) {
         if (type == CommentType::FriendRequest) {
             log::debug("comment type is friend request");

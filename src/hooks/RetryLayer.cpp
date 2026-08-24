@@ -35,9 +35,7 @@ class $modify(AdsRetryLevelLayer, RetryLevelLayer) {
             adBanner->setID("advertisement-menu");
             adBanner->setPosition({winSize.width / 2.f, winSize.height / 2.f});
 
-            m_mainLayer->addChild(adBanner);
-
-            adBanner->loadRandom();
+            m_mainLayer->addChild(adBanner, HIGHEST_Z);
         };
     };
 };

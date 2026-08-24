@@ -20,14 +20,11 @@ class $modify(AdsDailyLevelPage, DailyLevelPage) {
 
         auto const winSize = CCDirector::sharedDirector()->getWinSize();
 
-        // banner ad at the top
         if (auto adBanner = Advertisement::create(AdType::Banner)) {
             adBanner->setID("banner"_spr);
             adBanner->setPosition({winSize.width / 2.f, 70.f});
 
-            m_mainLayer->addChild(adBanner, 8);
-
-            adBanner->loadRandom();
+            m_mainLayer->addChild(adBanner);
         };
 
         return true;

@@ -15,16 +15,72 @@
 using namespace geode::prelude;
 using namespace cw::ads;
 
+namespace cw::ads {
+    enum class LevelRating {
+        None = 0,
+        Star = 1,
+        Featured = 2,
+        Epic = 3,
+        Legendary = 4,
+        Mythic = 5,
+    };
+};
+
 struct AdPreview::Impl final {
     Ad ad;
+
+    Ref<GJGameLevel> level;
 
     async::TaskHolder<web::WebResponse> announcementListener;
     async::TaskHolder<web::WebResponse> clickListener;
 
     CCMenuItemSprite* playBtn = nullptr;
+    Ref<CCSprite> playBtnSprite = nullptr;
     LoadingSpinner* playBtnLoading = nullptr;
 
     bool hasClicked = false;
+
+    constexpr auto getDiffSpriteNum(GJGameLevel* level) {
+        if (level->m_demon.value() == 1) {
+            switch (level->m_demonDifficulty) {
+                default: return 6;
+
+                case 3: return 7;
+                case 4: return 8;
+                case 5: return 9;
+                case 6: return 10;
+            };
+        };
+
+        if (level->m_autoLevel) return -1;
+        return level->getAverageDifficulty();
+    };
+
+    constexpr auto getRating(GJGameLevel* level) {
+        switch (level->m_isEpic) {
+            default: break;
+
+            case 1: return LevelRating::Epic;
+            case 2: return LevelRating::Legendary;
+            case 3: return LevelRating::Mythic;
+        };
+
+        if (level->m_featured != 0) return LevelRating::Featured;
+        if (level->m_stars.value() != 0) return LevelRating::Star;
+
+        return LevelRating::None;
+    };
+
+    constexpr auto getFeatureState(LevelRating r) {
+        switch (r) {
+            case LevelRating::None: return GJFeatureState::None;
+            case LevelRating::Star: return GJFeatureState::None;
+            case LevelRating::Featured: return GJFeatureState::Featured;
+            case LevelRating::Epic: return GJFeatureState::Epic;
+            case LevelRating::Legendary: return GJFeatureState::Legendary;
+            case LevelRating::Mythic: return GJFeatureState::Mythic;
+        };
+    };
 };
 
 AdPreview::AdPreview() : m_impl(std::make_unique<Impl>()) {};
@@ -39,48 +95,121 @@ bool AdPreview::init(Ad ad) {
     setTitle(fmt::format("Ad ID | {}", m_impl->ad.getID()));
     setCloseButtonSpr(CircleButtonSprite::createWithSpriteFrameName("geode.loader/close.png", 0.875f, CircleBaseColor::DarkAqua, CircleBaseSize::Small));
 
-    auto levelIdLabel = Label::create(
-        fmt::format("Level ID | {}", m_impl->ad.getLevel()),
-        "bigFont.fnt");
-    levelIdLabel->setID("level-id-label");
-    levelIdLabel->setPosition({m_mainLayer->getScaledContentWidth() / 2, m_mainLayer->getScaledContentHeight() - 40});
-    levelIdLabel->setScale(0.5f);
+    m_impl->playBtnSprite = CCSprite::createWithSpriteFrameName("GJ_playBtn2_001.png");  // iq 99999 (send help)
+    m_impl->playBtnLoading = LoadingSpinner::create(m_impl->playBtnSprite->getScaledContentHeight() * 0.875f);
 
-    m_mainLayer->addChild(levelIdLabel);
+    m_buttonMenu->addChildAtPosition(m_impl->playBtnLoading, Anchor::Center, {0.f, 3.75f});
 
-    m_impl->playBtn = CCMenuItemSpriteExtra::create(
-        CCSprite::createWithSpriteFrameName("GJ_playBtn2_001.png"),
-        this,
-        menu_selector(AdPreview::onPlayButton));
-    m_impl->playBtn->setID("play-btn");
+    log::trace("Requesting data for level of ID {} for ad of ID {}", m_impl->ad.getLevel(), m_impl->ad.getID());
 
-    m_buttonMenu->addChildAtPosition(m_impl->playBtn, Anchor::Center, {0.f, 3.75f});
+    fetch::getLevel(m_impl->ad.getLevel(), [self = WeakRef(this)](Result<GJGameLevel*> res) {
+        if (auto s = self.lock()) {
+            s->m_impl->playBtnLoading->setVisible(false);
 
-    m_impl->playBtnLoading = LoadingSpinner::create(m_impl->playBtn->getScaledContentHeight() * 0.875f);
-    m_impl->playBtnLoading->setVisible(false);
-    m_impl->playBtnLoading->setPosition(m_impl->playBtn->getPosition());
+            if (res.isErr()) {
+                log::error("Failed to parse level: {}", std::move(res).unwrapErr());
 
-    m_buttonMenu->addChild(m_impl->playBtnLoading, 1);
+                auto errLabel = Label::create("Something went wrong...", "goldFont.fnt");
+                errLabel->setID("error-label");
+                errLabel->setScale(0.375f);
+                errLabel->setAlignment(Label::Alignment::Center);
 
-    auto viewCountLabel = Label::create(
-        fmt::format("{} View{}", GameToolbox::pointsToString(m_impl->ad.getViews()), m_impl->ad.getViews() != 1 ? "s" : ""),  // this is so dumb
-        "geode.loader/mdFont.fnt");
-    viewCountLabel->setID("view-count-label");
-    viewCountLabel->setColor({255, 193, 136});
-    viewCountLabel->setScale(0.425f);
+                s->m_mainLayer->addChildAtPosition(errLabel, Anchor::Center);
 
-    m_mainLayer->addChildAtPosition(viewCountLabel, Anchor::Center, {0.f, -45.f});
+                return;
+            };
 
-    auto clickCountLabel = Label::create(
-        fmt::format("{} Click{}", GameToolbox::pointsToString(m_impl->ad.getClicks()), m_impl->ad.getClicks() != 1 ? "s" : ""),  // this is still very dumb
-        "geode.loader/mdFontB.fnt");
-    clickCountLabel->setID("click-count-label");
-    clickCountLabel->setColor({96, 167, 206});
-    clickCountLabel->setScale(0.375f);
+            s->m_impl->level = std::move(res).unwrap();  // it's soooo verbose
+            auto& lvl = s->m_impl->level;
 
-    m_mainLayer->addChildAtPosition(clickCountLabel, Anchor::Center, {0.f, -55.f});
+            log::debug("Retrieved level {} ({}) for ad of ID {}", lvl->m_levelName, lvl->m_levelID, s->m_impl->ad.getID());
 
-    // report button
+            auto levelLabel = Label::create(
+                lvl->m_levelName,
+                "bigFont.fnt");
+            levelLabel->setID("level-name-label");
+            levelLabel->setAlignment(Label::Alignment::Center);
+            levelLabel->setLimitLabelWidth(s->m_mainLayer->getScaledContentWidth() - 1.25f, 0.5f);
+            levelLabel->setPosition({s->m_mainLayer->getScaledContentWidth() / 2.f, s->m_mainLayer->getScaledContentHeight() - 37.5f});
+            levelLabel->setScale(0.5f);
+
+            s->m_mainLayer->addChild(levelLabel);
+
+            auto levelIDStr = numToString(lvl->m_levelID.value());
+
+            auto levelIDLabel = Button::createWithLabel(
+                levelIDStr,
+                "chatFont.fnt",
+                [id = levelIDStr](auto) {
+                    utils::clipboard::write(id);
+                    Notification::create("Copied to clipboard", NotificationIcon::Success)->show();
+                });
+            levelIDLabel->setID("copy-level-id-btn");
+            levelIDLabel->setOpacity(200);
+            levelIDLabel->setPosition({levelLabel->getPositionX(), levelLabel->getPositionY() - 12.5f});
+            levelIDLabel->setScale(0.625f);
+
+            s->m_mainLayer->addChild(levelIDLabel, 1);
+
+            s->m_impl->playBtn = CCMenuItemSpriteExtra::create(
+                s->m_impl->playBtnSprite.take(),
+                s,
+                menu_selector(AdPreview::onPlayButton));
+            s->m_impl->playBtn->setID("play-btn");
+            s->m_impl->playBtn->setPosition(s->m_impl->playBtnLoading->getPosition());
+
+            s->m_buttonMenu->addChild(s->m_impl->playBtn, 1);
+
+            auto statsContainerLayout = ColumnLayout::create()
+                                            ->setGap(5.f)
+                                            ->setAutoScale(false)
+                                            ->setCrossAxisLineAlignment(AxisAlignment::Start)
+                                            ->setCrossAxisAlignment(AxisAlignment::Start)
+                                            ->setAutoGrowAxis(0.f)
+                                            ->setAxisReverse(true);
+
+            auto statsContainer = CCNode::create();
+            statsContainer->setID("level-stats-container");
+            statsContainer->setAnchorPoint({0, 0.5});
+            statsContainer->setPosition({s->m_impl->playBtn->getPositionX() + (s->m_impl->playBtn->getScaledContentWidth() * 0.625f), s->m_impl->playBtn->getPositionY()});
+            statsContainer->setLayout(statsContainerLayout);
+
+            s->m_mainLayer->addChild(statsContainer, 9);
+
+            statsContainer->addChild(AdPreviewStat::create("GJ_downloadsIcon_001.png", numToAbbreviatedString(lvl->m_downloads)));
+            statsContainer->addChild(AdPreviewStat::create(lvl->m_dislikes <= 0 ? "GJ_likesIcon_001.png" : "GJ_dislikesIcon_001.png", numToAbbreviatedString(lvl->m_dislikes <= 0 ? lvl->m_likes : lvl->m_dislikes)));
+            statsContainer->addChild(AdPreviewStat::create("GJ_timeIcon_001.png", lvl->lengthKeyToString(lvl->getLengthKey(lvl->m_levelLength, lvl->isPlatformer()))));
+
+            statsContainer->updateLayout();
+
+            auto diff = GJDifficultySprite::create(s->m_impl->getDiffSpriteNum(lvl), GJDifficultyName::Long);
+            diff->setID("difficulty-icon");
+            diff->setPosition({s->m_impl->playBtn->getPositionX() - (s->m_impl->playBtn->getScaledContentWidth() * 0.875f), s->m_impl->playBtn->getPositionY()});
+            diff->updateFeatureState(s->m_impl->getFeatureState(s->m_impl->getRating(lvl)));
+
+            s->m_mainLayer->addChild(diff, 9);
+
+            auto viewCountLabel = Label::create(
+                fmt::format("{} View{}", GameToolbox::pointsToString(s->m_impl->ad.getViews()), s->m_impl->ad.getViews() != 1 ? "s" : ""),  // this is so dumb
+                "geode.loader/mdFont.fnt");
+            viewCountLabel->setID("view-count-label");
+            viewCountLabel->setScale(0.425f);
+            viewCountLabel->setColor({255, 193, 136});
+            viewCountLabel->setAlignment(Label::Alignment::Center);
+
+            s->m_mainLayer->addChildAtPosition(viewCountLabel, Anchor::Center, {0.f, -45.f});
+
+            auto clickCountLabel = Label::create(
+                fmt::format("{} Click{}", GameToolbox::pointsToString(s->m_impl->ad.getClicks()), s->m_impl->ad.getClicks() != 1 ? "s" : ""),  // this is still very dumb
+                "geode.loader/mdFontB.fnt");
+            clickCountLabel->setID("click-count-label");
+            clickCountLabel->setScale(0.375f);
+            clickCountLabel->setColor({104, 173, 209});
+            clickCountLabel->setAlignment(Label::Alignment::Center);
+
+            s->m_mainLayer->addChildAtPosition(clickCountLabel, Anchor::Center, {0.f, -55.f});
+        }; }, false);
+
     auto reportBtn = Button::createWithNode(
         CircleButtonSprite::createWithSpriteFrameName(
             "exMark_001.png",
@@ -247,14 +376,14 @@ bool AdPreview::init(Ad ad) {
 };
 
 void AdPreview::onPlayButton(CCObject* sender) {
-    m_impl->playBtn->setVisible(false);
     m_impl->playBtnLoading->setVisible(true);
+    m_impl->playBtn->setVisible(false);
 
     if (CCDirector::sharedDirector()->sceneCount() >= 5 && !Mod::get()->getSettingValue<bool>("scene-protection")) {
         createQuickPopup(
             "Hold up!",
-            "You have <cr>too many scenes loaded</c> because you're opening too many ads. This may cause your game to become <cr>unstable</c>.\n"
-            "<cy>Would you like to return to the main menu?</c>",
+            "You have <cr>too many scenes loaded</c> from opening too many ads. This may cause your game to become <cr>unstable</c>.\n"
+            "<cy>Would you like to return?</c>",
             "Cancel",
             "Yes",
             [](auto, bool ok) {
@@ -270,26 +399,25 @@ void AdPreview::onPlayButton(CCObject* sender) {
             "You are already inside of a level, opening this level will <cr>close your current level</c>.\n<cy>Do you still want to proceed</c>?",
             "Cancel",
             "Proceed",
-            [this, sender](auto, bool btn) {
-                if (btn) {
+            [this, sender](auto, bool ok) {
+                if (ok) {
                     registerClick();
-                    tryOpenOrFetchLevel(typeinfo_cast<CCMenuItemSpriteExtra*>(sender), m_impl->ad.getLevel());
+                    switchToLevel();
                 };
             });
     } else {
-        auto menuItem = typeinfo_cast<CCMenuItemSpriteExtra*>(sender);
-
         if (!m_impl->hasClicked) {
             log::debug("click registered for ad_id={}, user_id={}", m_impl->ad.getID(), m_impl->ad.getUser());
 
             m_impl->hasClicked = true;
+
             registerClick();
-            tryOpenOrFetchLevel(menuItem, m_impl->ad.getLevel());
+            switchToLevel();
         } else {
             log::debug("click already registered for ad_id={}, user_id={}",
                 m_impl->ad.getID(),
                 m_impl->ad.getUser());
-            tryOpenOrFetchLevel(menuItem, m_impl->ad.getLevel());
+            switchToLevel();
         };
     };
 };
@@ -347,29 +475,61 @@ void AdPreview::registerClick() {
         });
 };
 
-void AdPreview::tryOpenOrFetchLevel(CCMenuItemSpriteExtra* menuItem, int levelId) {
-    fetch::getLevel(levelId, [self = WeakRef(this)](Result<GJGameLevel*> res) {
-        if (auto s = self.lock()) {
-            if (res.isErr()) {
-                log::error("Failed to get level: {}", std::move(res).unwrapErr());
+void AdPreview::switchToLevel() {
+    auto layer = LevelInfoLayer::create(m_impl->level, false);
+    pushSceneWithLayer(layer);
 
-                s->m_impl->playBtn->setVisible(true);
-                s->m_impl->playBtnLoading->setVisible(false);
+    m_impl->playBtn->setVisible(true);
+    m_impl->playBtnLoading->setVisible(false);
 
-                return;
-            };
+    layer->downloadLevel();  // idk rlly :p
+    layer->onUpdate(layer->querySelector("right-side-menu > refresh-button"));
 
-            s->m_impl->playBtn->setVisible(true);
-            s->m_impl->playBtnLoading->setVisible(false);
-
-            pushSceneWithLayer(LevelInfoLayer::create(std::move(res).unwrap(), false));
-        };
-    });
+    if (auto gm = GameLevelManager::get()) gm->saveLevel(m_impl->level);
 };
 
 AdPreview* AdPreview::create(Ad ad) {
     auto ret = new AdPreview();
     if (ret->init(std::move(ad))) {
+        ret->autorelease();
+        return ret;
+    };
+
+    delete ret;
+    return nullptr;
+};
+
+bool AdPreviewStat::init(ZStringView sprite, std::string label) {
+    if (!CCNode::init()) return false;
+
+    auto layout = RowLayout::create()
+                      ->setGap(2.5f)
+                      ->setAutoScale(false)
+                      ->setAutoGrowAxis(0.f)
+                      ->setAxisAlignment(AxisAlignment::Start);
+
+    setContentSize({0.f, 12.5f});
+    setLayout(layout);
+
+    auto icon = CCSprite::createWithSpriteFrameName(sprite.c_str());
+    cue::rescaleToMatch(icon, getScaledContentHeight());
+
+    addChild(icon);
+
+    auto text = Label::create(std::move(label), "bigFont.fnt");
+    text->setLimitLabelWidth(37.5f, 0.425f);
+    text->setScale(0.425f);
+
+    addChild(text);
+
+    updateLayout();
+
+    return true;
+};
+
+AdPreviewStat* AdPreviewStat::create(ZStringView sprite, std::string label) {
+    auto ret = new AdPreviewStat();
+    if (ret->init(sprite, std::move(label))) {
         ret->autorelease();
         return ret;
     };

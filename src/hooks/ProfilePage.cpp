@@ -20,24 +20,18 @@ class $modify(AdsProfilePage, ProfilePage) {
 
         auto const winSize = CCDirector::sharedDirector()->getWinSize();
 
-        // skyscraper ad on the right side
         if (auto adSkyscraperRight = Advertisement::create(AdType::Skyscraper)) {
             adSkyscraperRight->setID("skyscraper-right"_spr);
             adSkyscraperRight->setPosition({winSize.width - 30.f, winSize.height / 2.f});
 
-            m_mainLayer->addChild(adSkyscraperRight);
-
-            adSkyscraperRight->loadRandom();
+            m_mainLayer->addChild(adSkyscraperRight, HIGHEST_Z);
         };
 
-        // skyscraper ad on the left side
         if (auto adSkyscraperLeft = Advertisement::create(AdType::Skyscraper)) {
             adSkyscraperLeft->setID("skyscraper-left"_spr);
             adSkyscraperLeft->setPosition({30.f, winSize.height / 2.f});
 
-            m_mainLayer->addChild(adSkyscraperLeft);
-
-            adSkyscraperLeft->loadRandom();
+            m_mainLayer->addChild(adSkyscraperLeft, HIGHEST_Z);
         };
 
         return true;

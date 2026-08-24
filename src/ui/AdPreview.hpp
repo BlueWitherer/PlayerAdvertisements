@@ -5,6 +5,14 @@
 #include <Geode/Geode.hpp>
 
 namespace cw::ads {
+    class AdPreviewStat final : public cocos2d::CCNode {
+    protected:
+        bool init(geode::ZStringView sprite, std::string label);
+
+    public:
+        static AdPreviewStat* create(geode::ZStringView sprite, std::string label);
+    };
+
     class AdPreview final : public geode::Popup {
         struct LinkButton final {
             std::string id;
@@ -24,7 +32,7 @@ namespace cw::ads {
 
         void onPlayButton(cocos2d::CCObject* sender);
 
-        void tryOpenOrFetchLevel(CCMenuItemSpriteExtra* menuItem, int levelId);
+        void switchToLevel();
         void registerClick();
 
     public:

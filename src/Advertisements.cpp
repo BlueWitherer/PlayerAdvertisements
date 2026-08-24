@@ -11,10 +11,12 @@
 using namespace geode::prelude;
 using namespace cw::ads;
 
-namespace particles {
-    constexpr auto banner = "50,2065,2,4515,3,855,155,1,156,20,145,20a-1a1a0.3a15a90a0a20a0a100a25a0a25a0a0a0a0a10a5a0a180a1a0a1a0a1a0a1a0a5a0a180a0a1a0a1a0a1a0a1a0a0a1a1a0a0a0a0a0a0a0a0a2a1a0a0a0a41a0a0a0a0a0a0a0a0a0a0a0a0a0a0;";
-    constexpr auto square = "50,2065,2,4515,3,855,155,1,156,20,145,20a-1a1a0.3a15a90a0a20a0a50a50a0a25a0a0a0a0a10a5a0a180a1a0a1a0a1a0a1a0a5a0a180a0a1a0a1a0a1a0a1a0a0a1a1a0a0a0a0a0a0a0a0a2a1a0a0a0a41a0a0a0a0a0a0a0a0a0a0a0a0a0a0;";
-    constexpr auto skyscraper = "50,2065,2,4515,3,855,155,1,156,20,145,20a-1a1a0.3a15a90a0a20a0a25a100a0a25a0a0a0a0a10a5a0a180a1a0a1a0a1a0a1a0a5a0a180a0a1a0a1a0a1a0a1a0a0a1a1a0a0a0a0a0a0a0a0a2a1a0a0a0a41a0a0a0a0a0a0a0a0a0a0a0a0a0a0;";
+namespace cw::ads {
+    namespace particles {
+        constexpr auto banner = "50,2065,2,4515,3,855,155,1,156,20,145,20a-1a1a0.3a15a90a0a20a0a100a25a0a25a0a0a0a0a10a5a0a180a1a0a1a0a1a0a1a0a5a0a180a0a1a0a1a0a1a0a1a0a0a1a1a0a0a0a0a0a0a0a0a2a1a0a0a0a41a0a0a0a0a0a0a0a0a0a0a0a0a0a0;";
+        constexpr auto square = "50,2065,2,4515,3,855,155,1,156,20,145,20a-1a1a0.3a15a90a0a20a0a50a50a0a25a0a0a0a0a10a5a0a180a1a0a1a0a1a0a1a0a5a0a180a0a1a0a1a0a1a0a1a0a0a1a1a0a0a0a0a0a0a0a0a2a1a0a0a0a41a0a0a0a0a0a0a0a0a0a0a0a0a0a0;";
+        constexpr auto skyscraper = "50,2065,2,4515,3,855,155,1,156,20,145,20a-1a1a0.3a15a90a0a20a0a25a100a0a25a0a0a0a0a10a5a0a180a1a0a1a0a1a0a1a0a5a0a180a0a1a0a1a0a1a0a1a0a0a1a1a0a0a0a0a0a0a0a0a2a1a0a0a0a41a0a0a0a0a0a0a0a0a0a0a0a0a0a0;";
+    };
 };
 
 struct Advertisement::Impl final {
@@ -89,7 +91,7 @@ void Advertisement::reload() {
                 s->m_impl->adIcon->setAnchorPoint({0.f, 0.f});
                 s->m_impl->adIcon->setPosition({3.f, 3.f});
                 s->m_impl->adIcon->setScale(0.25f);
-                s->m_impl->adIcon->setOpacity(100);
+                s->m_impl->adIcon->setOpacity(125);
 
                 if (s->m_impl->adButton) {
                     s->m_impl->adButton->addChild(s->m_impl->adIcon, 9);
@@ -138,7 +140,7 @@ void Advertisement::reload() {
                     featuredStar->setAnchorPoint({1.f, 0.f});
                     featuredStar->setScale(0.35f);
 
-                    float xpos = 3.f;
+                    auto xpos = 3.f;
                     if (s->m_impl->adButton) xpos = s->m_impl->adButton->getScaledContentWidth() - 3.f;
 
                     featuredStar->setPosition({xpos, 4.25f});
@@ -205,9 +207,9 @@ void Advertisement::reload() {
                         } break;
 
                         default: {
-                            if (glowNode) glowNode->removeFromParent();
-                            if (particles) particles->removeFromParent();
-                            if (tag) tag->removeFromParent();
+                            cue::resetNode(glowNode);
+                            cue::resetNode(particles);
+                            cue::resetNode(tag);
                         } break;
                     };
 
@@ -244,7 +246,12 @@ void Advertisement::reload() {
     m_impl->adButton = Button::createWithNode(
         m_impl->adSprite,
         [this](auto) {
-            if (auto popup = AdPreview::create(m_impl->ad)) popup->show();
+            if (!m_impl->ad.getImage().empty()) {
+                if (auto popup = AdPreview::create(m_impl->ad)) popup->show();
+                return;
+            };
+
+            Notification::create("Ad not loaded", NotificationIcon::Error)->show();
         });
     m_impl->adButton->setID("advertisement-btn");
 
@@ -268,7 +275,7 @@ void Advertisement::handleAdResponse(web::WebResponse const& res) {
     auto jsonRes = res.json();
     if (!jsonRes) {
         log::error("Failed to parse ad json: {}", std::move(jsonRes).unwrapErr());
-        if (m_impl->adSprite) m_impl->adSprite->removeFromParent();
+        cue::resetNode(m_impl->adSprite);
 
         return;
     };
@@ -278,7 +285,7 @@ void Advertisement::handleAdResponse(web::WebResponse const& res) {
     auto adRes = json.as<Ad>();
     if (adRes.isErr()) {
         log::error("Failed to parse ad: {}", std::move(adRes).unwrapErr());
-        if (m_impl->adSprite) m_impl->adSprite->removeFromParent();
+        cue::resetNode(m_impl->adSprite);
 
         return;
     };
@@ -344,14 +351,16 @@ void Advertisement::loadRandom() {
 void Advertisement::onEnter() {
     CCNode::onEnter();
 
-    m_impl->adSprite->cancelLoad();
+    if (m_impl->adSprite) m_impl->adSprite->cancelLoad();
     m_impl->adListener.cancel();
 
     loadRandom();
 };
 
 void Advertisement::onExit() {
+    if (m_impl->adSprite) m_impl->adSprite->cancelLoad();
     m_impl->adListener.cancel();
+
     CCNode::onExit();
 };
 

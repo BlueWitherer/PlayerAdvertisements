@@ -25,48 +25,38 @@ class $modify(AdsPlayLayer, PlayLayer) {
     void setupHasCompleted() {
         auto const winSize = CCDirector::sharedDirector()->getWinSize();
 
-        // banner ad at the top
-        if (!m_fields->bannerTop) {
-            m_fields->bannerTop = Advertisement::create(AdType::Banner);
-            m_fields->bannerTop->setID("banner-top"_spr);
-            m_fields->bannerTop->setPosition({winSize.width / 2.f, winSize.height - 30.f});
+        auto f = m_fields.self();
 
-            m_uiLayer->addChild(m_fields->bannerTop);
+        if (!f->bannerTop) {
+            f->bannerTop = Advertisement::create(AdType::Banner);
+            f->bannerTop->setID("banner-top"_spr);
+            f->bannerTop->setPosition({winSize.width / 2.f, winSize.height - 30.f});
 
-            m_fields->bannerTop->loadRandom();
+            m_uiLayer->addChild(f->bannerTop, HIGHEST_Z);
         };
 
-        // banner at the bottom
-        if (!m_fields->bannerBottom) {
-            m_fields->bannerBottom = Advertisement::create(AdType::Banner);
-            m_fields->bannerBottom->setID("banner-bottom"_spr);
-            m_fields->bannerBottom->setPosition({winSize.width / 2.f, 30.f});
+        if (!f->bannerBottom) {
+            f->bannerBottom = Advertisement::create(AdType::Banner);
+            f->bannerBottom->setID("banner-bottom"_spr);
+            f->bannerBottom->setPosition({winSize.width / 2.f, 30.f});
 
-            m_uiLayer->addChild(m_fields->bannerBottom);
-
-            m_fields->bannerBottom->loadRandom();
+            m_uiLayer->addChild(f->bannerBottom, HIGHEST_Z);
         };
 
-        // skyscraper ad on the right
-        if (!m_fields->skyscraperRight) {
-            m_fields->skyscraperRight = Advertisement::create(AdType::Skyscraper);
-            m_fields->skyscraperRight->setID("skyscraper-right"_spr);
-            m_fields->skyscraperRight->setPosition({winSize.width - 30.f, winSize.height / 2.f});
+        if (!f->skyscraperRight) {
+            f->skyscraperRight = Advertisement::create(AdType::Skyscraper);
+            f->skyscraperRight->setID("skyscraper-right"_spr);
+            f->skyscraperRight->setPosition({winSize.width - 30.f, winSize.height / 2.f});
 
-            m_uiLayer->addChild(m_fields->skyscraperRight);
-
-            m_fields->skyscraperRight->loadRandom();
+            m_uiLayer->addChild(f->skyscraperRight, HIGHEST_Z);
         };
 
-        // skyscraper ad on the left
-        if (!m_fields->skyscraperLeft) {
-            m_fields->skyscraperLeft = Advertisement::create(AdType::Skyscraper);
-            m_fields->skyscraperLeft->setID("skyscraper-left"_spr);
-            m_fields->skyscraperLeft->setPosition({30.f, winSize.height / 2.f});
+        if (!f->skyscraperLeft) {
+            f->skyscraperLeft = Advertisement::create(AdType::Skyscraper);
+            f->skyscraperLeft->setID("skyscraper-left"_spr);
+            f->skyscraperLeft->setPosition({30.f, winSize.height / 2.f});
 
-            m_uiLayer->addChild(m_fields->skyscraperLeft);
-
-            m_fields->skyscraperLeft->loadRandom();
+            m_uiLayer->addChild(f->skyscraperLeft, HIGHEST_Z);
         };
 
         log::trace("setting up scheduler for auto ad refresh");
@@ -76,13 +66,11 @@ class $modify(AdsPlayLayer, PlayLayer) {
     };
 
     void fullReset() {
-        // reload all ads lulz
         reloadAllAds();
         PlayLayer::fullReset();
     };
 
     void resetLevelFromStart() {
-        // reload all ads lulz
         reloadAllAds();
         PlayLayer::resetLevelFromStart();
     };
@@ -93,10 +81,12 @@ class $modify(AdsPlayLayer, PlayLayer) {
     };
 
     void reloadAllAds() {
-        if (m_fields->bannerTop) m_fields->bannerTop->loadRandom();
-        if (m_fields->bannerBottom) m_fields->bannerBottom->loadRandom();
-        if (m_fields->skyscraperRight) m_fields->skyscraperRight->loadRandom();
-        if (m_fields->skyscraperLeft) m_fields->skyscraperLeft->loadRandom();
+        auto f = m_fields.self();
+
+        if (f->bannerTop) f->bannerTop->loadRandom();
+        if (f->bannerBottom) f->bannerBottom->loadRandom();
+        if (f->skyscraperRight) f->skyscraperRight->loadRandom();
+        if (f->skyscraperLeft) f->skyscraperLeft->loadRandom();
 
         log::debug("All ads are now reloading");
     };

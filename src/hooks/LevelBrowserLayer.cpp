@@ -20,14 +20,11 @@ class $modify(AdsLevelBrowserLayer, LevelBrowserLayer) {
 
         auto const winSize = CCDirector::sharedDirector()->getWinSize();
 
-        // banner ad at the top
         if (auto adBanner = Advertisement::create(AdType::Banner)) {
             adBanner->setID("banner"_spr);
             adBanner->setPosition({winSize.width / 2.f, winSize.height - 30.f});
 
-            addChild(adBanner, 2);
-
-            adBanner->loadRandom();
+            addChild(adBanner, HIGHEST_Z);
         };
 
         return true;

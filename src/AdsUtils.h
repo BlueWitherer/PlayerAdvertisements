@@ -1,5 +1,10 @@
 #pragma once
 
+#include <cue/Util.hpp>
+
+#include <Geode/Geode.hpp>
+
+#define HIGHEST_Z cocos2d::CCScene::get()->getHighestChildZ() + 1
 namespace cw::ads {
     enum class AdType : uint8_t {
         Banner = 1,
@@ -62,7 +67,7 @@ namespace cw::ads {
     };
 
     namespace fetch {
-        void getLevel(int id, geode::CopyableFunction<void(geode::Result<GJGameLevel*>)>&& callback);
+        void getLevel(int id, geode::CopyableFunction<void(geode::Result<GJGameLevel*>)>&& callback, bool download = true);
     };
 };
 
