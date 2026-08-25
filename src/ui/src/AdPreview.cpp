@@ -40,6 +40,20 @@ struct AdPreview::Impl final {
 
     bool hasClicked = false;
 
+    constexpr auto getLengthText(int length, bool plat = false) {
+        if (plat) return "Plat.";
+
+        switch (length) {
+            default: [[fallthrough]];
+
+            case 0: return "Tiny";
+            case 1: return "Short";
+            case 2: return "Medium";
+            case 3: return "Long";
+            case 4: return "XL";
+        };
+    };
+
     constexpr auto getDiffSpriteNum(GJGameLevel* level) {
         if (level->m_demon.value() == 1) {
             switch (level->m_demonDifficulty) {
@@ -176,9 +190,11 @@ bool AdPreview::init(Ad ad) {
 
             s->m_mainLayer->addChild(statsContainer, 9);
 
+            log::info("level {} length: {}",  lvl->m_levelName, lvl->m_levelLength);
+
             statsContainer->addChild(AdPreviewStat::create("GJ_downloadsIcon_001.png", numToAbbreviatedString(lvl->m_downloads)));
             statsContainer->addChild(AdPreviewStat::create(lvl->m_likes >= 0 ? "GJ_likesIcon_001.png" : "GJ_dislikesIcon_001.png", numToAbbreviatedString(lvl->m_likes)));
-            statsContainer->addChild(AdPreviewStat::create("GJ_timeIcon_001.png", lvl->lengthKeyToString(lvl->getLengthKey(lvl->m_levelLength, lvl->isPlatformer()))));
+            statsContainer->addChild(AdPreviewStat::create("GJ_timeIcon_001.png", s->m_impl->getLengthText(lvl->m_levelLength, lvl->isPlatformer())));
 
             statsContainer->updateLayout();
 

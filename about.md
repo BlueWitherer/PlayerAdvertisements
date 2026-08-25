@@ -43,7 +43,7 @@ Happy advertising!
 
 ### Credits
 - **[ArcticWoof](user:7689052)**: Co-founder
-- **[iAndy_HD3](user:1688850)**: Difficulty face functionality in ad preview pop-up
+- **[iAndy_HD3](user:1688850)**: Difficulty face functionality
 
 ---
 

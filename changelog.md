@@ -1,3 +1,6 @@
+# v1.3.1 
+- Bug fixes
+
 # v1.3.0 
 - Now displaying ads on RobTop level selection page
 - Added level metadata to ad preview pop-up

@@ -51,7 +51,7 @@ Happy advertising!
 
 ### Credits
 - **[ArcticWoof](https://www.github.com/DumbCaveSpider/)**: Co-founder
-- **[iAndy_HD3](https://www.github.com/iAndyHD3/)**: Difficulty face functionality in ad preview pop-up
+- **[iAndy_HD3](https://www.github.com/iAndyHD3/)**: Difficulty face functionality 
 
 ---
 
