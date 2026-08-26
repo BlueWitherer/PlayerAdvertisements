@@ -89,7 +89,7 @@ void AdPreview::setupMetaLabels(AdLevelMetadata const& data) {
         });
     m_impl->levelIDLabel->setID("copy-level-id-btn");
     m_impl->levelIDLabel->setOpacity(200);
-    m_impl->levelIDLabel->setPosition({m_impl->levelLabel->getPositionX(), m_impl->levelLabel->getPositionY() - 17.5f});
+    m_impl->levelIDLabel->setPosition({m_impl->levelLabel->getPositionX(), m_impl->levelLabel->getPositionY() - 15.f});
     m_impl->levelIDLabel->setScale(0.625f);
 
     m_mainLayer->addChild(m_impl->levelIDLabel, 1);
