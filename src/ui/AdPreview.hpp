@@ -24,6 +24,8 @@ namespace cw::ads {
         struct Impl;
         std::unique_ptr<Impl> m_impl;
 
+        void setupMetaLabels(AdLevelMetadata const& data);
+
     protected:
         AdPreview();
         ~AdPreview();

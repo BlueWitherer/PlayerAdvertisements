@@ -1,4 +1,7 @@
 # v1.3.1 
+- Added level thumbnail to ad preview pop-up
+- Fixed level length label in ad preview pop-up
+- Fixed blank levels showing without an error message
 - Bug fixes
 
 # v1.3.0 

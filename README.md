@@ -51,7 +51,8 @@ Happy advertising!
 
 ### Credits
 - **[ArcticWoof](https://www.github.com/DumbCaveSpider/)**: Co-founder
-- **[iAndy_HD3](https://www.github.com/iAndyHD3/)**: Difficulty face functionality 
+- **[iAndy_HD3](https://www.github.com/iAndyHD3/)**: Level difficulty face functionality 
+- **[Level Thumbnails](https://geode-sdk.org/mods/cdc.level_thumbnails)**: Level thumbnail image provider
 
 ---
 

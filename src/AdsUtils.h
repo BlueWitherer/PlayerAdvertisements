@@ -46,18 +46,38 @@ namespace cw::ads {
         uint8_t getGlowLevel() const noexcept;
     };
 
+    enum class LevelRating : uint8_t {
+        None = 0,
+        Star = 1,
+        Featured = 2,
+        Epic = 3,
+        Legendary = 4,
+        Mythic = 5,
+    };
+
+    struct AdLevelMetadata final {
+        std::string name;
+        int id;
+        int difficulty;
+        LevelRating rating;
+    };
+
     class AdsDirector final {
     private:
-        asp::SmallVec<Ad, 20> m_seenAds;  // to be used in v1.3
+        asp::SmallVec<Ad, 30> m_seenAds;  // to be used in v1.4
         geode::utils::StringMap<std::vector<std::weak_ptr<geode::Hook>>> m_hooks;
+
+        std::unordered_map<int, AdLevelMetadata> m_seenLevels;
 
     public:
         static AdsDirector* get() noexcept;
 
         void registerHooks(std::string id, std::vector<std::weak_ptr<geode::Hook>> hooks);
+        void addLevelToCache(GJGameLevel* level);
         void addToViewed(Ad ad);
 
         std::span<const std::weak_ptr<geode::Hook>> getHooks(std::string_view id) const noexcept;
+        geode::Result<AdLevelMetadata> getLevelMeta(int id) const;
         std::span<const Ad> getViewedAds() const noexcept;
     };
 
@@ -68,6 +88,37 @@ namespace cw::ads {
 
     namespace fetch {
         void getLevel(int id, geode::CopyableFunction<void(geode::Result<GJGameLevel*>)>&& callback, bool download = true);
+
+        inline constexpr auto getRating(GJGameLevel* level) {
+            switch (level->m_isEpic) {
+                default: break;
+
+                case 1: return LevelRating::Epic;
+                case 2: return LevelRating::Legendary;
+                case 3: return LevelRating::Mythic;
+            };
+
+            if (level->m_featured != 0) return LevelRating::Featured;
+            if (level->m_stars.value() != 0) return LevelRating::Star;
+
+            return LevelRating::None;
+        };
+
+        inline constexpr auto getDiffSpriteNum(GJGameLevel* level) {
+            if (level->m_demon.value() == 1) {
+                switch (level->m_demonDifficulty) {
+                    default: return 6;
+
+                    case 3: return 7;
+                    case 4: return 8;
+                    case 5: return 9;
+                    case 6: return 10;
+                };
+            };
+
+            if (level->m_autoLevel) return -1;
+            return level->getAverageDifficulty();
+        };
     };
 };
 

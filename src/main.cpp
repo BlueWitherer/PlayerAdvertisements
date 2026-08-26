@@ -116,14 +116,23 @@ void AdsDirector::registerHooks(std::string id, std::vector<std::weak_ptr<Hook>>
     m_hooks[std::move(id)] = std::move(hooks);
 };
 
+void AdsDirector::addLevelToCache(GJGameLevel* level) {
+    m_seenLevels[level->m_levelID.value()] = AdLevelMetadata{level->m_levelName, level->m_levelID.value(), fetch::getDiffSpriteNum(level), fetch::getRating(level)};
+};
+
 void AdsDirector::addToViewed(Ad ad) {
-    if (m_seenAds.size() >= 20) m_seenAds.erase(m_seenAds.end());
+    if (m_seenAds.size() >= 30) m_seenAds.erase(m_seenAds.end());
     m_seenAds.push_back(std::move(ad));
 };
 
 std::span<const std::weak_ptr<Hook>> AdsDirector::getHooks(std::string_view id) const noexcept {
     if (auto it = m_hooks.find(id); it != m_hooks.end()) return it->second;
     return {};
+};
+
+Result<AdLevelMetadata> AdsDirector::getLevelMeta(int id) const {
+    if (auto it = m_seenLevels.find(id); it != m_seenLevels.end()) return Ok(it->second);
+    return Err("Level not in cache");
 };
 
 std::span<const Ad> AdsDirector::getViewedAds() const noexcept {
@@ -155,8 +164,15 @@ void hooks::toggleHooks(std::string_view id, bool on) {
 };
 
 void fetch::getLevel(int id, CopyableFunction<void(Result<GJGameLevel*>)>&& callback, bool download) {
+    auto reqForm = fmt::format("secret=Wmfd2893gb7&levelID={}", id);
+
+    if (argon::signedIn()) {
+        auto const auth = argon::getGameAccountData();
+        reqForm = fmt::format("{}&accountID={}&gjp2={}", reqForm, auth.accountId, auth.gjp2);
+    };
+
     auto req = web::WebRequest()
-                   .bodyString(fmt::format("secret=Wmfd2893gb7&levelID={}", id))
+                   .bodyString(reqForm)
                    .userAgent("");
 
     async::spawn(
@@ -172,11 +188,17 @@ void fetch::getLevel(int id, CopyableFunction<void(Result<GJGameLevel*>)>&& call
 
             auto const str = std::move(strRes).unwrap();
 
-            auto dict = CCDictionary::create();
-            auto const splits = asp::iter::split(str, ":")
-                                    .collect();
+            if (str == "-1") return cb(Err("Boomlings request returned an unknown error"));
 
-            for (size_t i = 0; i + 1 < splits.size(); i += 2) dict->setObject(CCString::create(std::string{splits[i + 1]}), std::string{splits[i]});
+            auto parts = asp::iter::split(str, "#").collect();
+            if (parts.size() < 3) return cb(Err("Malformed Boomlings response"));
+
+            auto const& levelStr = parts[0];
+            auto dict = CCDictionary::create();
+
+            auto kv = asp::iter::split(levelStr, ":").collect();
+            for (size_t i = 0; i + 1 < kv.size(); i += 2) dict->setObject(CCString::create(std::string{kv[i + 1]}), std::string{kv[i]});
+
             cb(Ok(GJGameLevel::create(dict, download)));
         });
 };
