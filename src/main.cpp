@@ -1,9 +1,14 @@
 #include <AdsUtils.h>
+
 #include <Advertisements.h>
+
+#include <ui/AdsViewer.hpp>
 
 #include <argon/argon.hpp>
 
 #include <Geode/Geode.hpp>
+
+#include <Geode/modify/MenuLayer.hpp>
 
 using namespace geode::prelude;
 using namespace cw::ads;
@@ -19,6 +24,30 @@ $on_mod(Loaded) {
                 log::warn("Auth failed: {}", std::move(res).unwrapErr());
             };
         });
+};
+
+class $modify(PAHookMenuLayer, MenuLayer) {
+    bool init() {
+        if (!MenuLayer::init()) return false;
+
+        if (auto menu = getChildByID("bottom-menu")) {
+            auto btn = CCMenuItemExt::createSpriteExtra(
+                CircleButtonSprite::createWithSpriteFrameName(
+                    "adIcon.png"_spr,
+                    0.875f,
+                    CircleBaseColor::Green,
+                    CircleBaseSize::MediumAlt),
+                [](auto) {
+                    pushSceneWithLayer(AdsViewer::create());
+                });
+            btn->setID("ads-viewer-btn"_spr);
+
+            menu->addChild(btn);
+            menu->updateLayout();
+        };
+
+        return true;
+    };
 };
 
 Result<Ad> matjson::Serialize<Ad>::fromJson(matjson::Value const& value) {
@@ -121,7 +150,7 @@ void AdsDirector::addLevelToCache(GJGameLevel* level) {
 };
 
 void AdsDirector::addToViewed(Ad ad) {
-    if (m_seenAds.size() >= 30) m_seenAds.erase(m_seenAds.end());
+    if (m_seenAds.size() >= 25) m_seenAds.erase(m_seenAds.begin());
     m_seenAds.push_back(std::move(ad));
 };
 

@@ -1,3 +1,5 @@
+# v1.4.0 
+
 # v1.3.2 
 - Fixed an issue where creator info didn't load properly on advertised levels
 - Fixed a crash
@@ -18,7 +20,7 @@
 - Bug fixes & optimizations
 
 # v1.2.3 
-- Supersede original [Player Advertisements](https://geode-sdk.org/mods/arcticwoof.player_advertisements) mod
+- Supersede original [Player Advertisements](https://geode-sdk.org/mods/arcticwoof.player_advertisements?version=1.2.2) mod
 - Huge internal refactor & optimizations
 - UI improvements
 

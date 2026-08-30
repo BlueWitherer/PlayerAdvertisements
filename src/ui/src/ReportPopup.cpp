@@ -4,11 +4,6 @@
 
 #include <Geode/Geode.hpp>
 
-#include <Geode/ui/GeodeUI.hpp>
-#include <Geode/ui/MDTextArea.hpp>
-
-#include <Geode/utils/async.hpp>
-
 using namespace geode::prelude;
 using namespace cw::ads;
 

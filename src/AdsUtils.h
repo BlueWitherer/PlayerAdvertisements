@@ -64,7 +64,7 @@ namespace cw::ads {
 
     class AdsDirector final {
     private:
-        asp::SmallVec<Ad, 30> m_seenAds;  // to be used in v1.4
+        asp::SmallVec<Ad, 25> m_seenAds;
         geode::utils::StringMap<std::vector<std::weak_ptr<geode::Hook>>> m_hooks;
 
         std::unordered_map<int, AdLevelMetadata> m_seenLevels;
