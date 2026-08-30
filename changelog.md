@@ -1,3 +1,7 @@
+# v1.3.2 
+- Fixed an issue where creator info didn't load properly on advertised levels
+- Fixed a crash
+
 # v1.3.1 
 - Added level thumbnail to ad preview pop-up
 - Fixed level length label in ad preview pop-up

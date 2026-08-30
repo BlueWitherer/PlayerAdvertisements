@@ -87,7 +87,7 @@ namespace cw::ads {
     };
 
     namespace fetch {
-        void getLevel(int id, geode::CopyableFunction<void(geode::Result<GJGameLevel*>)>&& callback, bool download = true);
+        void getLevel(int id, geode::CopyableFunction<void(geode::Result<GJGameLevel*>)>&& callback, bool download = false, GJGameLevel* data = nullptr);
 
         inline constexpr auto getRating(GJGameLevel* level) {
             switch (level->m_isEpic) {

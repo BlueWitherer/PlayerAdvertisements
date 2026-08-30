@@ -81,165 +81,161 @@ void Advertisement::reload() {
 
     log::trace("setting up callbacks");
 
-    m_impl->adSprite->setLoadCallback([self = WeakRef(this)](Result<> res) {
-        if (auto s = self.lock()) {
-            if (res.isOk()) {
-                log::info("Ad image loaded successfully");
+    m_impl->adSprite->setLoadCallback([this](Result<> res) {
+        if (res.isOk()) {
+            log::info("Ad image loaded successfully");
 
-                // add the adIcon at the bottom right of the ad button
-                s->m_impl->adIcon = CCSprite::createWithSpriteFrameName("adIcon.png"_spr);
-                s->m_impl->adIcon->setAnchorPoint({0.f, 0.f});
-                s->m_impl->adIcon->setPosition({3.f, 3.f});
-                s->m_impl->adIcon->setScale(0.25f);
-                s->m_impl->adIcon->setOpacity(125);
+            m_impl->adIcon = CCSprite::createWithSpriteFrameName("adIcon.png"_spr);
+            m_impl->adIcon->setAnchorPoint({0.f, 0.f});
+            m_impl->adIcon->setPosition({3.f, 3.f});
+            m_impl->adIcon->setScale(0.25f);
+            m_impl->adIcon->setOpacity(125);
 
-                if (s->m_impl->adButton) {
-                    s->m_impl->adButton->addChild(s->m_impl->adIcon, 9);
-                    s->m_impl->adButton->setScaleMultiplier(1.05f);
-                };
-
-                if (!s->m_impl->adSprite) {
-                    log::warn("Load callback: ad sprite is null");
-                    return;
-                };
-
-                s->m_impl->adSprite->setAnchorPoint({0.5, 0.5});
-
-                float posx = s->m_impl->adSprite->getScaledContentWidth() * s->m_impl->adSprite->getScale() / 2.f;
-                float posy = s->m_impl->adSprite->getScaledContentHeight() * s->m_impl->adSprite->getScale() / 2.f;
-
-                if (s->m_impl->adButton) {
-                    posx = s->m_impl->adButton->getScaledContentWidth() / 2.f;
-                    posy = s->m_impl->adButton->getScaledContentHeight() / 2.f;
-                };
-
-                s->m_impl->adSprite->setPosition({posx, posy});
-                s->m_impl->adSprite->setVisible(true);
-
-                auto const natural = s->m_impl->adSprite->getContentSize();
-                if (natural.width <= 0.f || natural.height <= 0.f) {
-                    log::warn("Ad sprite has invalid natural size ({}x{})", natural.width, natural.height);
-                } else {
-                    // try to determine target size from adButton if available, otherwise use sprite's container size
-                    auto target = s->m_impl->adSprite->getContentSize();
-                    if (s->m_impl->adButton) target = s->m_impl->adButton->getContentSize();
-
-                    float sx = target.width / natural.width;
-                    float sy = target.height / natural.height;
-
-                    float scale = std::min(sx, sy);
-
-                    s->m_impl->adSprite->setScale(scale);
-                    log::debug("Scaled ad sprite by {} to fit target {}x{} (natural {}x{})", scale, target.width, target.height, natural.width, natural.height);
-                };
-
-                if (s->m_impl->ad.getGlowLevel() > 0) {
-                    auto const size = s->m_impl->adSprite->getScaledContentSize();
-
-                    auto featuredStar = CCSprite::createWithSpriteFrameName("featuredIcon.png"_spr);
-                    featuredStar->setAnchorPoint({1.f, 0.f});
-                    featuredStar->setScale(0.35f);
-
-                    auto xpos = 3.f;
-                    if (s->m_impl->adButton) xpos = s->m_impl->adButton->getScaledContentWidth() - 3.f;
-
-                    featuredStar->setPosition({xpos, 4.25f});
-                    featuredStar->setOpacity(200);
-                    featuredStar->setColor({255, 255, 255});
-
-                    if (s->m_impl->adButton) s->m_impl->adButton->addChild(featuredStar, 9);
-
-                    auto glowNode = NineSlice::create("glow.png"_spr);
-                    glowNode->setContentSize(size);
-                    glowNode->setAnchorPoint({0.5, 0.5});
-
-                    if (s->m_impl->adButton) glowNode->setPosition(s->m_impl->adButton->getContentSize() / 2);
-
-                    auto particles = GameToolbox::particleFromString(s->m_impl->getParticlesForAdType(s->m_impl->ad.getType()), CCParticleSystemQuad::create(), false);
-                    particles->setScale(1.25f);
-                    particles->setAnchorPoint({0.5, 0.5});
-                    particles->setPosition(glowNode->getPosition());
-                    particles->resetSystem();
-                    particles->update(0.15f);
-
-                    auto tag = Label::create("Featured", "bigFont.fnt");
-                    tag->setScale(0.375f);
-                    tag->setAnchorPoint({1, 0});
-                    tag->setAlignment(Label::Alignment::Right);
-
-                    float tagx = 12.f;
-                    if (s->m_impl->adButton) tagx = s->m_impl->adButton->getScaledContentWidth() - 12.f;
-
-                    tag->setPosition({tagx, 3.f});
-                    tag->setOpacity(200);
-
-                    if (s->m_impl->ad.getType() == AdType::Skyscraper) tag->setVisible(false);
-
-                    switch (s->m_impl->ad.getGlowLevel()) {
-                        case 1: {
-                            glowNode->setOpacity(175);
-                            glowNode->setColor({250, 250, 75});
-                            glowNode->setContentSize({size.width + 6.25f, size.height + 6.25f});
-                            particles->setStartColorVar({250, 250, 75, 255});
-                            tag->setColor({250, 250, 75});
-
-                            if (featuredStar) featuredStar->setColor({250, 250, 75});
-                        } break;
-
-                        case 2: {
-                            glowNode->setOpacity(200);
-                            glowNode->setColor({50, 250, 250});
-                            glowNode->setContentSize({size.width + 7.5f, size.height + 7.5f});
-                            particles->setStartColorVar({50, 250, 250, 255});
-                            tag->setColor({50, 250, 250});
-
-                            if (featuredStar) featuredStar->setColor({50, 250, 250});
-                        } break;
-
-                        case 3: {
-                            glowNode->setOpacity(250);
-                            glowNode->setColor({255, 125, 175});
-                            glowNode->setContentSize({size.width + 8.75f, size.height + 8.75f});
-                            particles->setStartColorVar({255, 125, 175, 255});
-                            tag->setColor({255, 125, 175});
-
-                            if (featuredStar) featuredStar->setColor({255, 125, 175});
-                        } break;
-
-                        default: {
-                            cue::resetNode(glowNode);
-                            cue::resetNode(particles);
-                            cue::resetNode(tag);
-                        } break;
-                    };
-
-                    if (glowNode) {
-                        glowNode->setContentSize({glowNode->getScaledContentWidth() * 2.5f, glowNode->getScaledContentHeight() * 2.5f});
-                        glowNode->setScale(glowNode->getScale() / 2.5f);
-
-                        if (s->m_impl->adButton) s->m_impl->adButton->addChild(glowNode, -5);
-
-                        if (s->m_impl->ad.getType() != AdType::Skyscraper) {
-                            if (particles) {
-                                if (s->m_impl->adButton && s->m_impl->adButton->getParent()) s->m_impl->adButton->getParent()->addChild(particles, 2);
-                            };
-                        };
-
-                        if (tag && s->m_impl->adButton) s->m_impl->adButton->addChild(tag, 9);
-                    };
-                };
-            } else if (res.isErr()) {
-                log::error("Failed to load ad image: {}", res.unwrapErr());
-
-                if (s->m_impl->adSprite) {
-                    s->m_impl->adSprite->setVisible(false);
-                    s->m_impl->adSprite->cancelLoad();
-                };
-
-                if (s->m_impl->adButton) s->m_impl->adButton->setEnabled(false);
-            } else {
-                log::error("Unknown error loading ad image");
+            if (m_impl->adButton) {
+                m_impl->adButton->addChild(m_impl->adIcon, 9);
+                m_impl->adButton->setScaleMultiplier(1.025f);
             };
+
+            if (!m_impl->adSprite) {
+                log::warn("Load callback: ad sprite is null");
+                return;
+            };
+
+            m_impl->adSprite->setAnchorPoint({0.5, 0.5});
+
+            float posx = m_impl->adSprite->getScaledContentWidth() * m_impl->adSprite->getScale() / 2.f;
+            float posy = m_impl->adSprite->getScaledContentHeight() * m_impl->adSprite->getScale() / 2.f;
+
+            if (m_impl->adButton) {
+                posx = m_impl->adButton->getScaledContentWidth() / 2.f;
+                posy = m_impl->adButton->getScaledContentHeight() / 2.f;
+            };
+
+            m_impl->adSprite->setPosition({posx, posy});
+            m_impl->adSprite->setVisible(true);
+
+            auto const natural = m_impl->adSprite->getContentSize();
+            if (natural.width <= 0.f || natural.height <= 0.f) {
+                log::warn("Ad sprite has invalid natural size ({}x{})", natural.width, natural.height);
+            } else {
+                auto target = m_impl->adSprite->getContentSize();
+                if (m_impl->adButton) target = m_impl->adButton->getContentSize();
+
+                float sx = target.width / natural.width;
+                float sy = target.height / natural.height;
+
+                float scale = std::min(sx, sy);
+
+                m_impl->adSprite->setScale(scale);
+                log::debug("Scaled ad sprite by {} to fit target {}x{} (natural {}x{})", scale, target.width, target.height, natural.width, natural.height);
+            };
+
+            if (m_impl->ad.getGlowLevel() > 0) {
+                auto const size = m_impl->adSprite->getScaledContentSize();
+
+                auto featuredStar = CCSprite::createWithSpriteFrameName("featuredIcon.png"_spr);
+                featuredStar->setAnchorPoint({1.f, 0.f});
+                featuredStar->setScale(0.35f);
+
+                auto xpos = 3.f;
+                if (m_impl->adButton) xpos = m_impl->adButton->getScaledContentWidth() - 3.f;
+
+                featuredStar->setPosition({xpos, 4.25f});
+                featuredStar->setOpacity(200);
+                featuredStar->setColor({255, 255, 255});
+
+                if (m_impl->adButton) m_impl->adButton->addChild(featuredStar, 9);
+
+                auto glowNode = NineSlice::create("glow.png"_spr);
+                glowNode->setContentSize(size);
+                glowNode->setAnchorPoint({0.5, 0.5});
+
+                if (m_impl->adButton) glowNode->setPosition(m_impl->adButton->getContentSize() / 2);
+
+                auto particles = GameToolbox::particleFromString(m_impl->getParticlesForAdType(m_impl->ad.getType()), CCParticleSystemQuad::create(), false);
+                particles->setScale(1.25f);
+                particles->setAnchorPoint({0.5, 0.5});
+                particles->setPosition(glowNode->getPosition());
+                particles->resetSystem();
+                particles->update(0.15f);
+
+                auto tag = Label::create("Featured", "bigFont.fnt");
+                tag->setScale(0.375f);
+                tag->setAnchorPoint({1, 0});
+                tag->setAlignment(Label::Alignment::Right);
+
+                float tagx = 12.f;
+                if (m_impl->adButton) tagx = m_impl->adButton->getScaledContentWidth() - 12.f;
+
+                tag->setPosition({tagx, 3.f});
+                tag->setOpacity(200);
+
+                if (m_impl->ad.getType() == AdType::Skyscraper) tag->setVisible(false);
+
+                switch (m_impl->ad.getGlowLevel()) {
+                    case 1: {
+                        glowNode->setOpacity(175);
+                        glowNode->setColor({250, 250, 75});
+                        glowNode->setContentSize({size.width + 6.25f, size.height + 6.25f});
+                        particles->setStartColorVar({250, 250, 75, 255});
+                        tag->setColor({250, 250, 75});
+
+                        if (featuredStar) featuredStar->setColor({250, 250, 75});
+                    } break;
+
+                    case 2: {
+                        glowNode->setOpacity(200);
+                        glowNode->setColor({50, 250, 250});
+                        glowNode->setContentSize({size.width + 7.5f, size.height + 7.5f});
+                        particles->setStartColorVar({50, 250, 250, 255});
+                        tag->setColor({50, 250, 250});
+
+                        if (featuredStar) featuredStar->setColor({50, 250, 250});
+                    } break;
+
+                    case 3: {
+                        glowNode->setOpacity(250);
+                        glowNode->setColor({255, 125, 175});
+                        glowNode->setContentSize({size.width + 8.75f, size.height + 8.75f});
+                        particles->setStartColorVar({255, 125, 175, 255});
+                        tag->setColor({255, 125, 175});
+
+                        if (featuredStar) featuredStar->setColor({255, 125, 175});
+                    } break;
+
+                    default: {
+                        cue::resetNode(glowNode);
+                        cue::resetNode(particles);
+                        cue::resetNode(tag);
+                    } break;
+                };
+
+                if (glowNode) {
+                    glowNode->setContentSize({glowNode->getScaledContentWidth() * 2.5f, glowNode->getScaledContentHeight() * 2.5f});
+                    glowNode->setScale(glowNode->getScale() / 2.5f);
+
+                    if (m_impl->adButton) m_impl->adButton->addChild(glowNode, -5);
+
+                    if (m_impl->ad.getType() != AdType::Skyscraper) {
+                        if (particles) {
+                            if (m_impl->adButton && m_impl->adButton->getParent()) m_impl->adButton->getParent()->addChild(particles, 2);
+                        };
+                    };
+
+                    if (tag && m_impl->adButton) m_impl->adButton->addChild(tag, 9);
+                };
+            };
+        } else if (res.isErr()) {
+            log::error("Failed to load ad image: {}", res.unwrapErr());
+
+            if (m_impl->adSprite) {
+                m_impl->adSprite->setVisible(false);
+                m_impl->adSprite->cancelLoad();
+            };
+
+            if (m_impl->adButton) m_impl->adButton->setEnabled(false);
+        } else {
+            log::error("Unknown error loading ad image");
         };
     });
 

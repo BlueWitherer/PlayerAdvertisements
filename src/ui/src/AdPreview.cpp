@@ -233,18 +233,16 @@ bool AdPreview::init(Ad ad) {
     auto thumbnail = LazySprite::create(thumbnailContainer->getScaledContentSize(), false);
     thumbnail->setAutoResize(true);
 
-    thumbnail->setLoadCallback([thumb = WeakRef(thumbnail), container = WeakRef(thumbnailContainer)](Result<> res) {
-        if (auto t = thumb.lock()) {
-            if (res.isOk()) {
-                if (auto c = container.lock()) cue::rescaleToMatch(t, c->getScaledContentWidth() * 1.5f);
-                t->setOpacity(50);
+    thumbnail->setLoadCallback([container = WeakRef(thumbnailContainer), t = thumbnail](Result<> res) {
+        if (res.isOk()) {
+            if (auto c = container.lock()) cue::rescaleToMatch(t, c->getScaledContentWidth() * 1.5f);
+            t->setOpacity(50);
 
-                log::debug("Successfully loaded theme background");
-            } else if (res.isErr()) {
-                log::error("Failed to load theme background: {}", res.unwrapErr());
-            } else {
-                log::error("Failed to load theme background for an unknown reason");
-            };
+            log::debug("Successfully loaded theme background");
+        } else if (res.isErr()) {
+            log::error("Failed to load theme background: {}", res.unwrapErr());
+        } else {
+            log::error("Failed to load theme background for an unknown reason");
         };
     });
 
@@ -523,10 +521,7 @@ void AdPreview::switchToLevel() {
     m_impl->playBtn->setVisible(true);
     m_impl->playBtnLoading->setVisible(false);
 
-    layer->downloadLevel();  // idk rlly :p
-    layer->onUpdate(layer->querySelector("right-side-menu > refresh-button"));
-
-    if (auto gm = GameLevelManager::get()) gm->saveLevel(m_impl->level);
+    layer->downloadLevel();  // ugh
 };
 
 AdPreview* AdPreview::create(Ad ad) {

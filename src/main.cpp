@@ -163,8 +163,12 @@ void hooks::toggleHooks(std::string_view id, bool on) {
     };
 };
 
-void fetch::getLevel(int id, CopyableFunction<void(Result<GJGameLevel*>)>&& callback, bool download) {
-    auto reqForm = fmt::format("secret=Wmfd2893gb7&levelID={}", id);
+void fetch::getLevel(int id, CopyableFunction<void(Result<GJGameLevel*>)>&& callback, bool download, GJGameLevel* data) {
+    if (auto glm = GameLevelManager::sharedState()) {
+        if (auto level = glm->getSavedLevel(id)) return callback(Ok(level));
+    };
+
+    auto reqForm = fmt::format("secret=Wmfd2893gb7&{}={}", download ? "levelID" : "type=0&str", id);
 
     if (argon::signedIn()) {
         auto const auth = argon::getGameAccountData();
@@ -175,9 +179,10 @@ void fetch::getLevel(int id, CopyableFunction<void(Result<GJGameLevel*>)>&& call
                    .bodyString(reqForm)
                    .userAgent("");
 
+    // this might be a little bit cursed owo
     async::spawn(
-        req.post("https://www.boomlings.com/database/downloadGJLevel22.php"),
-        [cb = std::move(callback), download](web::WebResponse res) {
+        req.post(fmt::format("https://www.boomlings.com/database/{}.php", download ? "downloadGJLevel22" : "getGJLevels21")),
+        [cb = std::move(callback), id, download, data](web::WebResponse res) {
             if (res.error()) {
                 log::error("Error getting user information: {}", res.errorMessage());
                 return cb(Err("An error occurred while fetching user information"));
@@ -187,18 +192,45 @@ void fetch::getLevel(int id, CopyableFunction<void(Result<GJGameLevel*>)>&& call
             if (strRes.isErr()) return cb(Err(fmt::format("An error occurred while processing user information: {}", std::move(strRes).unwrapErr())));
 
             auto const str = std::move(strRes).unwrap();
-
             if (str == "-1") return cb(Err("Boomlings request returned an unknown error"));
 
-            auto parts = asp::iter::split(str, "#").collect();
-            if (parts.size() < 3) return cb(Err("Malformed Boomlings response"));
+            auto const parts = asp::iter::split(str, "#").collect();
+            if (parts.empty()) return cb(Err("Malformed Boomlings response"));
 
-            auto const& levelStr = parts[0];
-            auto dict = CCDictionary::create();
+            if (download) {
+                if (!data) return cb(Err("Missing level data"));
+                if (data->m_levelID != id) return cb(Err("Requested ID and level ID do not match"));
 
-            auto kv = asp::iter::split(levelStr, ":").collect();
-            for (size_t i = 0; i + 1 < kv.size(); i += 2) dict->setObject(CCString::create(std::string{kv[i + 1]}), std::string{kv[i]});
+                auto const& levelStr = parts[0];
+                auto dict = Ref(CCDictionary::create());
 
-            cb(Ok(GJGameLevel::create(dict, download)));
+                auto const kv = asp::iter::split(levelStr, ":").collect();
+                for (size_t i = 0; i + 1 < kv.size(); i += 2) dict->setObject(CCString::create(std::string{kv[i + 1]}), std::string{kv[i]});
+
+                data->m_levelString = dict->charForKey(numToString(4));
+
+                cb(Ok(data));
+            } else {
+                auto levelsRaw = asp::iter::split(parts[0], "|").collect();
+                if (levelsRaw.empty()) return cb(Err("No levels returned"));
+
+                auto creatorsRaw = asp::iter::split(parts[1], "|").collect();
+                if (creatorsRaw.empty()) return cb(Err("No creators returned"));
+
+                auto const& levelStr = levelsRaw[0];
+                auto const kvLvl = asp::iter::split(levelStr, ":").collect();
+
+                auto const& creatorStr = creatorsRaw[0];
+                auto const creatorData = asp::iter::split(creatorStr, ":").collect();
+
+                auto dict = CCDictionary::create();
+                for (size_t i = 0; i + 1 < kvLvl.size(); i += 2) dict->setObject(CCString::create(std::string{kvLvl[i + 1]}), std::string{kvLvl[i]});
+
+                auto lvl = GJGameLevel::create(dict, download);  // siiiiigh
+                lvl->m_creatorName = creatorData[1];
+                lvl->setAccountID(numFromString<int>(creatorData[2]).unwrapOrDefault());
+
+                cb(Ok(lvl));
+            };
         });
 };
