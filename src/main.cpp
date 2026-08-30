@@ -227,7 +227,7 @@ void fetch::getLevel(int id, CopyableFunction<void(Result<GJGameLevel*>)>&& call
                 for (size_t i = 0; i + 1 < kvLvl.size(); i += 2) dict->setObject(CCString::create(std::string{kvLvl[i + 1]}), std::string{kvLvl[i]});
 
                 auto lvl = GJGameLevel::create(dict, download);  // siiiiigh
-                lvl->m_creatorName = creatorData[1];
+                lvl->m_creatorName = std::string{creatorData[1]};
                 lvl->setAccountID(numFromString<int>(creatorData[2]).unwrapOrDefault());
 
                 cb(Ok(lvl));
