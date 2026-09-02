@@ -113,6 +113,7 @@ bool AdPreview::init(Ad ad) {
 
     m_title->setScale(m_title->getScale() * 0.75f);
     m_title->setPositionY(m_title->getPositionY() + 2.5f);
+
     m_bgSprite->setZOrder(-9);
 
     auto thumbnailContainer = CCClippingNode::create(m_bgSprite);
@@ -345,8 +346,9 @@ bool AdPreview::init(Ad ad) {
                 "gj_discordIcon_001.png",
                 [](auto) {
                     createQuickPopup(
-                        "Support Discord",
-                        "Join the <cb>support Discord server</c> for help with using this mod?",
+                        "Community Discord",
+                        "Join the <cd>Cheeseworks</c> <cb>community Discord server</c>?\n"
+                        "<cs>Get help, report bugs, and chat with other players!</c>",
                         "Cancel",
                         "OK",
                         [](auto, bool ok) {
@@ -360,7 +362,8 @@ bool AdPreview::init(Ad ad) {
                 [](auto) {
                     createQuickPopup(
                         "Ads Manager",
-                        "Go to the <co>Player Ads Manager</c> dashboard?\n<cc>Upload ads for your levels here!</c>",
+                        "Go to the <co>Player Ads Manager</c> dashboard?\n"
+                        "<cc>Upload ads for your levels here!</c>",
                         "Cancel",
                         "OK",
                         [](auto, bool ok) {
@@ -374,7 +377,8 @@ bool AdPreview::init(Ad ad) {
                 [](auto) {
                     createQuickPopup(
                         "Ko-fi",
-                        "Would you like to <cd>support the mod through Ko-fi</c>?\n<cy>Earn cool perks like more views on your ads!</c>",
+                        "Would you like to <cd>support the mod through Ko-fi</c>?\n"
+                        "<cy>Earn cool perks like more views on your ads!</c>",
                         "Cancel",
                         "OK",
                         [](auto, bool ok) {

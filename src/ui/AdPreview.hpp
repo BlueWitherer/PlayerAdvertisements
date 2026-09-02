@@ -14,12 +14,6 @@ namespace cw::ads {
     };
 
     class AdPreview final : public geode::Popup {
-        struct LinkButton final {
-            std::string id;
-            std::string sprite;
-            geode::Button::ButtonCallback callback = nullptr;
-        };
-
     private:
         struct Impl;
         std::unique_ptr<Impl> m_impl;

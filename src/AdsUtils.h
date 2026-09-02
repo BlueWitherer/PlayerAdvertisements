@@ -4,6 +4,8 @@
 
 #include <Geode/Geode.hpp>
 
+#include <Geode/ui/GeodeUI.hpp>
+
 #define HIGHEST_Z cocos2d::CCScene::get()->getHighestChildZ() + 1
 namespace cw::ads {
     enum class AdType : uint8_t {
@@ -79,6 +81,12 @@ namespace cw::ads {
         std::span<const std::weak_ptr<geode::Hook>> getHooks(std::string_view id) const noexcept;
         geode::Result<AdLevelMetadata> getLevelMeta(int id) const;
         std::span<const Ad> getViewedAds() const noexcept;
+    };
+
+    struct LinkButton final {
+        std::string id;
+        std::string sprite;
+        geode::Button::ButtonCallback callback = nullptr;
     };
 
     namespace hooks {
