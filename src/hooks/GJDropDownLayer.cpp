@@ -18,29 +18,11 @@ class $modify(AdsGJDropDownLayer, GJDropDownLayer) {
     bool init(const char* p0, float p1, bool p2) {
         if (!GJDropDownLayer::init(p0, p1, p2)) return false;
 
-        auto const winSize = CCDirector::sharedDirector()->getWinSize();
-
-        if (auto adBanner = Advertisement::create(AdType::Banner)) {
-            adBanner->setID("banner"_spr);
-            adBanner->setPosition({winSize.width / 2.f, winSize.height - 30.f});
-
-            m_mainLayer->addChild(adBanner, HIGHEST_Z);
-        };
+        nodes::placeAd(m_mainLayer, AdType::Banner, Anchor::Top, {0.f, -30.f});
 
         if (!m_mainLayer->getChildByID("hide-dropdown-menu")) {
-            if (auto adSkyscraperLeft = Advertisement::create(AdType::Skyscraper)) {
-                adSkyscraperLeft->setID("skyscraper-left"_spr);
-                adSkyscraperLeft->setPosition({30.f, winSize.height / 2.f});
-
-                m_mainLayer->addChild(adSkyscraperLeft, HIGHEST_Z);
-            };
-
-            if (auto adSkyscraperRight = Advertisement::create(AdType::Skyscraper)) {
-                adSkyscraperRight->setID("skyscraper-right"_spr);
-                adSkyscraperRight->setPosition({winSize.width - 30.f, winSize.height / 2.f});
-
-                m_mainLayer->addChild(adSkyscraperRight, HIGHEST_Z);
-            };
+            nodes::placeAd(m_mainLayer, AdType::Skyscraper, Anchor::Left, {30.f, 0.f});
+            nodes::placeAd(m_mainLayer, AdType::Skyscraper, Anchor::Right, {-30.f, 0.f});
         };
 
         return true;

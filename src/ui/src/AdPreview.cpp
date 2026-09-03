@@ -479,7 +479,6 @@ void AdPreview::registerClick() {
                 };
 
                 auto token = std::move(res).unwrapOrDefault();
-                Mod::get()->setSavedValue<std::string>("authtoken", token);
                 log::debug("Token: {}", token);
 
                 log::debug("Sending click tracking request for ad_id={}, user_id={}", s->m_impl->ad.getID(), s->m_impl->ad.getUser());

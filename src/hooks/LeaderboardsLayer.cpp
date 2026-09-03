@@ -18,14 +18,7 @@ class $modify(AdsLeaderboardsLayer, LeaderboardsLayer) {
     bool init(LeaderboardType type, LeaderboardStat stat) {
         if (!LeaderboardsLayer::init(type, stat)) return false;
 
-        auto const winSize = CCDirector::sharedDirector()->getWinSize();
-
-        if (auto adBanner = Advertisement::create(AdType::Banner)) {
-            adBanner->setID("banner"_spr);
-            adBanner->setPosition({winSize.width / 2.f, 30.f});
-
-            addChild(adBanner, HIGHEST_Z);
-        };
+        nodes::placeAd(this, AdType::Banner, Anchor::Bottom, {0.f, 30.f});
 
         return true;
     };

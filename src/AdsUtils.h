@@ -7,6 +7,7 @@
 #include <Geode/ui/GeodeUI.hpp>
 
 #define HIGHEST_Z cocos2d::CCScene::get()->getHighestChildZ() + 1
+
 namespace cw::ads {
     namespace rng = geode::utils::random;
 

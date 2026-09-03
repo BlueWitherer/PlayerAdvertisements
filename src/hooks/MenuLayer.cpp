@@ -20,25 +20,7 @@ class $modify(AdsMenuLayer, MenuLayer) {
     bool init() {
         if (!MenuLayer::init()) return false;
 
-        async::spawn(
-            argon::startAuth(),
-            [this](Result<std::string> res) {
-                if (res.isOk()) {
-                    auto token = std::move(res).unwrap();
-                    Mod::get()->setSavedValue<std::string>("authtoken", token);
-                } else {
-                    log::warn("Auth failed: {}", res.unwrapErr());
-                };
-            });
-
-        auto const winSize = CCDirector::sharedDirector()->getWinSize();
-
-        if (auto adBanner = Advertisement::create()) {
-            adBanner->setID("banner"_spr);
-            adBanner->setZOrder(HIGHEST_Z);
-
-            addChildAtPosition(adBanner, Anchor::Center, {0.f, -70.f}, false);
-        };
+        nodes::placeAd(this, AdType::Banner, Anchor::Bottom, {0.f, 92.5f});
 
         return true;
     };

@@ -44,4 +44,41 @@ namespace cw::ads {
          */
         void handleAdResponse(geode::utils::web::WebResponse const& res);
     };
+
+    namespace nodes {
+        inline constexpr auto getIDForType(AdType type) noexcept {
+            switch (type) {
+                default: [[fallthrough]];
+
+                case AdType::Banner: return "banner";
+                case AdType::Square: return "square";
+                case AdType::Skyscraper: return "skyscraper";
+            };
+        };
+
+        inline constexpr auto getIDForAnchor(geode::Anchor anchor) noexcept {
+            using namespace geode;
+
+            switch (anchor) {
+                default: [[fallthrough]];
+
+                case Anchor::TopLeft: return "top-left";
+                case Anchor::Top: return "top";
+                case Anchor::TopRight: return "top-right";
+                case Anchor::Left: return "left";
+                case Anchor::Center: return "center";
+                case Anchor::Right: return "right";
+                case Anchor::BottomLeft: return "bottom-left";
+                case Anchor::Bottom: return "bottom";
+                case Anchor::BottomRight: return "bottom-right";
+            };
+        };
+
+        inline auto formatIDForAd(AdType type, geode::Anchor anchor) {
+            return fmt::format("{}-{}"_spr, getIDForType(type), getIDForAnchor(anchor));
+        };
+
+        Advertisement* placeAd(cocos2d::CCNode* to, std::optional<std::string> id = std::nullopt, AdType type = AdType::Banner, geode::Anchor anchor = geode::Anchor::Center, cocos2d::CCPoint const& offset = {});
+        Advertisement* placeAd(cocos2d::CCNode* to, AdType type = AdType::Banner, geode::Anchor anchor = geode::Anchor::Center, cocos2d::CCPoint const& offset = {});
+    };
 };

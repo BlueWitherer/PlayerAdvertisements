@@ -18,14 +18,7 @@ class $modify(AdsCreatorLayer, CreatorLayer) {
     bool init() {
         if (!CreatorLayer::init()) return false;
 
-        auto const winSize = CCDirector::sharedDirector()->getWinSize();
-
-        if (auto adBanner = Advertisement::create(AdType::Banner)) {
-            adBanner->setID("banner"_spr);
-            adBanner->setPosition({winSize.width / 2.f, winSize.height - 30.f});
-
-            addChild(adBanner);
-        };
+        nodes::placeAd(this, AdType::Banner, Anchor::Top, {0.f, -30.f});
 
         return true;
     };

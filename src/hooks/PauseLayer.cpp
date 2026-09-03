@@ -18,49 +18,38 @@ class $modify(AdsPauseLayer, PauseLayer) {
     void customSetup() {
         PauseLayer::customSetup();
 
-        auto levelName = typeinfo_cast<CCLabelBMFont*>(getChildByID("level-name"));
+        auto levelName = static_cast<CCLabelBMFont*>(getChildByID("level-name"));
         levelName->setVisible(false);
 
-        auto practiceTitle = typeinfo_cast<CCLabelBMFont*>(getChildByID("practice-mode-label"));
-        auto practiceProgress = typeinfo_cast<CCLabelBMFont*>(getChildByID("practice-progress-label"));
-        auto practiceBar = typeinfo_cast<CCSprite*>(getChildByID("practice-progress-bar"));
+        auto normalTitle = static_cast<CCLabelBMFont*>(getChildByID("normal-mode-label"));
+        auto normalProgress = static_cast<CCLabelBMFont*>(getChildByID("normal-progress-label"));
+        auto normalBar = static_cast<CCSprite*>(getChildByID("normal-progress-bar"));
 
-        auto normalTitle = typeinfo_cast<CCLabelBMFont*>(getChildByID("normal-mode-label"));
-        auto normalProgress = typeinfo_cast<CCLabelBMFont*>(getChildByID("normal-progress-label"));
-        auto normalBar = typeinfo_cast<CCSprite*>(getChildByID("normal-progress-bar"));
+        auto practiceTitle = static_cast<CCLabelBMFont*>(getChildByID("practice-mode-label"));
+        auto practiceProgress = static_cast<CCLabelBMFont*>(getChildByID("practice-progress-label"));
+        auto practiceBar = static_cast<CCSprite*>(getChildByID("practice-progress-bar"));
 
-        auto playTime = typeinfo_cast<CCLabelBMFont*>(getChildByID("play-time"));
-        auto pointslabel = typeinfo_cast<CCLabelBMFont*>(getChildByID("points-label"));
+        auto playTime = static_cast<CCLabelBMFont*>(getChildByID("play-time"));
+        auto pointslabel = static_cast<CCLabelBMFont*>(getChildByID("points-label"));
+
+        auto isPractice = PlayLayer::get()->m_isPracticeMode;
 
         if (practiceTitle && normalTitle) normalTitle->setPositionY(practiceTitle->getPositionY());
         if (practiceProgress && normalProgress) normalProgress->setPositionY(practiceProgress->getPositionY());
         if (practiceBar && normalBar) normalBar->setPositionY(practiceBar->getPositionY());
 
-        if (practiceTitle) practiceTitle->setVisible(false);
-        if (practiceProgress) practiceProgress->setVisible(false);
-        if (practiceBar) practiceBar->setVisible(false);
+        if (normalTitle) normalTitle->setVisible(!isPractice);
+        if (normalProgress) normalProgress->setVisible(!isPractice);
+        if (normalBar) normalBar->setVisible(!isPractice);
+
+        if (practiceTitle) practiceTitle->setVisible(isPractice);
+        if (practiceProgress) practiceProgress->setVisible(isPractice);
+        if (practiceBar) practiceBar->setVisible(isPractice);
 
         if (playTime) playTime->setPositionY(playTime->getPositionY() - 30.f);
         if (pointslabel) pointslabel->setPositionY(pointslabel->getPositionY() - 30.f);
 
-        if (GJBaseGameLayer::get()->m_isPracticeMode) {
-            if (practiceTitle) practiceTitle->setVisible(true);
-            if (practiceProgress) practiceProgress->setVisible(true);
-            if (practiceBar) practiceBar->setVisible(true);
-
-            if (normalTitle) normalTitle->setVisible(false);
-            if (normalProgress) normalProgress->setVisible(false);
-            if (normalBar) normalBar->setVisible(false);
-        };
-
-        auto const winSize = CCDirector::get()->getWinSize();
-
-        if (auto adBanner = Advertisement::create(AdType::Banner)) {
-            adBanner->setID("banner"_spr);
-            adBanner->setPosition({winSize.width / 2.f, winSize.height - 50.f});
-
-            addChild(adBanner, HIGHEST_Z);
-        };
+        nodes::placeAd(this, AdType::Banner, Anchor::Top, {0.f, -65.f});
     };
 };
 

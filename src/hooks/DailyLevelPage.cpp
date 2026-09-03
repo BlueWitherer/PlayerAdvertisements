@@ -18,14 +18,10 @@ class $modify(AdsDailyLevelPage, DailyLevelPage) {
     bool init(GJTimedLevelType levelType) {
         if (!DailyLevelPage::init(levelType)) return false;
 
-        auto const winSize = CCDirector::sharedDirector()->getWinSize();
+        nodes::placeAd(m_mainLayer, AdType::Banner, Anchor::Bottom, {0.f, 65.f});
 
-        if (auto adBanner = Advertisement::create(AdType::Banner)) {
-            adBanner->setID("banner"_spr);
-            adBanner->setPosition({winSize.width / 2.f, 70.f});
-
-            m_mainLayer->addChild(adBanner);
-        };
+        nodes::placeAd(m_mainLayer, AdType::Skyscraper, Anchor::Left, {30.f, 0.f});
+        nodes::placeAd(m_mainLayer, AdType::Skyscraper, Anchor::Right, {-30.f, 0.f});
 
         return true;
     };

@@ -18,21 +18,8 @@ class $modify(AdsProfilePage, ProfilePage) {
     bool init(int p0, bool p1) {
         if (!ProfilePage::init(p0, p1)) return false;
 
-        auto const winSize = CCDirector::sharedDirector()->getWinSize();
-
-        if (auto adSkyscraperRight = Advertisement::create(AdType::Skyscraper)) {
-            adSkyscraperRight->setID("skyscraper-right"_spr);
-            adSkyscraperRight->setPosition({winSize.width - 30.f, winSize.height / 2.f});
-
-            m_mainLayer->addChild(adSkyscraperRight, HIGHEST_Z);
-        };
-
-        if (auto adSkyscraperLeft = Advertisement::create(AdType::Skyscraper)) {
-            adSkyscraperLeft->setID("skyscraper-left"_spr);
-            adSkyscraperLeft->setPosition({30.f, winSize.height / 2.f});
-
-            m_mainLayer->addChild(adSkyscraperLeft, HIGHEST_Z);
-        };
+        nodes::placeAd(m_mainLayer, AdType::Skyscraper, Anchor::Left, {30.f, 0.f});
+        nodes::placeAd(m_mainLayer, AdType::Skyscraper, Anchor::Right, {-30.f, 0.f});
 
         return true;
     };

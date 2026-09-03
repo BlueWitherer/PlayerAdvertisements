@@ -13,22 +13,11 @@
 using namespace geode::prelude;
 using namespace cw::ads;
 
-$on_mod(Loaded) {
-    async::spawn(
-        argon::startAuth(),
-        [](Result<std::string> res) {
-            if (res.isOk()) {
-                auto token = std::move(res).unwrap();
-                Mod::get()->setSavedValue<std::string>("authtoken", token);
-            } else {
-                log::warn("Auth failed: {}", std::move(res).unwrapErr());
-            };
-        });
-};
-
 class $modify(PAHookMenuLayer, MenuLayer) {
     bool init() {
         if (!MenuLayer::init()) return false;
+
+        if (Mod::get()->hasSavedValue("authtoken")) Mod::get()->getSaveContainer().erase("authtoken");  // this was never used lol
 
         if (auto menu = getChildByID("bottom-menu")) {
             auto btn = CCMenuItemExt::createSpriteExtra(

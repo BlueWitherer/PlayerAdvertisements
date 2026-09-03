@@ -25,41 +25,12 @@ class $modify(AdsPlayLayer, PlayLayer) {
     };
 
     void setupHasCompleted() {
-        auto const winSize = CCDirector::sharedDirector()->getWinSize();
-
         auto f = m_fields.self();
 
-        if (!f->bannerTop) {
-            f->bannerTop = Advertisement::create(AdType::Banner);
-            f->bannerTop->setID("banner-top"_spr);
-            f->bannerTop->setPosition({winSize.width / 2.f, winSize.height - 30.f});
-
-            m_uiLayer->addChild(f->bannerTop, HIGHEST_Z);
-        };
-
-        if (!f->bannerBottom) {
-            f->bannerBottom = Advertisement::create(AdType::Banner);
-            f->bannerBottom->setID("banner-bottom"_spr);
-            f->bannerBottom->setPosition({winSize.width / 2.f, 30.f});
-
-            m_uiLayer->addChild(f->bannerBottom, HIGHEST_Z);
-        };
-
-        if (!f->skyscraperRight) {
-            f->skyscraperRight = Advertisement::create(AdType::Skyscraper);
-            f->skyscraperRight->setID("skyscraper-right"_spr);
-            f->skyscraperRight->setPosition({winSize.width - 30.f, winSize.height / 2.f});
-
-            m_uiLayer->addChild(f->skyscraperRight, HIGHEST_Z);
-        };
-
-        if (!f->skyscraperLeft) {
-            f->skyscraperLeft = Advertisement::create(AdType::Skyscraper);
-            f->skyscraperLeft->setID("skyscraper-left"_spr);
-            f->skyscraperLeft->setPosition({30.f, winSize.height / 2.f});
-
-            m_uiLayer->addChild(f->skyscraperLeft, HIGHEST_Z);
-        };
+        f->bannerBottom = nodes::placeAd(m_uiLayer, AdType::Banner, Anchor::Bottom, {0.f, 30.f});
+        f->bannerBottom = nodes::placeAd(m_uiLayer, AdType::Banner, Anchor::Bottom, {0.f, 30.f});
+        f->skyscraperLeft = nodes::placeAd(m_uiLayer, AdType::Skyscraper, Anchor::Left, {30.f, 0.f});
+        f->skyscraperRight = nodes::placeAd(m_uiLayer, AdType::Skyscraper, Anchor::Right, {-30.f, 0.f});
 
         log::trace("setting up scheduler for auto ad refresh");
         scheduleOnce(schedule_selector(AdsPlayLayer::schedReload), rng::generate(2.5f, 12.5f));

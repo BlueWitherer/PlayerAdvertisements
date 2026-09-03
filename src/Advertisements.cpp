@@ -376,3 +376,22 @@ Advertisement* Advertisement::create(AdType type) {
     delete ret;
     return nullptr;
 };
+
+Advertisement* nodes::placeAd(CCNode* to, std::optional<std::string> id, AdType type, Anchor anchor, CCPoint const& offset) {
+    if (!to) return nullptr;
+
+    if (auto ad = Advertisement::create(type)) {
+        ad->setID(id.has_value() ? std::move(id).value() : formatIDForAd(type, anchor));
+        ad->setZOrder(HIGHEST_Z);
+
+        to->addChildAtPosition(ad, anchor, offset, false);
+
+        return ad;
+    };
+
+    return nullptr;
+};
+
+Advertisement* nodes::placeAd(cocos2d::CCNode* to, AdType type, geode::Anchor anchor, cocos2d::CCPoint const& offset) {
+    return placeAd(to, std::nullopt, type, anchor, offset);
+};

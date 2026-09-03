@@ -18,21 +18,8 @@ class $modify(AdsGJPathsLayer, GJPathsLayer) {
     bool init() {
         if (!GJPathsLayer::init()) return false;
 
-        auto const winSize = CCDirector::sharedDirector()->getWinSize();
-
-        if (auto adBannerLeft = Advertisement::create(AdType::Skyscraper)) {
-            adBannerLeft->setID("banner-left"_spr);
-            adBannerLeft->setPosition({30.f, winSize.height / 2.f});
-
-            addChild(adBannerLeft, HIGHEST_Z);
-        };
-
-        if (auto adBannerRight = Advertisement::create(AdType::Skyscraper)) {
-            adBannerRight->setID("banner-right"_spr);
-            adBannerRight->setPosition({winSize.width - 30.f, winSize.height / 2.f});
-
-            addChild(adBannerRight, HIGHEST_Z);
-        };
+        nodes::placeAd(m_mainLayer, AdType::Skyscraper, Anchor::Left, {30.f, 0.f});
+        nodes::placeAd(m_mainLayer, AdType::Skyscraper, Anchor::Right, {-30.f, 0.f});
 
         return true;
     };

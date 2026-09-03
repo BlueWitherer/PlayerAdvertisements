@@ -1,6 +1,8 @@
 # v1.4.0 
 - Now displaying ads in all secret vaults
-- Added recently viewed advertisement menu
+- Added recently viewed advertisements menu
+- Huge internal refactor & cleanup
+- Other enhancements
 
 # v1.3.2 
 - Fixed an issue where creator info didn't load properly on advertised levels

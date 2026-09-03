@@ -71,24 +71,19 @@
             "description": "Show ads while playing levels.",
             "default": false
         },
-        "ChallengesPage": {
-            "type": "bool",
-            "name": "Quests Page",
-            "default": true
-        },
         "CreatorLayer": {
             "type": "bool",
             "name": "Creator Layer",
             "default": true
         },
-        "DailyLevelPage": {
+        "GJDropDownLayer": {
             "type": "bool",
-            "name": "Daily Level Page",
+            "name": "Drop-down Layers",
             "default": true
         },
-        "EndLevelLayer": {
+        "DailyLevelPage": {
             "type": "bool",
-            "name": "End Level Layer",
+            "name": "Daily Level Pop-up",
             "default": true
         },
         "GauntletSelectLayer": {
@@ -96,19 +91,9 @@
             "name": "Gauntlet Select Layer",
             "default": true
         },
-        "GJDropDownLayer": {
-            "type": "bool",
-            "name": "Drop Down Layer",
-            "default": true
-        },
         "GJPathsLayer": {
             "type": "bool",
             "name": "Paths Layer",
-            "default": true
-        },
-        "InfoLayer": {
-            "type": "bool",
-            "name": "Info Layer",
             "default": true
         },
         "LeaderboardsLayer": {
@@ -134,11 +119,6 @@
         "ProfilePage": {
             "type": "bool",
             "name": "Profile Page",
-            "default": true
-        },
-        "RetryLayer": {
-            "type": "bool",
-            "name": "Retry Layer",
             "default": true
         },
         "ShareCommentLayer": {
