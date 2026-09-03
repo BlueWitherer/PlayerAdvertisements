@@ -20,7 +20,7 @@ class $modify(AdsGJDropDownLayer, GJDropDownLayer) {
 
         nodes::placeAd(m_mainLayer, AdType::Banner, Anchor::Top, {0.f, -30.f});
 
-        if (!m_mainLayer->getChildByID("hide-dropdown-menu")) {
+        if (win::isWide()) {
             nodes::placeAd(m_mainLayer, AdType::Skyscraper, Anchor::Left, {30.f, 0.f});
             nodes::placeAd(m_mainLayer, AdType::Skyscraper, Anchor::Right, {-30.f, 0.f});
         };

@@ -63,6 +63,7 @@
         "MenuLayer": {
             "type": "bool",
             "name": "Menu Layer",
+            "description": "Show ads in the main manu.",
             "default": true
         },
         "PlayLayer": {
@@ -74,61 +75,73 @@
         "CreatorLayer": {
             "type": "bool",
             "name": "Creator Layer",
+            "description": "Show ads in the creator page.",
+            "default": true
+        },
+        "LevelBrowserLayer": {
+            "type": "bool",
+            "name": "Level Browser Lists",
+            "description": "Show ads on every level selection list page.",
             "default": true
         },
         "GJDropDownLayer": {
             "type": "bool",
             "name": "Drop-down Layers",
+            "description": "Show ads on every drop-down layer.",
             "default": true
         },
         "DailyLevelPage": {
             "type": "bool",
-            "name": "Daily Level Pop-up",
+            "name": "Timed Level Pop-ups",
+            "description": "Show ads on Daily, Weekly, and Event level pop-ups.",
             "default": true
         },
         "GauntletSelectLayer": {
             "type": "bool",
-            "name": "Gauntlet Select Layer",
+            "name": "The Lost Gauntlets",
+            "description": "Show ads on the gauntlets page.",
             "default": true
         },
         "GJPathsLayer": {
             "type": "bool",
-            "name": "Paths Layer",
+            "name": "Paths of Power",
+            "description": "Show ads on the paths menu.",
             "default": true
         },
         "LeaderboardsLayer": {
             "type": "bool",
-            "name": "Leaderboards Layer",
+            "name": "Leaderboards",
+            "description": "Show ads on the leaderboards page.",
             "default": true
         },
         "LevelSelectLayer": {
             "type": "bool",
             "name": "Level Select Layer",
-            "default": true
-        },
-        "LevelBrowserLayer": {
-            "type": "bool",
-            "name": "Level Browser Layer",
+            "description": "Show ads on the RobTop levels page.",
             "default": true
         },
         "PauseLayer": {
             "type": "bool",
             "name": "Pause Layer",
+            "description": "Show ads on the level's pause menu.",
             "default": true
         },
         "ProfilePage": {
             "type": "bool",
             "name": "Profile Page",
+            "description": "Show ads on user profiles.",
             "default": true
         },
         "ShareCommentLayer": {
             "type": "bool",
             "name": "Comment Layer",
+            "description": "Show ads on the comment pop-up.",
             "default": true
         },
         "SecretLayers": {
             "type": "bool",
             "name": "Vault Layers",
+            "description": "Show ads on every vault and basement.",
             "default": true
         }
     }

@@ -1,8 +1,11 @@
 # v1.4.0 
 - Now displaying ads in all secret vaults
 - Added recently viewed advertisements menu
+- Ads that don't fit properly on certain aspect ratios will no longer be shown
+- Improved descriptions on the mod's settings
 - Huge internal refactor & cleanup
-- Other enhancements
+  - Removed redundant ad placements for some layers
+- Other enhancements & fixes
 
 # v1.3.2 
 - Fixed an issue where creator info didn't load properly on advertised levels

@@ -22,8 +22,10 @@ class $modify(AdsShareCommentLayer, ShareCommentLayer) {
         if (auto adSquareCenter = nodes::placeAd(m_mainLayer, AdType::Square, Anchor::Bottom, {0.f, 90.f})) positionForCommentType(adSquareCenter, type);
         if (auto adSquareRight = nodes::placeAd(m_mainLayer, nodes::formatIDForAd(AdType::Square, Anchor::BottomRight), AdType::Square, Anchor::Bottom, {144.f, 90.f})) positionForCommentType(adSquareRight, type);
 
-        nodes::placeAd(m_mainLayer, AdType::Skyscraper, Anchor::Left, {30.f, 0.f});
-        nodes::placeAd(m_mainLayer, AdType::Skyscraper, Anchor::Right, {-30.f, 0.f});
+        if (win::isWide()) {
+            nodes::placeAd(m_mainLayer, AdType::Skyscraper, Anchor::Left, {30.f, 0.f});
+            nodes::placeAd(m_mainLayer, AdType::Skyscraper, Anchor::Right, {-30.f, 0.f});
+        };
 
         return true;
     };

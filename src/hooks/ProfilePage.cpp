@@ -18,8 +18,10 @@ class $modify(AdsProfilePage, ProfilePage) {
     bool init(int p0, bool p1) {
         if (!ProfilePage::init(p0, p1)) return false;
 
-        nodes::placeAd(m_mainLayer, AdType::Skyscraper, Anchor::Left, {30.f, 0.f});
-        nodes::placeAd(m_mainLayer, AdType::Skyscraper, Anchor::Right, {-30.f, 0.f});
+        if (win::isWide()) {
+            nodes::placeAd(m_mainLayer, AdType::Skyscraper, Anchor::Left, {30.f, 0.f});
+            nodes::placeAd(m_mainLayer, AdType::Skyscraper, Anchor::Right, {-30.f, 0.f});
+        };
 
         return true;
     };

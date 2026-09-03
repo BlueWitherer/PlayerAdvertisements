@@ -29,8 +29,11 @@ class $modify(AdsPlayLayer, PlayLayer) {
 
         f->bannerBottom = nodes::placeAd(m_uiLayer, AdType::Banner, Anchor::Bottom, {0.f, 30.f});
         f->bannerBottom = nodes::placeAd(m_uiLayer, AdType::Banner, Anchor::Bottom, {0.f, 30.f});
-        f->skyscraperLeft = nodes::placeAd(m_uiLayer, AdType::Skyscraper, Anchor::Left, {30.f, 0.f});
-        f->skyscraperRight = nodes::placeAd(m_uiLayer, AdType::Skyscraper, Anchor::Right, {-30.f, 0.f});
+
+        if (win::isWide()) {
+            f->skyscraperLeft = nodes::placeAd(m_uiLayer, AdType::Skyscraper, Anchor::Left, {30.f, 0.f});
+            f->skyscraperRight = nodes::placeAd(m_uiLayer, AdType::Skyscraper, Anchor::Right, {-30.f, 0.f});
+        };
 
         log::trace("setting up scheduler for auto ad refresh");
         scheduleOnce(schedule_selector(AdsPlayLayer::schedReload), rng::generate(2.5f, 12.5f));

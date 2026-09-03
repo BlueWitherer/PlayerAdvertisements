@@ -92,6 +92,17 @@ namespace cw::ads {
         geode::Button::ButtonCallback callback = nullptr;
     };
 
+    namespace win {
+        inline constexpr auto isWide() noexcept {
+            if (auto dir = cocos2d::CCDirector::sharedDirector()) {
+                auto const size = dir->getWinSize();
+                return (size.width / size.height) > 1.33f;
+            };
+
+            return false;
+        };
+    };
+
     namespace hooks {
         void delegateHooks(std::string id, geode::utils::StringMap<std::shared_ptr<geode::Hook>> const& hooks);
         void toggleHooks(std::string_view id, bool on);
