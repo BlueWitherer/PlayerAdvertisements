@@ -84,16 +84,58 @@ class $modify(AdsSecretLayer, SecretLayer) {
     PLAYERADS_SECRETLAYER_HOOK_BODY(SecretLayer);
 };
 
-class $modify(AdsSecretLayer2, SecretLayer2) {
-    PLAYERADS_SECRETLAYER_HOOK_BODY(SecretLayer2);
-};
-
 class $modify(AdsSecretLayer4, SecretLayer4) {
     PLAYERADS_SECRETLAYER_HOOK_BODY(SecretLayer4);
 };
 
 class $modify(AdsSecretLayer5, SecretLayer5) {
     PLAYERADS_SECRETLAYER_HOOK_BODY(SecretLayer5);
+};
+
+// has stupid fucking buttons in the way of the right side square ad
+class $modify(AdsSecretLayer2, SecretLayer2) {
+    PLAYERADS_DELEGATE_HOOKS(THIS_ID);
+
+    struct Fields final {
+        asp::Instant lastTime;
+
+        Advertisement* banner = nullptr;
+    };
+
+    bool init() {
+        if (!SecretLayer2::init()) return false;
+
+        auto const winSize = CCDirector::sharedDirector()->getWinSize();
+
+        auto f = m_fields.self();
+
+        if (!f->banner) {
+            f->banner = Advertisement::create(AdType::Banner);
+            f->banner->setID("banner"_spr);
+            f->banner->setPosition({winSize.width / 2.f, winSize.height - 30.f});
+
+            addChild(f->banner, HIGHEST_Z);
+        };
+
+        return true;
+    };
+
+    void reloadAllAds() {
+        auto f = m_fields.self();
+
+        if (asp::Instant::now().durationSince(f->lastTime).seconds() < 5) return;
+
+        if (f->banner) f->banner->loadRandom();
+
+        log::debug("All ads are now reloading");
+
+        f->lastTime = asp::Instant::now();
+    };
+
+    void onSubmit(CCObject* sender) {
+        SecretLayer2::onSubmit(sender);
+        reloadAllAds();
+    };
 };
 
 // the basement secretlayer

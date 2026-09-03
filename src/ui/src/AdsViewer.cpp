@@ -47,7 +47,7 @@ bool AdsViewerCell::init(Ad ad, float width) {
     title->setScale(0.375f);
     title->setAlignment(Label::Alignment::Center);
 
-    addChildAtPosition(title, Anchor::Top, {0.f, -8.75f});
+    addChildAtPosition(title, Anchor::Top, {0.f, -10.f});
 
     auto imgContainer = NineSlice::create("geode.loader/black-square.png");
     imgContainer->setID("ad-thumbnail-container");
