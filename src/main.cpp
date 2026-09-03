@@ -9,23 +9,23 @@
 #include <Geode/Geode.hpp>
 
 #include <Geode/modify/MenuLayer.hpp>
+#include <Geode/modify/LevelInfoLayer.hpp>
 
 using namespace geode::prelude;
 using namespace cw::ads;
 
-class $modify(PAHookMenuLayer, MenuLayer) {
-    bool init() {
-        if (!MenuLayer::init()) return false;
+namespace cw::ads {
+    namespace ui {
+        static void addAdButton(CCNode* menu, bool alt = true, float scale = 1.f) {
+            auto spr = CircleButtonSprite::createWithSpriteFrameName(
+                "adIcon.png"_spr,
+                0.875f,
+                CircleBaseColor::Green,
+                alt ? CircleBaseSize::MediumAlt : CircleBaseSize::Medium);
+            spr->setScale(scale);
 
-        if (Mod::get()->hasSavedValue("authtoken")) Mod::get()->getSaveContainer().erase("authtoken");  // this was never used lol
-
-        if (auto menu = getChildByID("bottom-menu")) {
             auto btn = CCMenuItemExt::createSpriteExtra(
-                CircleButtonSprite::createWithSpriteFrameName(
-                    "adIcon.png"_spr,
-                    0.875f,
-                    CircleBaseColor::Green,
-                    CircleBaseSize::MediumAlt),
+                spr,
                 [](auto) {
                     pushSceneWithLayer(AdsViewer::create());
                 });
@@ -34,6 +34,26 @@ class $modify(PAHookMenuLayer, MenuLayer) {
             menu->addChild(btn);
             menu->updateLayout();
         };
+    };
+};
+
+class $modify(PAHookMenuLayer, MenuLayer) {
+    bool init() {
+        if (!MenuLayer::init()) return false;
+
+        if (auto menu = getChildByID("bottom-menu")) ui::addAdButton(menu);
+
+        if (Mod::get()->hasSavedValue("authtoken")) Mod::get()->getSaveContainer().erase("authtoken");  // this was never used lol
+
+        return true;
+    };
+};
+
+class $modify(PAHookLevelInfoLayer, LevelInfoLayer) {
+    bool init(GJGameLevel* level, bool challenge) {
+        if (!LevelInfoLayer::init(level, challenge)) return false;
+
+        if (auto menu = getChildByID("left-side-menu")) ui::addAdButton(menu, false, 0.925f);
 
         return true;
     };

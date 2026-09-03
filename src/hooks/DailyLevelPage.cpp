@@ -18,7 +18,7 @@ class $modify(AdsDailyLevelPage, DailyLevelPage) {
     bool init(GJTimedLevelType levelType) {
         if (!DailyLevelPage::init(levelType)) return false;
 
-        nodes::placeAd(m_mainLayer, AdType::Banner, Anchor::Bottom, {0.f, 65.f});
+        nodes::placeAd(m_mainLayer, AdType::Banner, Anchor::Center, {0.f, -95.f});
 
         if (win::isWide()) {
             nodes::placeAd(m_mainLayer, AdType::Skyscraper, Anchor::Left, {30.f, 0.f});
