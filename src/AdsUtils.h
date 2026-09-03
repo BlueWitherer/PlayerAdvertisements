@@ -96,7 +96,8 @@ namespace cw::ads {
         inline constexpr auto isWide() noexcept {
             if (auto dir = cocos2d::CCDirector::sharedDirector()) {
                 auto const size = dir->getWinSize();
-                return (size.width / size.height) > 1.33f;
+                geode::log::trace("{}", size.width / size.height);
+                return (size.width / size.height) >= 1.7f;
             };
 
             return false;
