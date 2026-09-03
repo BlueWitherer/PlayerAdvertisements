@@ -150,8 +150,8 @@ void AdsDirector::addLevelToCache(GJGameLevel* level) {
 };
 
 void AdsDirector::addToViewed(Ad ad) {
-    if (m_seenAds.size() >= 25) m_seenAds.erase(m_seenAds.begin());
-    m_seenAds.push_back(std::move(ad));
+    if (m_seenAds.size() >= 25) m_seenAds.pop_back();
+    m_seenAds.insert(m_seenAds.begin(), std::move(ad));
 };
 
 std::span<const std::weak_ptr<Hook>> AdsDirector::getHooks(std::string_view id) const noexcept {

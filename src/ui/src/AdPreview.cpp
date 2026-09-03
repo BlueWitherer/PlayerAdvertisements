@@ -102,8 +102,9 @@ void AdPreview::setupMetaLabels(AdLevelMetadata const& data) {
     m_mainLayer->addChild(m_impl->diff, 9);
 };
 
-bool AdPreview::init(Ad ad) {
+bool AdPreview::init(Ad ad, bool count) {
     m_impl->ad = std::move(ad);
+    m_impl->hasClicked = !count;
 
     if (!Popup::init(250.f, 200.f, "geode.loader/GE_square03.png")) return false;
 
@@ -119,7 +120,7 @@ bool AdPreview::init(Ad ad) {
     auto thumbnailContainer = CCClippingNode::create(m_bgSprite);
     thumbnailContainer->setID("level-thumbnail-container");
     thumbnailContainer->setAnchorPoint({0.5, 0.5});
-    thumbnailContainer->setContentSize(m_mainLayer->getScaledContentSize());
+    thumbnailContainer->setContentSize(m_bgSprite->getScaledContentSize());
     thumbnailContainer->setAlphaThreshold(0.f);
     thumbnailContainer->setZOrder(-8);
 
@@ -291,7 +292,7 @@ bool AdPreview::init(Ad ad) {
                             log::error("Failed to get announcement ({}): {}", res.code(), res.errorMessage());
                             Notification::create("Failed to get announcement", NotificationIcon::Error)->show();
 
-                            if (auto b = btn.lock()) b->setVisible(true);
+                            b->setVisible(true);
                             if (auto bLoad = btnLoad.lock()) bLoad->setVisible(false);
 
                             return;
@@ -346,8 +347,8 @@ bool AdPreview::init(Ad ad) {
                 "gj_discordIcon_001.png",
                 [](auto) {
                     createQuickPopup(
-                        "Community Discord",
-                        "Join the <cd>Cheeseworks</c> <cb>community Discord server</c>?\n"
+                        "Discord Community",
+                        "Join <cd>Cheeseworks</c>'s <cb>Discord server</c>?\n"
                         "<cs>Get help, report bugs, and chat with other players!</c>",
                         "Cancel",
                         "OK",
@@ -528,9 +529,9 @@ void AdPreview::switchToLevel() {
     layer->downloadLevel();  // ugh
 };
 
-AdPreview* AdPreview::create(Ad ad) {
+AdPreview* AdPreview::create(Ad ad, bool count) {
     auto ret = new AdPreview();
-    if (ret->init(std::move(ad))) {
+    if (ret->init(std::move(ad), count)) {
         ret->autorelease();
         return ret;
     };

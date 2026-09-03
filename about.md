@@ -14,6 +14,10 @@ This mod serves as **the place for people to share their levels**! Promote your 
 
 ---
 
+![▶](frame:gj_ytIcon_001.png?scale=0.375) <cr>**[Watch the trailer](https://youtu.be/P-IZ6ZJzTNI) of the mod** to learn even more about it!</c>
+
+---
+
 ### Promote Your Levels!
 Start off by <cy>going to the Player Ads Manager at **[ads.cheeseworks.gay](https://ads.cheeseworks.gay/)**</c>! <cr>You'll be required to log in with your [Discord account](https://discord.com/login)</c>.
 

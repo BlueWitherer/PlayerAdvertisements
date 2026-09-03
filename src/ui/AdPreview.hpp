@@ -24,14 +24,14 @@ namespace cw::ads {
         AdPreview();
         ~AdPreview();
 
-        bool init(Ad ad);
-
         void onPlayButton(cocos2d::CCObject* sender);
 
         void switchToLevel();
         void registerClick();
 
+        bool init(Ad ad, bool count = true);
+
     public:
-        static AdPreview* create(Ad ad);
+        static AdPreview* create(Ad ad, bool count = true);
     };
 };

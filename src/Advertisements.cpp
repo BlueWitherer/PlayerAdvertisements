@@ -74,7 +74,7 @@ void Advertisement::reload() {
         return;
     };
 
-    log::debug("Created LazySprite with size: {}x{}", getScaledContentSize().width, getScaledContentSize().height);
+    log::debug("Created LazySprite with size: {}x{}", getScaledContentWidth(), getScaledContentHeight());
 
     m_impl->adSprite->setPosition({getScaledContentWidth() / 2.f, getScaledContentHeight() / 2.f});
     m_impl->adSprite->setVisible(true);
