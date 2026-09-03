@@ -58,6 +58,7 @@ Happy advertising!
 
 ![preview](previews/preview-1.png)
 ![preview](previews/preview-2.png)
+![preview](previews/preview-3.png)
 
 ---
 
