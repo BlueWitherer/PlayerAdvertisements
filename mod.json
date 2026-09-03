@@ -8,7 +8,7 @@
     },
     "id": "cheeseworks.ads",
     "name": "Player Advertisements",
-    "version": "1.3.2",
+    "version": "1.4.0",
     "developers": [
         "Cheeseworks"
     ],
@@ -46,19 +46,19 @@
         "scene-protection": {
             "type": "bool",
             "name": "Disable Scene Limit Protection",
-            "default": false,
-            "description": "Disabling will remove the 5 scene limit. <co>This usually occurs when you keep viewing levels from ads without returning to previous scenes.</c> <cc>Keeping this enabled is recommended.</c>"
+            "description": "Disabling will remove the 5 scene limit. <co>This usually occurs when you keep viewing levels from ads without returning to previous scenes.</c> <cc>Keeping this enabled is recommended.</c>",
+            "default": false
         },
         "loading-circles": {
             "type": "bool",
             "name": "Loading Circle",
-            "default": true,
-            "description": "Show a spinning loading circle on ads that haven't loaded yet."
+            "description": "Show a spinning loading circle on ads that haven't loaded yet.",
+            "default": true
         },
         "placements": {
             "type": "title",
             "name": "Ad Placements",
-            "description": "Select where advertisements will be shown in the game."
+            "description": "Select where ads will be placed throughout the game."
         },
         "MenuLayer": {
             "type": "bool",
@@ -68,7 +68,7 @@
         },
         "PlayLayer": {
             "type": "bool",
-            "name": "In-Game UI Layer",
+            "name": "Level UI",
             "description": "Show ads while playing levels.",
             "default": false
         },

@@ -16,16 +16,13 @@ using namespace cw::ads;
 
 namespace cw::ads {
     namespace ui {
-        static void addAdButton(CCNode* menu, bool alt = true, float scale = 1.f) {
-            auto spr = CircleButtonSprite::createWithSpriteFrameName(
-                "adIcon.png"_spr,
-                0.875f,
-                CircleBaseColor::Green,
-                alt ? CircleBaseSize::MediumAlt : CircleBaseSize::Medium);
-            spr->setScale(scale);
-
+        static void addAdButton(CCNode* menu, bool alt = true) {
             auto btn = CCMenuItemExt::createSpriteExtra(
-                spr,
+                CircleButtonSprite::createWithSpriteFrameName(
+                    "adIcon.png"_spr,
+                    0.875f,
+                    CircleBaseColor::Green,
+                    alt ? CircleBaseSize::MediumAlt : CircleBaseSize::Medium),
                 [](auto) {
                     pushSceneWithLayer(AdsViewer::create());
                 });
@@ -53,7 +50,7 @@ class $modify(PAHookLevelInfoLayer, LevelInfoLayer) {
     bool init(GJGameLevel* level, bool challenge) {
         if (!LevelInfoLayer::init(level, challenge)) return false;
 
-        if (auto menu = getChildByID("left-side-menu")) ui::addAdButton(menu, false, 0.925f);
+        if (auto menu = getChildByID("left-side-menu")) ui::addAdButton(menu, false);
 
         return true;
     };
