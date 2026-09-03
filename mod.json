@@ -145,6 +145,11 @@
             "type": "bool",
             "name": "Comment Layer",
             "default": true
+        },
+        "SecretLayers": {
+            "type": "bool",
+            "name": "Vault Layers",
+            "default": true
         }
     }
 }

@@ -85,7 +85,7 @@ bool AdsViewerCell::init(Ad ad, float width) {
             return;
         };
 
-        type == AdType::Skyscraper ? cue::rescaleToMatchY(img, imgClipper->getScaledContentHeight() * 2.f) : cue::rescaleToMatchX(img, imgClipper->getScaledContentWidth() * 1.125f);
+        type == AdType::Skyscraper ? img->setScale(imgClipper->getScaledContentHeight() * 2.f / img->getScaledContentHeight()) : img->setScale(imgClipper->getScaledContentWidth() * 1.125f / img->getScaledContentWidth());
     });
 
     imgClipper->addChildAtPosition(img, Anchor::Center, {imgContainer->getPositionX(), 7.5f}, false);
@@ -347,7 +347,7 @@ bool AdsViewer::init() {
 
     menuContainer->addChildAtPosition(recentAdsLabel, Anchor::Top, {0.f, -15.f});
 
-    auto adList = ScrollLayer::create({containerWidth - 42.5f, 180.f});
+    auto adList = ScrollLayer::create({containerWidth - 37.5f, 175.f});
     adList->setID("ad-list");
     adList->setZOrder(1);
     adList->setAnchorPoint({0.5f, 0.5f});
@@ -355,10 +355,10 @@ bool AdsViewer::init() {
 
     adList->m_contentLayer->setLayout(ScrollLayer::createDefaultListLayout());
 
-    menuContainer->addChildAtPosition(adList, Anchor::Center, {0.f, -10.f});
+    menuContainer->addChildAtPosition(adList, Anchor::Center, {0.f, -12.5f});
 
     auto adListBg = cue::createBackground(
-        {adList->getScaledContentWidth() + 10.f, adList->getScaledContentHeight() + 12.5f},
+        {adList->getScaledContentWidth() + 12.5f, adList->getScaledContentHeight() + 15.f},
         {
             .cornerRoundness = -0.75f,
             .zOrder = 0,

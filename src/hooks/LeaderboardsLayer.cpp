@@ -21,7 +21,7 @@ class $modify(AdsLeaderboardsLayer, LeaderboardsLayer) {
         auto const winSize = CCDirector::sharedDirector()->getWinSize();
 
         if (auto adBanner = Advertisement::create(AdType::Banner)) {
-            adBanner->setID("advertisement-leaderboards-bottom");
+            adBanner->setID("banner"_spr);
             adBanner->setPosition({winSize.width / 2.f, 30.f});
 
             addChild(adBanner, HIGHEST_Z);

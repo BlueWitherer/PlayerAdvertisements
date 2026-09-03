@@ -32,7 +32,7 @@ class $modify(AdsRetryLevelLayer, RetryLevelLayer) {
         if (auto adBanner = Advertisement::create(AdType::Square)) {
             auto const winSize = CCDirector::sharedDirector()->getWinSize();
 
-            adBanner->setID("advertisement-menu");
+            adBanner->setID("banner"_spr);
             adBanner->setPosition({winSize.width / 2.f, winSize.height / 2.f});
 
             m_mainLayer->addChild(adBanner, HIGHEST_Z);

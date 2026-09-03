@@ -8,6 +8,8 @@
 
 #define HIGHEST_Z cocos2d::CCScene::get()->getHighestChildZ() + 1
 namespace cw::ads {
+    namespace rng = geode::utils::random;
+
     enum class AdType : uint8_t {
         Banner = 1,
         Square = 2,

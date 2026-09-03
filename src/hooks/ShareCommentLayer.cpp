@@ -37,7 +37,7 @@ class $modify(AdsShareCommentLayer, ShareCommentLayer) {
         };
 
         if (auto adSquareRight = Advertisement::create(AdType::Square)) {
-            adSquareRight->setID("advertisement-menu"_spr);
+            adSquareRight->setID("square-right"_spr);
             adSquareRight->setPosition({winSize.width / 2.f + 140.f, winSize.height / 2.f - 70.f});
 
             m_mainLayer->addChild(adSquareRight, HIGHEST_Z);

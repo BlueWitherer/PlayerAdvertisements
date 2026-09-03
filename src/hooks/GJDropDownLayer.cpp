@@ -29,7 +29,7 @@ class $modify(AdsGJDropDownLayer, GJDropDownLayer) {
 
         if (!m_mainLayer->getChildByID("hide-dropdown-menu")) {
             if (auto adSkyscraperLeft = Advertisement::create(AdType::Skyscraper)) {
-                adSkyscraperLeft->setID("advertisement-menu-skyscraper-left");
+                adSkyscraperLeft->setID("skyscraper-left"_spr);
                 adSkyscraperLeft->setPosition({30.f, winSize.height / 2.f});
 
                 m_mainLayer->addChild(adSkyscraperLeft, HIGHEST_Z);
