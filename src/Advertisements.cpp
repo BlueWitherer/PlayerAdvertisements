@@ -27,8 +27,6 @@ struct Advertisement::Impl final {
     Ref<LazySprite> adSprite = nullptr;
     CCSprite* adIcon = nullptr;
 
-    std::string token;
-
     TaskHolder<web::WebResponse> adListener;
 
     constexpr auto getAdSize(AdType type) noexcept {
@@ -292,27 +290,38 @@ void Advertisement::handleAdResponse(web::WebResponse const& res) {
 
     log::trace("Sending view tracking request for ad_id={}, user_id={}", m_impl->ad.getID(), m_impl->ad.getUser());
 
-    auto viewRequest = web::WebRequest();
-    viewRequest.userAgent("PlayerAdvertisements/1.2");
-    viewRequest.timeout(std::chrono::seconds(15));
-
-    matjson::Value viewBody = matjson::Value::object();
-    viewBody["ad_id"] = m_impl->ad.getID();
-    viewBody["authtoken"] = m_impl->token;
-    viewBody["account_id"] = GJAccountManager::sharedState()->m_accountID;
-
-    viewRequest.bodyJSON(viewBody);
-
     async::spawn(
-        viewRequest.post("https://ads.cheeseworks.gay/api/view"),
-        [self = WeakRef(this)](web::WebResponse res) {
-            if (auto s = self.lock()) {
-                if (res.error()) return log::error("View failed with code {} for ad_id={}, user_id={}: {}", res.code(), s->m_impl->ad.getID(), s->m_impl->ad.getUser(), res.errorMessage());
-
-                log::info("View passed ad_id={}, user_id={}", s->m_impl->ad.getID(), s->m_impl->ad.getUser());
-
-                log::debug("View request completed for ad_id={}, user_id={}", s->m_impl->ad.getID(), s->m_impl->ad.getUser());
+        argon::startAuth(),
+        [self = WeakRef(this)](Result<std::string> res) {
+            if (res.isErr()) {
+                log::warn("Auth failed: {}", std::move(res).unwrapErr());
+                return;
             };
+
+            if (auto s = self.lock()) {
+                auto viewRequest = web::WebRequest();
+                viewRequest.userAgent("PlayerAdvertisements/1.4");
+                viewRequest.timeout(std::chrono::seconds(15));
+
+                matjson::Value viewBody = matjson::Value::object();
+                viewBody["ad_id"] = s->m_impl->ad.getID();
+                viewBody["authtoken"] = std::move(res).unwrap();
+                viewBody["account_id"] = GJAccountManager::sharedState()->m_accountID;
+
+                viewRequest.bodyJSON(viewBody);
+
+                async::spawn(
+                    viewRequest.post("https://ads.cheeseworks.gay/api/view"),
+                    [self](web::WebResponse res) {
+                        if (auto s = self.lock()) {
+                            if (res.error()) return log::error("View failed with code {} for ad_id={}, user_id={}: {}", res.code(), s->m_impl->ad.getID(), s->m_impl->ad.getUser(), res.errorMessage());
+
+                            log::info("View passed ad_id={}, user_id={}", s->m_impl->ad.getID(), s->m_impl->ad.getUser());
+
+                            log::debug("View request completed for ad_id={}, user_id={}", s->m_impl->ad.getID(), s->m_impl->ad.getUser());
+                        };
+                    });
+            }
         });
 
     log::debug("Sent view tracking request for ad_id={}, user_id={}", m_impl->ad.getID(), m_impl->ad.getUser());
@@ -333,7 +342,7 @@ void Advertisement::loadRandom() {
     log::trace("Preparing request for random advertisement...");
 
     auto request = web::WebRequest();
-    request.userAgent("PlayerAdvertisements/1.2");
+    request.userAgent("PlayerAdvertisements/1.4");
     request.timeout(std::chrono::seconds(15));
     request.param("type", static_cast<uint8_t>(m_impl->type));
 

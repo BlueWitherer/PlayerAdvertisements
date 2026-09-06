@@ -281,7 +281,7 @@ bool AdPreview::init(Ad ad, bool count) {
             sender->setVisible(false);
 
             auto req = web::WebRequest()
-                           .userAgent("PlayerAdvertisements/1.2")
+                           .userAgent("PlayerAdvertisements/1.4")
                            .timeout(std::chrono::seconds(15));
 
             async::spawn(
@@ -484,7 +484,7 @@ void AdPreview::registerClick() {
                 log::debug("Sending click tracking request for ad_id={}, user_id={}", s->m_impl->ad.getID(), s->m_impl->ad.getUser());
 
                 auto clickRequest = web::WebRequest();
-                clickRequest.userAgent("PlayerAdvertisements/1.2");
+                clickRequest.userAgent("PlayerAdvertisements/1.4");
                 clickRequest.timeout(std::chrono::seconds(15));
 
                 matjson::Value clickBody = matjson::Value::object();

@@ -282,7 +282,7 @@ bool AdsViewer::init() {
             sender->setVisible(false);
 
             auto req = web::WebRequest()
-                           .userAgent("PlayerAdvertisements/1.2")
+                           .userAgent("PlayerAdvertisements/1.4")
                            .timeout(std::chrono::seconds(15));
 
             async::spawn(

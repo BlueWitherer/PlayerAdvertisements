@@ -108,7 +108,7 @@ void ReportPopup::onSubmitButton(Button* sender, LoadingSpinner* spinner) {
                 log::debug("Token: {}", token);
 
                 auto reportReq = web::WebRequest();
-                reportReq.userAgent("PlayerAdvertisements/1.2");
+                reportReq.userAgent("PlayerAdvertisements/1.4");
                 reportReq.timeout(std::chrono::seconds(15));
 
                 matjson::Value body = matjson::Value();
@@ -128,6 +128,7 @@ void ReportPopup::onSubmitButton(Button* sender, LoadingSpinner* spinner) {
                                 s->onClose(nullptr);
                                 if (auto up = upopup.lock()) up->showSuccessMessage("Report submitted successfully!");
                             } else {
+                                log::error("Failed to send report ({}): {}", res.code(), res.errorMessage());
                                 if (auto up = upopup.lock()) up->showFailMessage(res.code() == 403 ? "You've been banned from reporting ads." : "Failed to send report!");
                             };
 

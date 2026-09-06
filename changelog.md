@@ -1,3 +1,7 @@
+# v1.4.1 
+- Fix some authorization issues
+- Remove obtrusive ads from certain dropdown layers
+
 # v1.4.0 
 - Now displaying ads in all secret vaults
 - Added recently viewed advertisements menu
