@@ -25,7 +25,7 @@ namespace cw::ads {
     };
 };
 
-bool AdsViewerCell::init(Ad ad, float width) {
+bool AdsViewerCell::init(Ad ad, bool managed, float width) {
     m_ad = std::move(ad);
 
     if (!CCNode::init()) return false;
@@ -135,9 +135,144 @@ bool AdsViewerCell::init(Ad ad, float width) {
     return true;
 };
 
-AdsViewerCell* AdsViewerCell::create(Ad ad, float width) {
+AdsViewerCell* AdsViewerCell::create(Ad ad, bool managed, float width) {
     auto ret = new AdsViewerCell();
-    if (ret->init(std::move(ad), width)) {
+    if (ret->init(std::move(ad), managed, width)) {
+        ret->autorelease();
+        return ret;
+    };
+
+    delete ret;
+    return nullptr;
+};
+
+bool AdsViewerSection::init(CCSize const& size) {
+    if (!CCNode::init()) return false;
+
+    setContentSize(size);
+    setAnchorPoint({0.5, 0.5});
+    ignoreAnchorPointForPosition(false);
+    setVisible(false);
+
+    return true;
+};
+
+AdsViewerSection* AdsViewerSection::create(CCSize const& size) {
+    auto ret = new AdsViewerSection();
+    if (ret->init(size)) {
+        ret->autorelease();
+        return ret;
+    };
+
+    delete ret;
+    return nullptr;
+};
+
+bool AdsViewerRecent::init(CCSize const& size) {
+    if (!AdsViewerSection::init(size)) return false;
+
+    auto recentAdsLabel = Label::create("Recently Viewed Ads", "bigFont.fnt");
+    recentAdsLabel->setID("recent-ads-label");
+    recentAdsLabel->setScale(0.425f);
+    recentAdsLabel->setAlignment(Label::Alignment::Center);
+
+    addChildAtPosition(recentAdsLabel, Anchor::Top, {0.f, -15.f});
+
+    auto m_list = ScrollLayer::create({getScaledContentWidth() - 37.5f, 175.f});
+    m_list->setID("ad-list");
+    m_list->setZOrder(1);
+    m_list->setAnchorPoint({0.5f, 0.5f});
+    m_list->ignoreAnchorPointForPosition(false);
+
+    m_list->m_contentLayer->setLayout(ScrollLayer::createDefaultListLayout());
+
+    addChildAtPosition(m_list, Anchor::Center, {0.f, -12.5f});
+
+    auto adListBg = cue::createBackground(
+        {m_list->getScaledContentWidth() + 12.5f, m_list->getScaledContentHeight() + 15.f},
+        {
+            .cornerRoundness = -0.75f,
+            .zOrder = 0,
+            .id = "",
+        });
+    adListBg->setPosition(m_list->getPosition());
+
+    addChild(adListBg);
+
+    if (auto ads = AdsDirector::get()) {
+        auto countLabel = Label::create(fmt::format("{} Ads", ads->getViewedAds().size()), "chatFont.fnt");
+        countLabel->setID("ad-count-label");
+        countLabel->setScale(0.625f);
+        countLabel->setOpacity(200);
+        countLabel->setAlignment(Label::Alignment::Center);
+
+        addChildAtPosition(countLabel, Anchor::Top, {0.f, -26.5f}, false);
+
+        auto recentAds = ads->getViewedAds();
+
+        for (auto const& ad : recentAds) {
+            auto cell = AdsViewerCell::create(ad, false, m_list->getScaledContentWidth());
+            m_list->m_contentLayer->addChild(cell);
+        };
+
+        m_list->m_contentLayer->updateLayout();
+    };
+
+    m_list->scrollToTop();
+
+    return true;
+};
+
+AdsViewerRecent* AdsViewerRecent::create(CCSize const& size) {
+    auto ret = new AdsViewerRecent();
+    if (ret->init(size)) {
+        ret->autorelease();
+        return ret;
+    };
+
+    delete ret;
+    return nullptr;
+};
+
+bool AdsViewerManaged::init(CCSize const& size) {
+    if (!AdsViewerSection::init(size)) return false;
+
+    auto manageAdsLabel = Label::create("Recently Viewed Ads", "bigFont.fnt");
+    manageAdsLabel->setID("recent-ads-label");
+    manageAdsLabel->setScale(0.425f);
+    manageAdsLabel->setAlignment(Label::Alignment::Center);
+
+    addChildAtPosition(manageAdsLabel, Anchor::Top, {0.f, -15.f});
+
+    m_list = ScrollLayer::create({getScaledContentWidth() - 37.5f, 175.f});
+    m_list->setID("ad-list");
+    m_list->setZOrder(1);
+    m_list->setAnchorPoint({0.5f, 0.5f});
+    m_list->ignoreAnchorPointForPosition(false);
+
+    m_list->m_contentLayer->setLayout(ScrollLayer::createDefaultListLayout());
+
+    addChildAtPosition(m_list, Anchor::Center, {0.f, -12.5f});
+
+    auto adListBg = cue::createBackground(
+        {m_list->getScaledContentWidth() + 12.5f, m_list->getScaledContentHeight() + 15.f},
+        {
+            .cornerRoundness = -0.75f,
+            .zOrder = 0,
+            .id = "",
+        });
+    adListBg->setPosition(m_list->getPosition());
+
+    addChild(adListBg);
+
+    m_list->scrollToTop();
+
+    return true;
+};
+
+AdsViewerManaged* AdsViewerManaged::create(CCSize const& size) {
+    auto ret = new AdsViewerManaged();
+    if (ret->init(size)) {
         ret->autorelease();
         return ret;
     };
@@ -178,7 +313,7 @@ bool AdsViewer::init() {
     version->setAlignment(Label::Alignment::Center);
     version->setOpacity(100);
 
-    addChildAtPosition(version, Anchor::Bottom, {0.f, 17.5f}, false);
+    addChildAtPosition(version, Anchor::Top, {0.f, 0.f - ((title->getPositionY() - getScaledContentHeight()) - (title->getScaledContentHeight() * 0.625f))}, false);
 
     auto btnContainerLayout = ColumnLayout::create()
                                   ->setGap(5.f)
@@ -339,55 +474,6 @@ bool AdsViewer::init() {
     menuContainer->setContentSize({containerWidth, 240.f});
 
     addChildAtPosition(menuContainer, Anchor::Center, {0.f, -8.75f}, false);
-
-    auto recentAdsLabel = Label::create("Recently Viewed Ads", "bigFont.fnt");
-    recentAdsLabel->setID("recent-ads-label");
-    recentAdsLabel->setScale(0.425f);
-    recentAdsLabel->setAlignment(Label::Alignment::Center);
-
-    menuContainer->addChildAtPosition(recentAdsLabel, Anchor::Top, {0.f, -15.f});
-
-    auto adList = ScrollLayer::create({containerWidth - 37.5f, 175.f});
-    adList->setID("ad-list");
-    adList->setZOrder(1);
-    adList->setAnchorPoint({0.5f, 0.5f});
-    adList->ignoreAnchorPointForPosition(false);
-
-    adList->m_contentLayer->setLayout(ScrollLayer::createDefaultListLayout());
-
-    menuContainer->addChildAtPosition(adList, Anchor::Center, {0.f, -12.5f});
-
-    auto adListBg = cue::createBackground(
-        {adList->getScaledContentWidth() + 12.5f, adList->getScaledContentHeight() + 15.f},
-        {
-            .cornerRoundness = -0.75f,
-            .zOrder = 0,
-            .id = "",
-        });
-    adListBg->setPosition(adList->getPosition());
-
-    menuContainer->addChild(adListBg);
-
-    if (auto ads = AdsDirector::get()) {
-        auto countLabel = Label::create(fmt::format("{} Ads", ads->getViewedAds().size()), "chatFont.fnt");
-        countLabel->setID("ad-count-label");
-        countLabel->setScale(0.625f);
-        countLabel->setOpacity(200);
-        countLabel->setAlignment(Label::Alignment::Center);
-
-        menuContainer->addChildAtPosition(countLabel, Anchor::Top, {0.f, -26.5f}, false);
-
-        auto recentAds = ads->getViewedAds();
-
-        for (auto const& ad : recentAds) {
-            auto cell = AdsViewerCell::create(ad, adList->getScaledContentWidth());
-            adList->m_contentLayer->addChild(cell);
-        };
-
-        adList->m_contentLayer->updateLayout();
-    };
-
-    adList->scrollToTop();
 
     auto infoBtn = Button::createWithSpriteFrameName(
         "GJ_infoIcon_001.png",
