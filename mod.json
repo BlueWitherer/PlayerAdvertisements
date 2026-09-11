@@ -27,6 +27,9 @@
             ],
             "ADS_btns": [
                 "resources/buttons/*.png"
+            ],
+            "ADS_badges": [
+                "resources/badges/*.png"
             ]
         }
     },

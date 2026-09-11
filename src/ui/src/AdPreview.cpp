@@ -18,10 +18,12 @@ using namespace cw::ads;
 struct AdPreview::Impl final {
     Ad ad;
 
-    Ref<GJGameLevel> level;
+    async::TaskHolder<fetch::AuthResult> authTask;
 
-    async::TaskHolder<web::WebResponse> announcementListener;
-    async::TaskHolder<web::WebResponse> clickListener;
+    async::TaskHolder<web::WebResponse> clickTask;
+    async::TaskHolder<web::WebResponse> announceTask;
+
+    Ref<GJGameLevel> level;
 
     CCMenuItemSprite* playBtn = nullptr;
     Ref<CCSprite> playBtnSprite = nullptr;
@@ -276,15 +278,13 @@ bool AdPreview::init(Ad ad, bool count) {
 
     auto announcementBtn = Button::createWithNode(
         announcementBtnSprite,
-        [announcementBtnLoading](Button* sender) {
+        [this, announcementBtnLoading](Button* sender) {
             announcementBtnLoading->setVisible(true);
             sender->setVisible(false);
 
-            auto req = web::WebRequest()
-                           .userAgent("PlayerAdvertisements/1.4")
-                           .timeout(std::chrono::seconds(15));
+            auto req = fetch::baseRequest();
 
-            async::spawn(
+            m_impl->announceTask.spawn(
                 req.get("https://ads.cheeseworks.gay/api/announcement"),
                 [btn = WeakRef(sender), btnLoad = WeakRef(announcementBtnLoading)](web::WebResponse res) {
                     if (auto b = btn.lock()) {
@@ -469,7 +469,7 @@ void AdPreview::onPlayButton(CCObject* sender) {
 void AdPreview::registerClick() {
     log::debug("Sending click tracking request for ad_id={}, user_id={}", m_impl->ad.getID(), m_impl->ad.getUser());
 
-    async::spawn(
+    m_impl->authTask.spawn(
         argon::startAuth(),
         [self = WeakRef(this)](Result<std::string> res) {
             if (auto s = self.lock()) {
@@ -483,9 +483,7 @@ void AdPreview::registerClick() {
 
                 log::debug("Sending click tracking request for ad_id={}, user_id={}", s->m_impl->ad.getID(), s->m_impl->ad.getUser());
 
-                auto clickRequest = web::WebRequest();
-                clickRequest.userAgent("PlayerAdvertisements/1.4");
-                clickRequest.timeout(std::chrono::seconds(15));
+                auto clickRequest = fetch::baseRequest();
 
                 matjson::Value clickBody = matjson::Value::object();
                 clickBody["ad_id"] = s->m_impl->ad.getID();
@@ -494,7 +492,7 @@ void AdPreview::registerClick() {
 
                 clickRequest.bodyJSON(clickBody);
 
-                async::spawn(
+                s->m_impl->clickTask.spawn(
                     clickRequest.post("https://ads.cheeseworks.gay/api/click"),
                     [self](web::WebResponse res) {
                         if (auto s = self.lock()) {

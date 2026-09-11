@@ -51,6 +51,17 @@ namespace cw::ads {
         uint8_t getGlowLevel() const noexcept;
     };
 
+    struct AdBadge final {
+        int user = 0;
+        bool owner = false;
+        bool dev = false;
+        bool admin = false;
+        bool staff = false;
+        bool verified = false;
+        bool contributor = false;
+        std::string discord;
+    };
+
     enum class LevelRating : uint8_t {
         None = 0,
         Star = 1,
@@ -72,6 +83,7 @@ namespace cw::ads {
         asp::SmallVec<Ad, 25> m_seenAds;
         geode::utils::StringMap<std::vector<std::weak_ptr<geode::Hook>>> m_hooks;
 
+        std::unordered_map<int, AdBadge> m_badges;
         std::unordered_map<int, AdLevelMetadata> m_seenLevels;
 
     public:
@@ -81,15 +93,39 @@ namespace cw::ads {
         void addLevelToCache(GJGameLevel* level);
         void addToViewed(Ad ad);
 
+        void saveBadge(int id, AdBadge badge);
+
         std::span<const std::weak_ptr<geode::Hook>> getHooks(std::string_view id) const noexcept;
         geode::Result<AdLevelMetadata> getLevelMeta(int id) const;
         std::span<const Ad> getViewedAds() const noexcept;
+
+        geode::Result<AdBadge> getBadge(int id);
     };
 
     struct LinkButton final {
         std::string id;
         std::string sprite;
         geode::Button::ButtonCallback callback = nullptr;
+    };
+
+    namespace ui {
+        class AdsTabSprite final : public cocos2d::CCNode {  // thank u gode uwu
+        private:
+            geode::NineSlice* m_deselectedBG;
+            geode::NineSlice* m_selectedBG;
+
+            cocos2d::CCSprite* m_icon;
+            geode::Label* m_label;
+
+        protected:
+            bool init(geode::ZStringView iconFrame, std::string text, float width, bool altColor);
+
+        public:
+            static AdsTabSprite* create(geode::ZStringView iconFrame, std::string text, float width, bool altColor = false);
+
+            void select(bool selected);
+            void disable(bool disabled);
+        };
     };
 
     namespace win {
@@ -110,7 +146,18 @@ namespace cw::ads {
     };
 
     namespace fetch {
+        using AuthResult = geode::Result<std::string>;
+
         void getLevel(int id, geode::CopyableFunction<void(geode::Result<GJGameLevel*>)>&& callback, bool download = false, GJGameLevel* data = nullptr);
+        void getBadge(int id, geode::CopyableFunction<void(geode::Result<AdBadge>)>&& callback, bool local = false);
+
+        inline geode::utils::web::WebRequest baseRequest() {
+            using namespace geode::prelude;
+
+            return web::WebRequest()
+                .userAgent(fmt::format("PlayerAdvertisements/{}", Mod::get()->getVersion().toNonVString(false)))
+                .timeout(std::chrono::seconds(15));
+        };
 
         inline constexpr auto getRating(GJGameLevel* level) {
             switch (level->m_isEpic) {
@@ -149,6 +196,12 @@ template <>
 struct matjson::Serialize<cw::ads::Ad> final {
     static geode::Result<cw::ads::Ad> fromJson(matjson::Value const& value);
     static matjson::Value toJson(cw::ads::Ad const& value);
+};
+
+template <>
+struct matjson::Serialize<cw::ads::AdBadge> final {
+    static geode::Result<cw::ads::AdBadge> fromJson(matjson::Value const& value);
+    static matjson::Value toJson(cw::ads::AdBadge const& value);
 };
 
 #define PLAYERADS_DELEGATE_HOOKS(id)                     \

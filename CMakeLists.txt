@@ -27,4 +27,5 @@ setup_geode_mod(${PROJECT_NAME})
 
 CPMAddPackage("gh:dankmeme01/cue#main")
 CPMAddPackage("gh:GlobedGD/argon@1.5.1")
-target_link_libraries(${PROJECT_NAME} cue argon)
+CPMAddPackage("gh:CubicCommunity/gdcord@1.0.1")
+target_link_libraries(${PROJECT_NAME} cue argon gdcord)

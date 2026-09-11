@@ -10,6 +10,9 @@ using namespace cw::ads;
 struct ReportPopup::Impl final {
     Ad ad;
 
+    geode::async::TaskHolder<fetch::AuthResult> authTask;
+    geode::async::TaskHolder<geode::utils::web::WebResponse> getTask;
+
     TextInput* descInput = nullptr;
 
     std::string userId = "";
@@ -95,7 +98,7 @@ void ReportPopup::onSubmitButton(Button* sender, LoadingSpinner* spinner) {
 
     async::spawn(
         argon::startAuth(),
-        [self = WeakRef(this), btn = WeakRef(sender), btnLoad = WeakRef(spinner), desc = std::move(desc), upopup = WeakRef(upopup)](Result<std::string> res) {
+        [self = WeakRef(this), btn = WeakRef(sender), btnLoad = WeakRef(spinner), desc = std::move(desc), upopup = WeakRef(upopup)](fetch::AuthResult res) {
             if (auto s = self.lock()) {
                 if (res.isErr()) {
                     log::warn("Auth failed: {}", std::move(res).unwrapErr());
@@ -107,10 +110,6 @@ void ReportPopup::onSubmitButton(Button* sender, LoadingSpinner* spinner) {
                 auto token = std::move(res).unwrap();
                 log::debug("Token: {}", token);
 
-                auto reportReq = web::WebRequest();
-                reportReq.userAgent("PlayerAdvertisements/1.4");
-                reportReq.timeout(std::chrono::seconds(15));
-
                 matjson::Value body = matjson::Value();
 
                 body["ad_id"] = s->m_impl->ad.getID();
@@ -118,7 +117,8 @@ void ReportPopup::onSubmitButton(Button* sender, LoadingSpinner* spinner) {
                 body["description"] = std::move(desc);
                 body["authtoken"] = std::move(token);
 
-                reportReq.bodyJSON(body);
+                auto reportReq = fetch::baseRequest()
+                                     .bodyJSON(body);
 
                 async::spawn(
                     reportReq.post("https://ads.cheeseworks.gay/api/report"),

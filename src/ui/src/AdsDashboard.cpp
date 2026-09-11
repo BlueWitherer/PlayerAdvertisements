@@ -1,8 +1,12 @@
-#include "../AdsViewer.hpp"
+#include "../AdsDashboard.hpp"
 
 #include <ui/AdPreview.hpp>
 
 #include <AdsUtils.h>
+
+#include <gdcord/gdc.h>
+
+#include <argon/argon.hpp>
 
 #include <cue/RepeatingBackground.hpp>
 
@@ -25,7 +29,7 @@ namespace cw::ads {
     };
 };
 
-bool AdsViewerCell::init(Ad ad, bool managed, float width) {
+bool AdsDashboardCell::init(Ad ad, bool managed, bool pending, float width) {
     m_ad = std::move(ad);
 
     if (!CCNode::init()) return false;
@@ -135,9 +139,9 @@ bool AdsViewerCell::init(Ad ad, bool managed, float width) {
     return true;
 };
 
-AdsViewerCell* AdsViewerCell::create(Ad ad, bool managed, float width) {
-    auto ret = new AdsViewerCell();
-    if (ret->init(std::move(ad), managed, width)) {
+AdsDashboardCell* AdsDashboardCell::create(Ad ad, bool managed, bool pending, float width) {
+    auto ret = new AdsDashboardCell();
+    if (ret->init(std::move(ad), managed, pending, width)) {
         ret->autorelease();
         return ret;
     };
@@ -146,7 +150,7 @@ AdsViewerCell* AdsViewerCell::create(Ad ad, bool managed, float width) {
     return nullptr;
 };
 
-bool AdsViewerSection::init(CCSize const& size) {
+bool AdsDashboardSection::init(CCSize const& size) {
     if (!CCNode::init()) return false;
 
     setContentSize(size);
@@ -157,8 +161,8 @@ bool AdsViewerSection::init(CCSize const& size) {
     return true;
 };
 
-AdsViewerSection* AdsViewerSection::create(CCSize const& size) {
-    auto ret = new AdsViewerSection();
+AdsDashboardSection* AdsDashboardSection::create(CCSize const& size) {
+    auto ret = new AdsDashboardSection();
     if (ret->init(size)) {
         ret->autorelease();
         return ret;
@@ -168,8 +172,8 @@ AdsViewerSection* AdsViewerSection::create(CCSize const& size) {
     return nullptr;
 };
 
-bool AdsViewerRecent::init(CCSize const& size) {
-    if (!AdsViewerSection::init(size)) return false;
+bool AdsDashboardRecent::init(CCSize const& size) {
+    if (!AdsDashboardSection::init(size)) return false;
 
     auto recentAdsLabel = Label::create("Recently Viewed Ads", "bigFont.fnt");
     recentAdsLabel->setID("recent-ads-label");
@@ -211,7 +215,7 @@ bool AdsViewerRecent::init(CCSize const& size) {
         auto recentAds = ads->getViewedAds();
 
         for (auto const& ad : recentAds) {
-            auto cell = AdsViewerCell::create(ad, false, m_list->getScaledContentWidth());
+            auto cell = AdsDashboardCell::create(ad, false, false, m_list->getScaledContentWidth());
             m_list->m_contentLayer->addChild(cell);
         };
 
@@ -223,8 +227,8 @@ bool AdsViewerRecent::init(CCSize const& size) {
     return true;
 };
 
-AdsViewerRecent* AdsViewerRecent::create(CCSize const& size) {
-    auto ret = new AdsViewerRecent();
+AdsDashboardRecent* AdsDashboardRecent::create(CCSize const& size) {
+    auto ret = new AdsDashboardRecent();
     if (ret->init(size)) {
         ret->autorelease();
         return ret;
@@ -234,8 +238,8 @@ AdsViewerRecent* AdsViewerRecent::create(CCSize const& size) {
     return nullptr;
 };
 
-bool AdsViewerManaged::init(CCSize const& size) {
-    if (!AdsViewerSection::init(size)) return false;
+bool AdsDashboardManaged::init(CCSize const& size) {
+    if (!AdsDashboardSection::init(size)) return false;
 
     auto manageAdsLabel = Label::create("Recently Viewed Ads", "bigFont.fnt");
     manageAdsLabel->setID("recent-ads-label");
@@ -265,13 +269,19 @@ bool AdsViewerManaged::init(CCSize const& size) {
 
     addChild(adListBg);
 
+    m_authTask.spawn(
+        argon::startAuth(),
+        [self = WeakRef(this)](fetch::AuthResult res) {
+
+        });
+
     m_list->scrollToTop();
 
     return true;
 };
 
-AdsViewerManaged* AdsViewerManaged::create(CCSize const& size) {
-    auto ret = new AdsViewerManaged();
+AdsDashboardManaged* AdsDashboardManaged::create(CCSize const& size) {
+    auto ret = new AdsDashboardManaged();
     if (ret->init(size)) {
         ret->autorelease();
         return ret;
@@ -281,7 +291,7 @@ AdsViewerManaged* AdsViewerManaged::create(CCSize const& size) {
     return nullptr;
 };
 
-bool AdsViewer::init() {
+bool AdsDashboard::init() {
     if (!CCLayer::init()) return false;
 
     setKeypadEnabled(true);
@@ -416,9 +426,7 @@ bool AdsViewer::init() {
             announcementBtnLoading->setVisible(true);
             sender->setVisible(false);
 
-            auto req = web::WebRequest()
-                           .userAgent("PlayerAdvertisements/1.4")
-                           .timeout(std::chrono::seconds(15));
+            auto req = fetch::baseRequest();
 
             async::spawn(
                 req.get("https://ads.cheeseworks.gay/api/announcement"),
@@ -493,12 +501,12 @@ bool AdsViewer::init() {
     return true;
 };
 
-void AdsViewer::keyBackClicked() {
+void AdsDashboard::keyBackClicked() {
     CCDirector::sharedDirector()->popSceneWithTransition(0.5f, PopTransition::kPopTransitionFade);
 };
 
-AdsViewer* AdsViewer::create() {
-    auto ret = new AdsViewer();
+AdsDashboard* AdsDashboard::create() {
+    auto ret = new AdsDashboard();
     if (ret->init()) {
         ret->autorelease();
         return ret;

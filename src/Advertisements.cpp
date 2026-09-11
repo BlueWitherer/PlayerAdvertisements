@@ -23,6 +23,9 @@ struct Advertisement::Impl final {
     Ad ad;
     AdType type = AdType::Banner;
 
+    geode::async::TaskHolder<fetch::AuthResult> authTask;
+    geode::async::TaskHolder<geode::utils::web::WebResponse> getTask;
+
     Button* adButton = nullptr;
     Ref<LazySprite> adSprite = nullptr;
     CCSprite* adIcon = nullptr;
@@ -124,12 +127,12 @@ void Advertisement::reload() {
         m_impl->adSprite->setPosition({posx, posy});
         m_impl->adSprite->setVisible(true);
 
-        auto const natural = m_impl->adSprite->getContentSize();
+        auto const natural = m_impl->adSprite->getScaledContentSize();
         if (natural.width <= 0.f || natural.height <= 0.f) {
             log::warn("Ad sprite has invalid natural size ({}x{})", natural.width, natural.height);
         } else {
-            auto target = m_impl->adSprite->getContentSize();
-            if (m_impl->adButton) target = m_impl->adButton->getContentSize();
+            auto target = m_impl->adSprite->getScaledContentSize();
+            if (m_impl->adButton) target = m_impl->adButton->getScaledContentSize();
 
             float sx = target.width / natural.width;
             float sy = target.height / natural.height;
@@ -160,7 +163,7 @@ void Advertisement::reload() {
             glowNode->setContentSize(size);
             glowNode->setAnchorPoint({0.5, 0.5});
 
-            if (m_impl->adButton) glowNode->setPosition(m_impl->adButton->getContentSize() / 2);
+            if (m_impl->adButton) glowNode->setPosition(m_impl->adButton->getScaledContentSize() / 2);
 
             auto particles = GameToolbox::particleFromString(m_impl->getParticlesForAdType(m_impl->ad.getType()), CCParticleSystemQuad::create(), false);
             particles->setScale(1.25f);
@@ -278,7 +281,7 @@ void Advertisement::handleAdResponse(web::WebResponse const& res) {
 
     auto json = std::move(jsonRes).unwrap();
 
-    auto adRes = json.as<Ad>();
+    auto adRes = std::move(json).as<Ad>();
     if (adRes.isErr()) {
         log::error("Failed to parse ad: {}", std::move(adRes).unwrapErr());
         cue::resetNode(m_impl->adSprite);
@@ -292,23 +295,20 @@ void Advertisement::handleAdResponse(web::WebResponse const& res) {
 
     async::spawn(
         argon::startAuth(),
-        [self = WeakRef(this)](Result<std::string> res) {
+        [self = WeakRef(this)](fetch::AuthResult res) {
             if (res.isErr()) {
                 log::warn("Auth failed: {}", std::move(res).unwrapErr());
                 return;
             };
 
             if (auto s = self.lock()) {
-                auto viewRequest = web::WebRequest();
-                viewRequest.userAgent("PlayerAdvertisements/1.4");
-                viewRequest.timeout(std::chrono::seconds(15));
-
                 matjson::Value viewBody = matjson::Value::object();
                 viewBody["ad_id"] = s->m_impl->ad.getID();
                 viewBody["authtoken"] = std::move(res).unwrap();
                 viewBody["account_id"] = GJAccountManager::sharedState()->m_accountID;
 
-                viewRequest.bodyJSON(viewBody);
+                auto viewRequest = fetch::baseRequest()
+                                       .bodyJSON(viewBody);
 
                 async::spawn(
                     viewRequest.post("https://ads.cheeseworks.gay/api/view"),
@@ -341,9 +341,7 @@ void Advertisement::loadRandom() {
 
     log::trace("Preparing request for random advertisement...");
 
-    auto request = web::WebRequest();
-    request.userAgent("PlayerAdvertisements/1.4");
-    request.timeout(std::chrono::seconds(15));
+    auto request = fetch::baseRequest();
     request.param("type", static_cast<uint8_t>(m_impl->type));
 
     async::spawn(
