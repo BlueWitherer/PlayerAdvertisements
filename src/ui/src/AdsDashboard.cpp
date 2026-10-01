@@ -175,6 +175,8 @@ AdsDashboardSection* AdsDashboardSection::create(CCSize const& size) {
 bool AdsDashboardRecent::init(CCSize const& size) {
     if (!AdsDashboardSection::init(size)) return false;
 
+    setVisible(true);
+
     auto recentAdsLabel = Label::create("Recently Viewed Ads", "bigFont.fnt");
     recentAdsLabel->setID("recent-ads-label");
     recentAdsLabel->setScale(0.425f);
@@ -203,24 +205,24 @@ bool AdsDashboardRecent::init(CCSize const& size) {
 
     addChild(adListBg);
 
-    if (auto ads = AdsDirector::get()) {
-        auto countLabel = Label::create(fmt::format("{} Ads", ads->getViewedAds().size()), "chatFont.fnt");
-        countLabel->setID("ad-count-label");
-        countLabel->setScale(0.625f);
-        countLabel->setOpacity(200);
-        countLabel->setAlignment(Label::Alignment::Center);
+    auto ads = AdsDirector::get();
 
-        addChildAtPosition(countLabel, Anchor::Top, {0.f, -26.5f}, false);
+    auto countLabel = Label::create(fmt::format("{} Ads", ads->getViewedAds().size()), "chatFont.fnt");
+    countLabel->setID("ad-count-label");
+    countLabel->setScale(0.625f);
+    countLabel->setOpacity(200);
+    countLabel->setAlignment(Label::Alignment::Center);
 
-        auto recentAds = ads->getViewedAds();
+    addChildAtPosition(countLabel, Anchor::Top, {0.f, -26.5f}, false);
 
-        for (auto const& ad : recentAds) {
-            auto cell = AdsDashboardCell::create(ad, false, false, m_list->getScaledContentWidth());
-            m_list->m_contentLayer->addChild(cell);
-        };
+    auto recentAds = ads->getViewedAds();
 
-        m_list->m_contentLayer->updateLayout();
+    for (auto const& ad : recentAds) {
+        auto cell = AdsDashboardCell::create(ad, false, false, m_list->getScaledContentWidth());
+        m_list->m_contentLayer->addChild(cell);
     };
+
+    m_list->m_contentLayer->updateLayout();
 
     m_list->scrollToTop();
 
@@ -269,11 +271,11 @@ bool AdsDashboardManaged::init(CCSize const& size) {
 
     addChild(adListBg);
 
-    m_authTask.spawn(
-        argon::startAuth(),
-        [self = WeakRef(this)](fetch::AuthResult res) {
+    // m_authTask.spawn(
+    //     argon::startAuth(),
+    //     [self = WeakRef(this)](fetch::AuthResult res) {
 
-        });
+    //     });
 
     m_list->scrollToTop();
 
@@ -482,6 +484,10 @@ bool AdsDashboard::init() {
     menuContainer->setContentSize({containerWidth, 240.f});
 
     addChildAtPosition(menuContainer, Anchor::Center, {0.f, -8.75f}, false);
+
+    menuContainer->addChildAtPosition(
+        AdsDashboardRecent::create(menuContainer->getScaledContentSize()),
+        Anchor::Center);
 
     auto infoBtn = Button::createWithSpriteFrameName(
         "GJ_infoIcon_001.png",

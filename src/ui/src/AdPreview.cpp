@@ -156,10 +156,8 @@ bool AdPreview::init(Ad ad, bool count) {
 
     log::trace("Requesting data for level of ID {} for ad of ID {}", m_impl->ad.getLevel(), m_impl->ad.getID());
 
-    if (auto ads = AdsDirector::get()) {
-        auto lvlCacheRes = ads->getLevelMeta(m_impl->ad.getLevel());
-        if (lvlCacheRes.isOk()) setupMetaLabels(std::move(lvlCacheRes).unwrap());
-    };
+    auto lvlCacheRes = AdsDirector::get()->getLevelMeta(m_impl->ad.getLevel());
+    if (lvlCacheRes.isOk()) setupMetaLabels(std::move(lvlCacheRes).unwrap());
 
     fetch::getLevel(m_impl->ad.getLevel(), [self = WeakRef(this)](Result<GJGameLevel*> res) {
         if (auto s = self.lock()) {
@@ -183,10 +181,10 @@ bool AdPreview::init(Ad ad, bool count) {
 
             log::debug("Retrieved level {} ({}) for ad of ID {}", lvl->m_levelName, lvl->m_levelID, s->m_impl->ad.getID());
 
-            if (auto ads = AdsDirector::get()) {
-                ads->addLevelToCache(lvl);
-                s->setupMetaLabels(ads->getLevelMeta(lvl->m_levelID.value()).unwrap());
-            };
+            auto ads = AdsDirector::get();
+
+            ads->addLevelToCache(lvl);
+            s->setupMetaLabels(ads->getLevelMeta(lvl->m_levelID.value()).unwrap());
 
             s->m_impl->playBtn->setVisible(true);
 

@@ -239,7 +239,7 @@ void Advertisement::reload() {
             };
         };
 
-        if (auto am = AdsDirector::get()) am->addToViewed(m_impl->ad);
+        AdsDirector::get()->addToViewed(m_impl->ad);
     });
 
     m_impl->adButton = Button::createWithNode(
@@ -389,6 +389,7 @@ Advertisement* nodes::placeAd(CCNode* to, std::optional<std::string> id, AdType 
 
     if (auto ad = Advertisement::create(type)) {
         ad->setID(id.has_value() ? std::move(id).value() : formatIDForAd(type, anchor));
+        ad->setScale(0.975f);
         ad->setZOrder(HIGHEST_Z);
 
         to->addChildAtPosition(ad, anchor, offset, false);

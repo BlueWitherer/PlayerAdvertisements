@@ -34,43 +34,39 @@ namespace cw::ads {
     };
 };
 
-$on_game(ModsLoaded) {
-    async::spawn(
-        fetch::baseRequest().get("https://ads.cheeseworks.gay/api/badges"),
-        [](web::WebResponse res) {
-            if (auto ads = AdsDirector::get()) {
-                if (res.error()) return log::error("{}", res.errorMessage());
+// $on_game(ModsLoaded) {
+//     async::spawn(
+//         fetch::baseRequest().get("https://ads.cheeseworks.gay/api/badges"),
+//         [](web::WebResponse res) {
+//             if (res.error()) return log::error("{}", res.errorMessage());
 
-                auto jsonRes = res.json();
-                if (jsonRes.isErr()) return log::error("{}", std::move(jsonRes).unwrapErr());
+//             auto jsonRes = res.json();
+//             if (jsonRes.isErr()) return log::error("{}", std::move(jsonRes).unwrapErr());
 
-                auto json = std::move(jsonRes).unwrap();
+//             auto json = std::move(jsonRes).unwrap();
 
-                auto arrayRes = std::move(json).asArray();
-                if (arrayRes.isErr()) return log::error("{}", std::move(arrayRes).unwrapErr());
+//             auto arrayRes = std::move(json).asArray();
+//             if (arrayRes.isErr()) return log::error("{}", std::move(arrayRes).unwrapErr());
 
-                auto array = std::move(arrayRes).unwrap();
+//             auto array = std::move(arrayRes).unwrap();
 
-                for (auto& i : array) {
-                    auto badgeRes = std::move(i).as<AdBadge>();
-                    if (badgeRes.isErr()) return log::error("{}", std::move(badgeRes).unwrapErr());
+//             for (auto& i : array) {
+//                 auto badgeRes = std::move(i).as<AdBadge>();
+//                 if (badgeRes.isErr()) return log::error("{}", std::move(badgeRes).unwrapErr());
 
-                    auto badge = std::move(badgeRes).unwrap();
+//                 auto badge = std::move(badgeRes).unwrap();
 
-                    auto user = badge.user;
-                    ads->saveBadge(user, std::move(badge));
-                };
-            };
-        });
-};
+//                 auto user = badge.user;
+//                 AdsDirector::get()->saveBadge(user, std::move(badge));
+//             };
+//         });
+// };
 
 class $modify(PAHookMenuLayer, MenuLayer) {
     bool init() {
         if (!MenuLayer::init()) return false;
 
         if (auto menu = getChildByID("bottom-menu")) ui::addAdButton(menu);
-
-        if (Mod::get()->hasSavedValue("authtoken")) Mod::get()->getSaveContainer().erase("authtoken");  // this was never used lol
 
         return true;
     };
@@ -320,21 +316,17 @@ void ui::AdsTabSprite::disable(bool disabled) {
 };
 
 void hooks::delegateHooks(std::string id, utils::StringMap<std::shared_ptr<Hook>> const& hooks) {
-    if (auto ads = AdsDirector::get()) {
-        std::vector<std::weak_ptr<Hook>> out;
-        out.reserve(hooks.size());
+    std::vector<std::weak_ptr<Hook>> out;
+    out.reserve(hooks.size());
 
-        for (auto const& hook : hooks) out.push_back(hook.second);
+    for (auto const& hook : hooks) out.push_back(hook.second);
 
-        ads->registerHooks(std::move(id), std::move(out));
-    };
+    AdsDirector::get()->registerHooks(std::move(id), std::move(out));
 };
 
 void hooks::toggleHooks(std::string_view id, bool on) {
-    if (auto ads = AdsDirector::get()) {
-        for (auto const& hook : ads->getHooks(id)) {
-            if (auto h = hook.lock()) (void)h->toggle(on);
-        };
+    for (auto const& hook : AdsDirector::get()->getHooks(id)) {
+        if (auto h = hook.lock()) (void)h->toggle(on);
     };
 };
 
@@ -411,10 +403,8 @@ void fetch::getLevel(int id, CopyableFunction<void(Result<GJGameLevel*>)>&& call
 };
 
 void fetch::getBadge(int id, CopyableFunction<void(Result<AdBadge>)>&& callback, bool local) {
-    if (auto ads = AdsDirector::get()) {
-        auto res = ads->getBadge(id);
-        if (res.isOk()) return callback(std::move(res));
-    };
+    auto res = AdsDirector::get()->getBadge(id);
+    if (res.isOk()) return callback(std::move(res));
 
     if (local) return callback(Err("Badge not found"));
 
