@@ -75,7 +75,7 @@ jobs:
         steps:
             - uses: actions/download-artifact@v8
               with:
-                  path: ./artifacts/
+                  path: ./artifacts/build-output/
                   merge-multiple: true
 
             - name: Get latest release tag
