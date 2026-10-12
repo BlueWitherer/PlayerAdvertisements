@@ -2,7 +2,7 @@
 
 #include <ui/AdPreview.hpp>
 
-#include <AdsUtils.h>
+#include <Util.h>
 
 #include <gdcord/gdc.h>
 
